@@ -140,6 +140,7 @@ import { ZepBlock } from '@/blocks/blocks/zep'
 import { ZoomBlock } from '@/blocks/blocks/zoom'
 import type { BlockConfig } from '@/blocks/types'
 import { SQSBlock } from './blocks/sqs'
+import { KafkaBlock } from './blocks/kafka'
 
 // Registry of all available blocks, alphabetically sorted
 export const registry: Record<string, BlockConfig> = {
@@ -231,6 +232,7 @@ export const registry: Record<string, BlockConfig> = {
   qdrant: QdrantBlock,
   rds: RDSBlock,
   sqs: SQSBlock,
+  kafka: KafkaBlock,
   dynamodb: DynamoDBBlock,
   reddit: RedditBlock,
   resend: ResendBlock,

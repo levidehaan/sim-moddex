@@ -1326,6 +1326,7 @@ import {
   zoomUpdateMeetingTool,
 } from '@/tools/zoom'
 import { sqsSendTool } from './sqs'
+import { kafkaConsumeTool, kafkaProduceTool } from './kafka'
 
 // Registry of all available tools
 export const tools: Record<string, ToolConfig> = {
@@ -2314,6 +2315,8 @@ export const tools: Record<string, ToolConfig> = {
   salesforce_describe_object: salesforceDescribeObjectTool,
   salesforce_list_objects: salesforceListObjectsTool,
   sqs_send: sqsSendTool,
+  kafka_produce: kafkaProduceTool,
+  kafka_consume: kafkaConsumeTool,
   mailchimp_get_audiences: mailchimpGetAudiencesTool,
   mailchimp_get_audience: mailchimpGetAudienceTool,
   mailchimp_create_audience: mailchimpCreateAudienceTool,
