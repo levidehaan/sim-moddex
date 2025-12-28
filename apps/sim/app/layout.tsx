@@ -3,10 +3,8 @@ import { PublicEnvScript } from 'next-runtime-env'
 import { BrandedLayout } from '@/components/branded-layout'
 import { generateThemeCSS } from '@/lib/branding/inject-theme'
 import { generateBrandedMetadata, generateStructuredData } from '@/lib/branding/metadata'
-import { PostHogProvider } from '@/app/_shell/providers/posthog-provider'
 import '@/app/_styles/globals.css'
 
-import { OneDollarStats } from '@/components/analytics/onedollarstats'
 import { HydrationErrorHandler } from '@/app/_shell/hydration-error-handler'
 import { QueryProvider } from '@/app/_shell/providers/query-provider'
 import { SessionProvider } from '@/app/_shell/providers/session-provider'
@@ -177,23 +175,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name='format-detection' content='telephone=no' />
         <meta httpEquiv='x-ua-compatible' content='ie=edge' />
 
-        {/* OneDollarStats Analytics */}
-        <script defer src='https://assets.onedollarstats.com/stonks.js' />
-
         <PublicEnvScript />
       </head>
       <body className={`${season.variable} font-season`} suppressHydrationWarning>
         <HydrationErrorHandler />
-        <OneDollarStats />
-        <PostHogProvider>
-          <ThemeProvider>
-            <QueryProvider>
-              <SessionProvider>
-                <BrandedLayout>{children}</BrandedLayout>
-              </SessionProvider>
-            </QueryProvider>
-          </ThemeProvider>
-        </PostHogProvider>
+        <ThemeProvider>
+          <QueryProvider>
+            <SessionProvider>
+              <BrandedLayout>{children}</BrandedLayout>
+            </SessionProvider>
+          </QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

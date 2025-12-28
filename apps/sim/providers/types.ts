@@ -1,19 +1,13 @@
 import type { StreamingExecution } from '@/executor/types'
 
-export type ProviderId =
-  | 'openai'
-  | 'azure-openai'
-  | 'anthropic'
-  | 'google'
-  | 'vertex'
-  | 'deepseek'
-  | 'xai'
-  | 'cerebras'
-  | 'groq'
-  | 'mistral'
-  | 'ollama'
-  | 'openrouter'
-  | 'vllm'
+/**
+ * Supported AI providers:
+ * - ollama: Local LLM server
+ * - vllm: Self-hosted vLLM with OpenAI-compatible API
+ * - openrouter: Open gateway to many models
+ * - deepseek: DeepSeek AI models
+ */
+export type ProviderId = 'deepseek' | 'ollama' | 'openrouter' | 'vllm'
 
 /**
  * Model pricing information per million tokens

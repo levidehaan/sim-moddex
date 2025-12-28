@@ -1,33 +1,22 @@
 import { createLogger } from '@sim/logger'
-import { anthropicProvider } from '@/providers/anthropic'
-import { azureOpenAIProvider } from '@/providers/azure-openai'
-import { cerebrasProvider } from '@/providers/cerebras'
 import { deepseekProvider } from '@/providers/deepseek'
-import { googleProvider } from '@/providers/google'
-import { groqProvider } from '@/providers/groq'
-import { mistralProvider } from '@/providers/mistral'
 import { ollamaProvider } from '@/providers/ollama'
-import { openaiProvider } from '@/providers/openai'
 import { openRouterProvider } from '@/providers/openrouter'
 import type { ProviderConfig, ProviderId } from '@/providers/types'
-import { vertexProvider } from '@/providers/vertex'
 import { vllmProvider } from '@/providers/vllm'
-import { xAIProvider } from '@/providers/xai'
 
 const logger = createLogger('ProviderRegistry')
 
-const providerRegistry: Record<ProviderId, ProviderConfig> = {
-  openai: openaiProvider,
-  anthropic: anthropicProvider,
-  google: googleProvider,
-  vertex: vertexProvider,
+/**
+ * Provider registry with only local and open-source friendly providers:
+ * - ollama: Local LLM server
+ * - vllm: Self-hosted vLLM with OpenAI-compatible API
+ * - openrouter: Open gateway to many models
+ * - deepseek: DeepSeek AI models
+ */
+const providerRegistry: Partial<Record<ProviderId, ProviderConfig>> = {
   deepseek: deepseekProvider,
-  xai: xAIProvider,
-  cerebras: cerebrasProvider,
-  groq: groqProvider,
   vllm: vllmProvider,
-  mistral: mistralProvider,
-  'azure-openai': azureOpenAIProvider,
   openrouter: openRouterProvider,
   ollama: ollamaProvider,
 }
