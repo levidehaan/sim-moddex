@@ -141,10 +141,12 @@ import { ZoomBlock } from '@/blocks/blocks/zoom'
 import type { BlockConfig } from '@/blocks/types'
 import { SQSBlock } from './blocks/sqs'
 import { KafkaBlock } from './blocks/kafka'
+import { AndroidBlock } from './blocks/android'
 
 // Registry of all available blocks, alphabetically sorted
 export const registry: Record<string, BlockConfig> = {
   agent: AgentBlock,
+  android: AndroidBlock,
   ahrefs: AhrefsBlock,
   airtable: AirtableBlock,
   api: ApiBlock,
