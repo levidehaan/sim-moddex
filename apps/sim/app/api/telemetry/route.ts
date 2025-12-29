@@ -80,6 +80,7 @@ function createSafeAttributes(
 
 /**
  * Forwards telemetry data to OpenTelemetry collector
+ * Only forwards if a custom TELEMETRY_ENDPOINT is configured
  */
 async function forwardToCollector(data: any): Promise<boolean> {
   if (!data || typeof data !== 'object') {
@@ -87,7 +88,10 @@ async function forwardToCollector(data: any): Promise<boolean> {
     return false
   }
 
-  const endpoint = env.TELEMETRY_ENDPOINT || 'https://telemetry.simstudio.ai/v1/traces'
+  const endpoint = env.TELEMETRY_ENDPOINT
+  if (!endpoint) {
+    return false
+  }
   const timeout = DEFAULT_TIMEOUT
 
   try {

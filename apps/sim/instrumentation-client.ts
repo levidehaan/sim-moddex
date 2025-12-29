@@ -1,5 +1,6 @@
 /**
  * Sim Telemetry - Client-side Instrumentation
+ * Disabled by default - only enable if TELEMETRY_ENDPOINT is configured
  */
 
 import { env } from './lib/core/config/env'
@@ -9,18 +10,19 @@ if (typeof window !== 'undefined') {
   const TELEMETRY_STATUS_KEY = 'simstudio-telemetry-status'
   const BATCH_INTERVAL_MS = 10000 // Send batches every 10 seconds
   const MAX_BATCH_SIZE = 50 // Max events per batch
-  let telemetryEnabled = true
+  let telemetryEnabled = false // Disabled by default
   const eventBatch: any[] = []
   let batchTimer: NodeJS.Timeout | null = null
 
   try {
+    // Only enable telemetry if explicitly enabled and not disabled
     if (env.NEXT_TELEMETRY_DISABLED === '1') {
       telemetryEnabled = false
     } else {
       const storedPreference = localStorage.getItem(TELEMETRY_STATUS_KEY)
       if (storedPreference) {
         const status = JSON.parse(storedPreference)
-        telemetryEnabled = status.enabled
+        telemetryEnabled = status.enabled === true
       }
     }
   } catch (_e) {

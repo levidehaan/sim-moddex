@@ -93,8 +93,6 @@ export default async function Layout({ children, params }: LayoutProps) {
           type='application/ld+json'
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        {/* OneDollarStats Analytics - CDN script handles everything automatically */}
-        <script defer src='https://assets.onedollarstats.com/stonks.js' />
       </head>
       <body className='flex min-h-screen flex-col font-sans'>
         <RootProvider i18n={provider(lang)}>

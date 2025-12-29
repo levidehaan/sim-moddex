@@ -68,45 +68,20 @@ export const env = createEnv({
     TWILIO_AUTH_TOKEN:                     z.string().min(1).optional(),           // Twilio Auth Token for API authentication
     TWILIO_PHONE_NUMBER:                   z.string().min(1).optional(),           // Twilio phone number for sending SMS
 
-    // AI/LLM Provider API Keys
-    OPENAI_API_KEY:                        z.string().min(1).optional(),           // Primary OpenAI API key
-    OPENAI_API_KEY_1:                      z.string().min(1).optional(),           // Additional OpenAI API key for load balancing
-    OPENAI_API_KEY_2:                      z.string().min(1).optional(),           // Additional OpenAI API key for load balancing
-    OPENAI_API_KEY_3:                      z.string().min(1).optional(),           // Additional OpenAI API key for load balancing
-    MISTRAL_API_KEY:                       z.string().min(1).optional(),           // Mistral AI API key
-    ANTHROPIC_API_KEY_1:                   z.string().min(1).optional(),           // Primary Anthropic Claude API key
-    ANTHROPIC_API_KEY_2:                   z.string().min(1).optional(),           // Additional Anthropic API key for load balancing
-    ANTHROPIC_API_KEY_3:                   z.string().min(1).optional(),           // Additional Anthropic API key for load balancing
-    GEMINI_API_KEY_1:                      z.string().min(1).optional(),           // Primary Gemini API key
-    GEMINI_API_KEY_2:                      z.string().min(1).optional(),           // Additional Gemini API key for load balancing
-    GEMINI_API_KEY_3:                      z.string().min(1).optional(),           // Additional Gemini API key for load balancing
+    // AI/LLM Provider API Keys - Supported providers: Ollama, vLLM, OpenRouter, DeepSeek
     OLLAMA_URL:                            z.string().url().optional(),            // Ollama local LLM server URL
     VLLM_BASE_URL:                         z.string().url().optional(),            // vLLM self-hosted base URL (OpenAI-compatible)
     VLLM_API_KEY:                          z.string().optional(),                  // Optional bearer token for vLLM
+    OPENROUTER_API_KEY:                    z.string().min(1).optional(),           // OpenRouter API key for accessing multiple models
+    DEEPSEEK_API_KEY:                      z.string().min(1).optional(),           // DeepSeek API key
     ELEVENLABS_API_KEY:                    z.string().min(1).optional(),           // ElevenLabs API key for text-to-speech in deployed chat
     SERPER_API_KEY:                        z.string().min(1).optional(),           // Serper API key for online search
     EXA_API_KEY:                           z.string().min(1).optional(),           // Exa AI API key for enhanced online search
-    DEEPSEEK_MODELS_ENABLED:               z.boolean().optional().default(false),  // Enable Deepseek models in UI (defaults to false for compliance)
 
-    // Azure Configuration - Shared credentials with feature-specific models
-    AZURE_OPENAI_ENDPOINT:                 z.string().url().optional(),            // Shared Azure OpenAI service endpoint
-    AZURE_OPENAI_API_VERSION:              z.string().optional(),                  // Shared Azure OpenAI API version
-    AZURE_OPENAI_API_KEY:                  z.string().min(1).optional(),           // Shared Azure OpenAI API key
-    KB_OPENAI_MODEL_NAME:                  z.string().optional(),                  // Knowledge base OpenAI model name (works with both regular OpenAI and Azure OpenAI)
-    WAND_OPENAI_MODEL_NAME:                z.string().optional(),                  // Wand generation OpenAI model name (works with both regular OpenAI and Azure OpenAI)
-    OCR_AZURE_ENDPOINT:                    z.string().url().optional(),            // Azure Mistral OCR service endpoint
-    OCR_AZURE_MODEL_NAME:                  z.string().optional(),                  // Azure Mistral OCR model name for document processing
-    OCR_AZURE_API_KEY:                     z.string().min(1).optional(),           // Azure Mistral OCR API key
-
-    // Vertex AI Configuration
-    VERTEX_PROJECT:                        z.string().optional(),                  // Google Cloud project ID for Vertex AI
-    VERTEX_LOCATION:                       z.string().optional(),                  // Google Cloud location/region for Vertex AI (defaults to us-central1)
-
-    // Monitoring & Analytics
-    TELEMETRY_ENDPOINT:                    z.string().url().optional(),            // Custom telemetry/analytics endpoint
+    // Monitoring & Logging
+    TELEMETRY_ENDPOINT:                    z.string().url().optional(),            // Custom telemetry endpoint (optional, for self-hosted collectors)
     COST_MULTIPLIER:                       z.number().optional(),                  // Multiplier for cost calculations
     LOG_LEVEL:                             z.enum(['DEBUG', 'INFO', 'WARN', 'ERROR']).optional(), // Minimum log level to display (defaults to ERROR in production, DEBUG in development)
-    DRIZZLE_ODS_API_KEY:                   z.string().min(1).optional(),           // OneDollarStats API key for analytics tracking
 
     // External Services
     BROWSERBASE_API_KEY:                   z.string().min(1).optional(),           // Browserbase API key for browser automation
@@ -292,10 +267,6 @@ export const env = createEnv({
     
     // Billing
     NEXT_PUBLIC_BILLING_ENABLED:           z.boolean().optional(),                 // Enable billing enforcement and usage tracking (client-side)
-    
-    // Analytics & Tracking
-    NEXT_PUBLIC_POSTHOG_ENABLED:           z.boolean().optional(),                 // Enable PostHog analytics (client-side)
-    NEXT_PUBLIC_POSTHOG_KEY:               z.string().optional(),                  // PostHog project API key
 
     // UI Branding & Whitelabeling
     NEXT_PUBLIC_BRAND_NAME:                z.string().optional(),                  // Custom brand name (defaults to "Sim")
@@ -353,8 +324,6 @@ export const env = createEnv({
     NEXT_PUBLIC_E2B_ENABLED: process.env.NEXT_PUBLIC_E2B_ENABLED,
     NEXT_PUBLIC_COPILOT_TRAINING_ENABLED: process.env.NEXT_PUBLIC_COPILOT_TRAINING_ENABLED,
     NEXT_PUBLIC_ENABLE_PLAYGROUND: process.env.NEXT_PUBLIC_ENABLE_PLAYGROUND,
-    NEXT_PUBLIC_POSTHOG_ENABLED: process.env.NEXT_PUBLIC_POSTHOG_ENABLED,
-    NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_TELEMETRY_DISABLED: process.env.NEXT_TELEMETRY_DISABLED,
   },

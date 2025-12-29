@@ -86,6 +86,7 @@ import {
 } from '@/triggers/microsoftteams'
 import { outlookPollingTrigger } from '@/triggers/outlook'
 import { rssPollingTrigger } from '@/triggers/rss'
+import { kafkaPollingTrigger } from '@/triggers/kafka'
 import { slackWebhookTrigger } from '@/triggers/slack'
 import { stripeWebhookTrigger } from '@/triggers/stripe'
 import { telegramWebhookTrigger } from '@/triggers/telegram'
@@ -155,6 +156,7 @@ export const TRIGGER_REGISTRY: TriggerRegistry = {
   microsoftteams_chat_subscription: microsoftTeamsChatSubscriptionTrigger,
   outlook_poller: outlookPollingTrigger,
   rss_poller: rssPollingTrigger,
+  kafka_poller: kafkaPollingTrigger,
   stripe_webhook: stripeWebhookTrigger,
   telegram_webhook: telegramWebhookTrigger,
   typeform_webhook: typeformWebhookTrigger,

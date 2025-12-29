@@ -11,10 +11,10 @@ diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR)
 const logger = createLogger('OTelInstrumentation')
 
 const DEFAULT_TELEMETRY_CONFIG = {
-  endpoint: env.TELEMETRY_ENDPOINT || 'https://telemetry.simstudio.ai/v1/traces',
+  endpoint: env.TELEMETRY_ENDPOINT || '',
   serviceName: 'sim-studio',
   serviceVersion: '0.1.0',
-  serverSide: { enabled: true },
+  serverSide: { enabled: false },
   batchSettings: {
     maxQueueSize: 2048,
     maxExportBatchSize: 512,
@@ -42,6 +42,11 @@ async function initializeOpenTelemetry() {
 
     if (telemetryConfig.serverSide?.enabled === false) {
       logger.info('Server-side OpenTelemetry disabled in config')
+      return
+    }
+
+    if (!telemetryConfig.endpoint) {
+      logger.info('OpenTelemetry disabled - no TELEMETRY_ENDPOINT configured')
       return
     }
 
