@@ -215,6 +215,55 @@ cd apps/sim
 bun run dev:sockets
 ```
 
+### Self-hosted: Android (Termux)
+
+Run Sim Studio directly on your Android device using [Termux](https://f-droid.org/packages/com.termux/). This enables mobile workflows with access to Android sensors, notifications, GPS, and more.
+
+**Requirements:**
+- Android device (ARM64 recommended)
+- [Termux](https://f-droid.org/packages/com.termux/) from F-Droid (not Play Store)
+- [Termux:API](https://f-droid.org/packages/com.termux.api/) for Android integration
+
+**One-liner install:**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/levidehaan/sim-moddex/main/scripts/termux/install.sh | bash
+```
+
+Or with wget:
+```bash
+wget -qO- https://raw.githubusercontent.com/levidehaan/sim-moddex/main/scripts/termux/install.sh | bash
+```
+
+The installer will:
+- Install Node.js, PostgreSQL, and all dependencies
+- Clone and configure the repository
+- Set up the database with migrations
+- Create a control menu accessible via `sim` command
+
+**After installation:**
+
+```bash
+sim              # Open control menu
+sim start        # Start the server
+sim stop         # Stop the server
+sim logs         # View server logs
+sim open         # Open in browser
+```
+
+**Optional:** Install [Termux:Boot](https://f-droid.org/packages/com.termux.boot/) to auto-start Sim Studio when your device boots.
+
+**Android Integration:**
+When running on Android, Sim Studio can access device features through workflow blocks:
+- 📍 GPS location and geofencing
+- 📱 Device sensors (accelerometer, gyroscope, light, proximity)
+- 🔔 Android notifications
+- 🔋 Battery status monitoring
+- 📋 Clipboard read/write
+- 🔊 Text-to-speech
+- 📶 WiFi scanning and status
+- 📳 Vibration patterns
+
 ## Copilot API Keys
 
 Copilot is a Sim-managed service. To use Copilot on a self-hosted instance:
