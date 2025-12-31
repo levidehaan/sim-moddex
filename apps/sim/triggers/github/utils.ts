@@ -157,6 +157,21 @@ export function isGitHubEventMatch(
     },
     github_pr_reviewed: { event: 'pull_request_review', actions: ['submitted'] },
     github_push: { event: 'push' },
+    github_push_to_branch: { event: 'push' },
+    github_files_added: {
+      event: 'push',
+      validator: (p) => {
+        const commits = p.commits || []
+        return commits.some((c: { added?: string[] }) => c.added && c.added.length > 0)
+      },
+    },
+    github_files_deleted: {
+      event: 'push',
+      validator: (p) => {
+        const commits = p.commits || []
+        return commits.some((c: { removed?: string[] }) => c.removed && c.removed.length > 0)
+      },
+    },
     github_release_published: { event: 'release', actions: ['published'] },
   }
 
