@@ -1,9 +1,5 @@
-import { db } from '@sim/db'
-import { account } from '@sim/db/schema'
 import { createLogger } from '@sim/logger'
-import { eq } from 'drizzle-orm'
 import { getBaseUrl } from '@/lib/core/utils/urls'
-import { refreshTokenIfNeeded } from '@/app/api/auth/oauth/utils'
 import { generateRouterPrompt } from '@/blocks/blocks/router'
 import type { BlockOutput } from '@/blocks/types'
 import { BlockType, DEFAULTS, HTTP, isAgentBlockType, ROUTER } from '@/executor/constants'
@@ -34,9 +30,6 @@ export class RouterBlockHandler implements BlockHandler {
       prompt: inputs.prompt,
       model: inputs.model || ROUTER.DEFAULT_MODEL,
       apiKey: inputs.apiKey,
-      vertexProject: inputs.vertexProject,
-      vertexLocation: inputs.vertexLocation,
-      vertexCredential: inputs.vertexCredential,
     }
 
     const providerId = getProviderFromModel(routerConfig.model)
@@ -47,10 +40,7 @@ export class RouterBlockHandler implements BlockHandler {
       const messages = [{ role: 'user', content: routerConfig.prompt }]
       const systemPrompt = generateRouterPrompt(routerConfig.prompt, targetBlocks)
 
-      let finalApiKey: string | undefined = routerConfig.apiKey
-      if (providerId === 'vertex' && routerConfig.vertexCredential) {
-        finalApiKey = await this.resolveVertexCredential(routerConfig.vertexCredential)
-      }
+      const finalApiKey: string | undefined = routerConfig.apiKey
 
       const providerRequest: Record<string, any> = {
         provider: providerId,
@@ -61,16 +51,6 @@ export class RouterBlockHandler implements BlockHandler {
         apiKey: finalApiKey,
         workflowId: ctx.workflowId,
         workspaceId: ctx.workspaceId,
-      }
-
-      if (providerId === 'vertex') {
-        providerRequest.vertexProject = routerConfig.vertexProject
-        providerRequest.vertexLocation = routerConfig.vertexLocation
-      }
-
-      if (providerId === 'azure-openai') {
-        providerRequest.azureEndpoint = inputs.azureEndpoint
-        providerRequest.azureApiVersion = inputs.azureApiVersion
       }
 
       const response = await fetch(url.toString(), {
@@ -175,31 +155,5 @@ export class RouterBlockHandler implements BlockHandler {
           currentState: ctx.blockStates.get(targetBlock.id)?.output,
         }
       })
-  }
-
-  /**
-   * Resolves a Vertex AI OAuth credential to an access token
-   */
-  private async resolveVertexCredential(credentialId: string): Promise<string> {
-    const requestId = `vertex-router-${Date.now()}`
-
-    logger.info(`[${requestId}] Resolving Vertex AI credential: ${credentialId}`)
-
-    const credential = await db.query.account.findFirst({
-      where: eq(account.id, credentialId),
-    })
-
-    if (!credential) {
-      throw new Error(`Vertex AI credential not found: ${credentialId}`)
-    }
-
-    const { accessToken } = await refreshTokenIfNeeded(requestId, credential, credentialId)
-
-    if (!accessToken) {
-      throw new Error('Failed to get Vertex AI access token')
-    }
-
-    logger.info(`[${requestId}] Successfully resolved Vertex AI credential`)
-    return accessToken
   }
 }

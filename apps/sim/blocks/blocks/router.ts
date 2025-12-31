@@ -2,12 +2,7 @@ import { ConnectIcon } from '@/components/icons'
 import { isHosted } from '@/lib/core/config/feature-flags'
 import { AuthMode, type BlockConfig } from '@/blocks/types'
 import type { ProviderId } from '@/providers/types'
-import {
-  getAllModelProviders,
-  getHostedModels,
-  getProviderIcon,
-  providers,
-} from '@/providers/utils'
+import { getAllModelProviders, getHostedModels, getProviderIcon } from '@/providers/utils'
 import { useProvidersStore } from '@/stores/providers/store'
 import type { ToolResponse } from '@/tools/types'
 
@@ -153,19 +148,6 @@ export const RouterBlock: BlockConfig<RouterResponse> = {
       },
     },
     {
-      id: 'vertexCredential',
-      title: 'Google Cloud Account',
-      type: 'oauth-input',
-      serviceId: 'vertex-ai',
-      requiredScopes: ['https://www.googleapis.com/auth/cloud-platform'],
-      placeholder: 'Select Google Cloud account',
-      required: true,
-      condition: {
-        field: 'model',
-        value: providers.vertex.models,
-      },
-    },
-    {
       id: 'apiKey',
       title: 'API Key',
       type: 'short-input',
@@ -173,69 +155,18 @@ export const RouterBlock: BlockConfig<RouterResponse> = {
       password: true,
       connectionDroppable: false,
       required: true,
-      // Hide API key for hosted models, llama.cpp models, vLLM models, and Vertex models (uses OAuth)
+      // Hide API key for hosted models, llama.cpp models, and vLLM models
       condition: isHosted
         ? {
             field: 'model',
-            value: [...getHostedModels(), ...providers.vertex.models],
-            not: true, // Show for all models EXCEPT those listed
+            value: getHostedModels(),
+            not: true, // Show for all models EXCEPT hosted models
           }
         : () => ({
             field: 'model',
-            value: [
-              ...getCurrentLlamaCppModels(),
-              ...getCurrentVLLMModels(),
-              ...providers.vertex.models,
-            ],
-            not: true, // Show for all models EXCEPT llama.cpp, vLLM, and Vertex models
+            value: [...getCurrentLlamaCppModels(), ...getCurrentVLLMModels()],
+            not: true, // Show for all models EXCEPT llama.cpp and vLLM models
           }),
-    },
-    {
-      id: 'azureEndpoint',
-      title: 'Azure OpenAI Endpoint',
-      type: 'short-input',
-      password: true,
-      placeholder: 'https://your-resource.openai.azure.com',
-      connectionDroppable: false,
-      condition: {
-        field: 'model',
-        value: providers['azure-openai'].models,
-      },
-    },
-    {
-      id: 'azureApiVersion',
-      title: 'Azure API Version',
-      type: 'short-input',
-      placeholder: '2024-07-01-preview',
-      connectionDroppable: false,
-      condition: {
-        field: 'model',
-        value: providers['azure-openai'].models,
-      },
-    },
-    {
-      id: 'vertexProject',
-      title: 'Vertex AI Project',
-      type: 'short-input',
-      placeholder: 'your-gcp-project-id',
-      connectionDroppable: false,
-      required: true,
-      condition: {
-        field: 'model',
-        value: providers.vertex.models,
-      },
-    },
-    {
-      id: 'vertexLocation',
-      title: 'Vertex AI Location',
-      type: 'short-input',
-      placeholder: 'us-central1',
-      connectionDroppable: false,
-      required: true,
-      condition: {
-        field: 'model',
-        value: providers.vertex.models,
-      },
     },
     {
       id: 'temperature',
@@ -282,14 +213,6 @@ export const RouterBlock: BlockConfig<RouterResponse> = {
     prompt: { type: 'string', description: 'Routing prompt content' },
     model: { type: 'string', description: 'AI model to use' },
     apiKey: { type: 'string', description: 'Provider API key' },
-    azureEndpoint: { type: 'string', description: 'Azure OpenAI endpoint URL' },
-    azureApiVersion: { type: 'string', description: 'Azure API version' },
-    vertexProject: { type: 'string', description: 'Google Cloud project ID for Vertex AI' },
-    vertexLocation: { type: 'string', description: 'Google Cloud location for Vertex AI' },
-    vertexCredential: {
-      type: 'string',
-      description: 'Google Cloud OAuth credential ID for Vertex AI',
-    },
     temperature: {
       type: 'number',
       description: 'Response randomness level (low for consistent routing)',

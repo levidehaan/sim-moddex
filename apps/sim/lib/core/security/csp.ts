@@ -78,7 +78,7 @@ export const buildTimeCSPDirectives: CSPDirectives = {
     "'self'",
     env.NEXT_PUBLIC_APP_URL || '',
     // Only include localhost fallbacks in development mode
-    ...(env.OLLAMA_URL ? [env.OLLAMA_URL] : isDev ? ['http://localhost:11434'] : []),
+    ...(env.LLAMACPP_BASE_URL ? [env.LLAMACPP_BASE_URL] : isDev ? ['http://localhost:8080'] : []),
     ...(env.NEXT_PUBLIC_SOCKET_URL
       ? [
           env.NEXT_PUBLIC_SOCKET_URL,

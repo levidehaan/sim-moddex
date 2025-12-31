@@ -48,13 +48,12 @@ export const azureOpenAIProvider: ProviderConfig = {
       stream: !!request.stream,
     })
 
-    const azureEndpoint = request.azureEndpoint || env.AZURE_OPENAI_ENDPOINT
-    const azureApiVersion =
-      request.azureApiVersion || env.AZURE_OPENAI_API_VERSION || '2024-07-01-preview'
+    const azureEndpoint = request.azureEndpoint
+    const azureApiVersion = request.azureApiVersion || '2024-07-01-preview'
 
     if (!azureEndpoint) {
       throw new Error(
-        'Azure OpenAI endpoint is required. Please provide it via azureEndpoint parameter or AZURE_OPENAI_ENDPOINT environment variable.'
+        'Azure OpenAI endpoint is required. Please provide it via azureEndpoint parameter.'
       )
     }
 

@@ -133,6 +133,7 @@ export async function processDocument(
 }
 
 async function getMistralApiKey(workspaceId?: string | null): Promise<string | null> {
+  // Mistral OCR has been disabled - proprietary API keys removed
   if (workspaceId) {
     const byokResult = await getBYOKKey(workspaceId, 'mistral')
     if (byokResult) {
@@ -140,7 +141,7 @@ async function getMistralApiKey(workspaceId?: string | null): Promise<string | n
       return byokResult.apiKey
     }
   }
-  return env.MISTRAL_API_KEY || null
+  return null
 }
 
 async function parseDocument(
@@ -156,22 +157,15 @@ async function parseDocument(
   metadata?: any
 }> {
   const isPDF = mimeType === 'application/pdf'
-  const hasAzureMistralOCR =
-    env.OCR_AZURE_API_KEY && env.OCR_AZURE_ENDPOINT && env.OCR_AZURE_MODEL_NAME
+  // Azure OCR has been disabled - proprietary API keys removed
+  const hasAzureMistralOCR = false
 
   const mistralApiKey = await getMistralApiKey(workspaceId)
   const hasMistralOCR = !!mistralApiKey
 
-  if (isPDF && (hasAzureMistralOCR || hasMistralOCR)) {
-    if (hasAzureMistralOCR) {
-      logger.info(`Using Azure Mistral OCR: ${filename}`)
-      return parseWithAzureMistralOCR(fileUrl, filename, mimeType, userId, workspaceId)
-    }
-
-    if (hasMistralOCR) {
-      logger.info(`Using Mistral OCR: ${filename}`)
-      return parseWithMistralOCR(fileUrl, filename, mimeType, userId, workspaceId, mistralApiKey)
-    }
+  if (isPDF && hasMistralOCR) {
+    logger.info(`Using Mistral OCR: ${filename}`)
+    return parseWithMistralOCR(fileUrl, filename, mimeType, userId, workspaceId, mistralApiKey)
   }
 
   logger.info(`Using file parser: ${filename}`)
@@ -328,65 +322,21 @@ async function parseWithAzureMistralOCR(
   userId?: string,
   workspaceId?: string | null
 ) {
-  validateOCRConfig(
-    env.OCR_AZURE_API_KEY,
-    env.OCR_AZURE_ENDPOINT,
-    env.OCR_AZURE_MODEL_NAME,
-    'Azure Mistral OCR'
-  )
+  // Azure Mistral OCR has been disabled - proprietary API keys removed
+  logger.info(`Azure Mistral OCR disabled, falling back to file parser: ${filename}`)
 
-  const fileBuffer = await downloadFileForBase64(fileUrl)
-  const base64Data = fileBuffer.toString('base64')
-  const dataUri = `data:${mimeType};base64,${base64Data}`
-
-  try {
-    const response = await retryWithExponentialBackoff(
-      () =>
-        makeOCRRequest(
-          env.OCR_AZURE_ENDPOINT!,
-          {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${env.OCR_AZURE_API_KEY}`,
-          },
-          {
-            model: env.OCR_AZURE_MODEL_NAME!,
-            document: {
-              type: 'document_url',
-              document_url: dataUri,
-            },
-            include_image_base64: false,
-          }
-        ),
-      { maxRetries: 3, initialDelayMs: 1000, maxDelayMs: 10000 }
+  const fallbackMistralKey = await getMistralApiKey(workspaceId)
+  if (fallbackMistralKey) {
+    return parseWithMistralOCR(
+      fileUrl,
+      filename,
+      mimeType,
+      userId,
+      workspaceId,
+      fallbackMistralKey
     )
-
-    const ocrResult = (await response.json()) as AzureOCRResponse
-    const content = extractPageContent(ocrResult.pages || []) || JSON.stringify(ocrResult, null, 2)
-
-    if (!content.trim()) {
-      throw new Error('Azure Mistral OCR returned empty content')
-    }
-
-    logger.info(`Azure Mistral OCR completed: ${filename}`)
-    return { content, processingMethod: 'mistral-ocr' as const, cloudUrl: undefined }
-  } catch (error) {
-    logger.error(`Azure Mistral OCR failed for ${filename}:`, {
-      message: error instanceof Error ? error.message : String(error),
-    })
-
-    const fallbackMistralKey = await getMistralApiKey(workspaceId)
-    if (fallbackMistralKey) {
-      return parseWithMistralOCR(
-        fileUrl,
-        filename,
-        mimeType,
-        userId,
-        workspaceId,
-        fallbackMistralKey
-      )
-    }
-    return parseWithFileParser(fileUrl, filename, mimeType)
   }
+  return parseWithFileParser(fileUrl, filename, mimeType)
 }
 
 async function parseWithMistralOCR(
@@ -397,7 +347,7 @@ async function parseWithMistralOCR(
   workspaceId?: string | null,
   mistralApiKey?: string | null
 ) {
-  const apiKey = mistralApiKey || env.MISTRAL_API_KEY
+  const apiKey = mistralApiKey
   if (!apiKey) {
     throw new Error('Mistral API key required')
   }

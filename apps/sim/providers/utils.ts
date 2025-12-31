@@ -67,25 +67,8 @@ function buildProviderMetadata(providerId: ProviderId): ProviderMetadata {
 }
 
 export const providers: Record<ProviderId, ProviderMetadata> = {
-  openai: {
-    ...buildProviderMetadata('openai'),
-    computerUseModels: ['computer-use-preview'],
-  },
-  anthropic: {
-    ...buildProviderMetadata('anthropic'),
-    computerUseModels: getComputerUseModels().filter((model) =>
-      getProviderModelsFromDefinitions('anthropic').includes(model)
-    ),
-  },
-  google: buildProviderMetadata('google'),
-  vertex: buildProviderMetadata('vertex'),
   deepseek: buildProviderMetadata('deepseek'),
-  xai: buildProviderMetadata('xai'),
-  cerebras: buildProviderMetadata('cerebras'),
-  groq: buildProviderMetadata('groq'),
   vllm: buildProviderMetadata('vllm'),
-  mistral: buildProviderMetadata('mistral'),
-  'azure-openai': buildProviderMetadata('azure-openai'),
   openrouter: buildProviderMetadata('openrouter'),
   llamacpp: buildProviderMetadata('llamacpp'),
 }

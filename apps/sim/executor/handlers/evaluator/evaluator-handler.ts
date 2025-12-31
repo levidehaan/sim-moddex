@@ -1,8 +1,4 @@
-import { db } from '@sim/db'
-import { account } from '@sim/db/schema'
 import { createLogger } from '@sim/logger'
-import { eq } from 'drizzle-orm'
-import { refreshTokenIfNeeded } from '@/app/api/auth/oauth/utils'
 import type { BlockOutput } from '@/blocks/types'
 import { BlockType, DEFAULTS, EVALUATOR, HTTP } from '@/executor/constants'
 import type { BlockHandler, ExecutionContext } from '@/executor/types'
@@ -29,16 +25,10 @@ export class EvaluatorBlockHandler implements BlockHandler {
     const evaluatorConfig = {
       model: inputs.model || EVALUATOR.DEFAULT_MODEL,
       apiKey: inputs.apiKey,
-      vertexProject: inputs.vertexProject,
-      vertexLocation: inputs.vertexLocation,
-      vertexCredential: inputs.vertexCredential,
     }
     const providerId = getProviderFromModel(evaluatorConfig.model)
 
-    let finalApiKey: string | undefined = evaluatorConfig.apiKey
-    if (providerId === 'vertex' && evaluatorConfig.vertexCredential) {
-      finalApiKey = await this.resolveVertexCredential(evaluatorConfig.vertexCredential)
-    }
+    const finalApiKey: string | undefined = evaluatorConfig.apiKey
 
     const processedContent = this.processContent(inputs.content)
 
@@ -116,16 +106,6 @@ export class EvaluatorBlockHandler implements BlockHandler {
         apiKey: finalApiKey,
         workflowId: ctx.workflowId,
         workspaceId: ctx.workspaceId,
-      }
-
-      if (providerId === 'vertex') {
-        providerRequest.vertexProject = evaluatorConfig.vertexProject
-        providerRequest.vertexLocation = evaluatorConfig.vertexLocation
-      }
-
-      if (providerId === 'azure-openai') {
-        providerRequest.azureEndpoint = inputs.azureEndpoint
-        providerRequest.azureApiVersion = inputs.azureApiVersion
       }
 
       const response = await fetch(url.toString(), {
@@ -272,31 +252,5 @@ export class EvaluatorBlockHandler implements BlockHandler {
 
     logger.warn(`Metric "${metricName}" not found in LLM response`)
     return DEFAULTS.EXECUTION_TIME
-  }
-
-  /**
-   * Resolves a Vertex AI OAuth credential to an access token
-   */
-  private async resolveVertexCredential(credentialId: string): Promise<string> {
-    const requestId = `vertex-evaluator-${Date.now()}`
-
-    logger.info(`[${requestId}] Resolving Vertex AI credential: ${credentialId}`)
-
-    const credential = await db.query.account.findFirst({
-      where: eq(account.id, credentialId),
-    })
-
-    if (!credential) {
-      throw new Error(`Vertex AI credential not found: ${credentialId}`)
-    }
-
-    const { accessToken } = await refreshTokenIfNeeded(requestId, credential, credentialId)
-
-    if (!accessToken) {
-      throw new Error('Failed to get Vertex AI access token')
-    }
-
-    logger.info(`[${requestId}] Successfully resolved Vertex AI credential`)
-    return accessToken
   }
 }

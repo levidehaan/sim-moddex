@@ -14,7 +14,6 @@ import {
   MODELS_WITH_REASONING_EFFORT,
   MODELS_WITH_THINKING,
   MODELS_WITH_VERBOSITY,
-  providers,
   supportsTemperature,
 } from '@/providers/utils'
 
@@ -109,19 +108,6 @@ export const AgentBlock: BlockConfig<AgentResponse> = {
           const icon = getProviderIcon(model)
           return { label: model, id: model, ...(icon && { icon }) }
         })
-      },
-    },
-    {
-      id: 'vertexCredential',
-      title: 'Google Cloud Account',
-      type: 'oauth-input',
-      serviceId: 'vertex-ai',
-      requiredScopes: ['https://www.googleapis.com/auth/cloud-platform'],
-      placeholder: 'Select Google Cloud account',
-      required: true,
-      condition: {
-        field: 'model',
-        value: providers.vertex.models,
       },
     },
     {
@@ -283,53 +269,6 @@ export const AgentBlock: BlockConfig<AgentResponse> = {
     },
 
     {
-      id: 'azureEndpoint',
-      title: 'Azure OpenAI Endpoint',
-      type: 'short-input',
-      password: true,
-      placeholder: 'https://your-resource.openai.azure.com',
-      connectionDroppable: false,
-      condition: {
-        field: 'model',
-        value: providers['azure-openai'].models,
-      },
-    },
-    {
-      id: 'azureApiVersion',
-      title: 'Azure API Version',
-      type: 'short-input',
-      placeholder: '2024-07-01-preview',
-      connectionDroppable: false,
-      condition: {
-        field: 'model',
-        value: providers['azure-openai'].models,
-      },
-    },
-    {
-      id: 'vertexProject',
-      title: 'Vertex AI Project',
-      type: 'short-input',
-      placeholder: 'your-gcp-project-id',
-      connectionDroppable: false,
-      required: true,
-      condition: {
-        field: 'model',
-        value: providers.vertex.models,
-      },
-    },
-    {
-      id: 'vertexLocation',
-      title: 'Vertex AI Location',
-      type: 'short-input',
-      placeholder: 'us-central1',
-      connectionDroppable: false,
-      required: true,
-      condition: {
-        field: 'model',
-        value: providers.vertex.models,
-      },
-    },
-    {
       id: 'tools',
       title: 'Tools',
       type: 'tool-input',
@@ -343,21 +282,17 @@ export const AgentBlock: BlockConfig<AgentResponse> = {
       password: true,
       connectionDroppable: false,
       required: true,
-      // Hide API key for hosted models, llama.cpp models, vLLM models, and Vertex models (uses OAuth)
+      // Hide API key for hosted models, llama.cpp models, and vLLM models
       condition: isHosted
         ? {
             field: 'model',
-            value: [...getHostedModels(), ...providers.vertex.models],
-            not: true, // Show for all models EXCEPT those listed
+            value: getHostedModels(),
+            not: true, // Show for all models EXCEPT hosted models
           }
         : () => ({
             field: 'model',
-            value: [
-              ...getCurrentLlamaCppModels(),
-              ...getCurrentVLLMModels(),
-              ...providers.vertex.models,
-            ],
-            not: true, // Show for all models EXCEPT llama.cpp, vLLM, and Vertex models
+            value: [...getCurrentLlamaCppModels(), ...getCurrentVLLMModels()],
+            not: true, // Show for all models EXCEPT llama.cpp and vLLM models
           }),
     },
     {
@@ -630,10 +565,6 @@ Example 3 (Array Input):
     },
     model: { type: 'string', description: 'AI model to use' },
     apiKey: { type: 'string', description: 'Provider API key' },
-    azureEndpoint: { type: 'string', description: 'Azure OpenAI endpoint URL' },
-    azureApiVersion: { type: 'string', description: 'Azure API version' },
-    vertexProject: { type: 'string', description: 'Google Cloud project ID for Vertex AI' },
-    vertexLocation: { type: 'string', description: 'Google Cloud location for Vertex AI' },
     responseFormat: {
       type: 'json',
       description: 'JSON response format schema',

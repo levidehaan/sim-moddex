@@ -295,28 +295,11 @@ export async function POST(req: NextRequest) {
     const providerEnv = env.COPILOT_PROVIDER as any
 
     if (providerEnv) {
-      if (providerEnv === 'azure-openai') {
-        providerConfig = {
-          provider: 'azure-openai',
-          model: modelToUse,
-          apiKey: env.AZURE_OPENAI_API_KEY,
-          apiVersion: 'preview',
-          endpoint: env.AZURE_OPENAI_ENDPOINT,
-        }
-      } else if (providerEnv === 'vertex') {
-        providerConfig = {
-          provider: 'vertex',
-          model: modelToUse,
-          apiKey: env.COPILOT_API_KEY,
-          vertexProject: env.VERTEX_PROJECT,
-          vertexLocation: env.VERTEX_LOCATION,
-        }
-      } else {
-        providerConfig = {
-          provider: providerEnv,
-          model: modelToUse,
-          apiKey: env.COPILOT_API_KEY,
-        }
+      // Only support OpenRouter and other generic providers
+      providerConfig = {
+        provider: providerEnv,
+        model: modelToUse,
+        apiKey: env.COPILOT_API_KEY,
       }
     }
 
