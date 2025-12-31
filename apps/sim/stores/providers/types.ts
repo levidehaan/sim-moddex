@@ -1,8 +1,12 @@
-export type ProviderName = 'ollama' | 'vllm' | 'openrouter' | 'base'
+export type ProviderName = 'llamacpp' | 'vllm' | 'openrouter' | 'base'
 
 export interface OpenRouterModelInfo {
   id: string
+  name?: string
+  description?: string
   contextLength?: number
+  modality?: string
+  isModerated?: boolean
   supportsStructuredOutputs?: boolean
   supportsTools?: boolean
   pricing?: {

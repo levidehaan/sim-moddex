@@ -14,8 +14,8 @@ import type { ToolResponse } from '@/tools/types'
 
 const logger = createLogger('EvaluatorBlock')
 
-const getCurrentOllamaModels = () => {
-  return useProvidersStore.getState().providers.ollama.models
+const getCurrentLlamaCppModels = () => {
+  return useProvidersStore.getState().providers.llamacpp.models
 }
 
 const getCurrentVLLMModels = () => {
@@ -191,11 +191,11 @@ export const EvaluatorBlock: BlockConfig<EvaluatorResponse> = {
       options: () => {
         const providersState = useProvidersStore.getState()
         const baseModels = providersState.providers.base.models
-        const ollamaModels = providersState.providers.ollama.models
+        const llamacppModels = providersState.providers.llamacpp.models
         const vllmModels = providersState.providers.vllm.models
         const openrouterModels = providersState.providers.openrouter.models
         const allModels = Array.from(
-          new Set([...baseModels, ...ollamaModels, ...vllmModels, ...openrouterModels])
+          new Set([...baseModels, ...llamacppModels, ...vllmModels, ...openrouterModels])
         )
 
         return allModels.map((model) => {
@@ -225,7 +225,7 @@ export const EvaluatorBlock: BlockConfig<EvaluatorResponse> = {
       password: true,
       connectionDroppable: false,
       required: true,
-      // Hide API key for hosted models, Ollama models, vLLM models, and Vertex models (uses OAuth)
+      // Hide API key for hosted models, llama.cpp models, vLLM models, and Vertex models (uses OAuth)
       condition: isHosted
         ? {
             field: 'model',
@@ -235,11 +235,11 @@ export const EvaluatorBlock: BlockConfig<EvaluatorResponse> = {
         : () => ({
             field: 'model',
             value: [
-              ...getCurrentOllamaModels(),
+              ...getCurrentLlamaCppModels(),
               ...getCurrentVLLMModels(),
               ...providers.vertex.models,
             ],
-            not: true, // Show for all models EXCEPT Ollama, vLLM, and Vertex models
+            not: true, // Show for all models EXCEPT llama.cpp, vLLM, and Vertex models
           }),
     },
     {

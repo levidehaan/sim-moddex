@@ -72,40 +72,32 @@ docker compose -f docker-compose.prod.yml up -d
 
 Access the application at [http://localhost:3000/](http://localhost:3000/)
 
-#### Using Local Models with Ollama
+#### Using Local Models with llama.cpp
 
-Run Sim with local AI models using [Ollama](https://ollama.ai) - no external APIs required:
+Run Sim with local AI models using [llama.cpp](https://github.com/ggerganov/llama.cpp):
 
 ```bash
-# Start with GPU support (automatically downloads gemma3:4b model)
-docker compose -f docker-compose.ollama.yml --profile setup up -d
+# Start llama.cpp server with a model
+llama-server -m your-model.gguf --port 8080
 
-# For CPU-only systems:
-docker compose -f docker-compose.ollama.yml --profile cpu --profile setup up -d
+# Or with llama-cli
+llama-cli --server -m your-model.gguf --port 8080
 ```
 
-Wait for the model to download, then visit [http://localhost:3000](http://localhost:3000). Add more models with:
+Set the environment variable to point to your llama.cpp server:
 ```bash
-docker compose -f docker-compose.ollama.yml exec ollama ollama pull llama3.1:8b
+LLAMACPP_BASE_URL=http://localhost:8080
+LLAMACPP_API_KEY=your_optional_api_key  # Only if your server requires auth
 ```
 
-#### Using an External Ollama Instance
-
-If you already have Ollama running on your host machine (outside Docker), you need to configure the `OLLAMA_URL` to use `host.docker.internal` instead of `localhost`:
-
+When running with Docker, use `host.docker.internal` if llama.cpp is on your host machine:
 ```bash
 # Docker Desktop (macOS/Windows)
-OLLAMA_URL=http://host.docker.internal:11434 docker compose -f docker-compose.prod.yml up -d
+LLAMACPP_BASE_URL=http://host.docker.internal:8080 docker compose -f docker-compose.prod.yml up -d
 
-# Linux (add extra_hosts or use host IP)
-docker compose -f docker-compose.prod.yml up -d  # Then set OLLAMA_URL to your host's IP
+# Linux (use your host's IP)
+LLAMACPP_BASE_URL=http://192.168.1.100:8080 docker compose -f docker-compose.prod.yml up -d
 ```
-
-**Why?** When running inside Docker, `localhost` refers to the container itself, not your host machine. `host.docker.internal` is a special DNS name that resolves to the host.
-
-For Linux users, you can either:
-- Use your host machine's actual IP address (e.g., `http://192.168.1.100:11434`)
-- Add `extra_hosts: ["host.docker.internal:host-gateway"]` to the simstudio service in your compose file
 
 #### Using vLLM
 
@@ -117,7 +109,7 @@ VLLM_BASE_URL=http://your-vllm-server:8000
 VLLM_API_KEY=your_optional_api_key  # Only if your vLLM instance requires auth
 ```
 
-When running with Docker, use `host.docker.internal` if vLLM is on your host machine (same as Ollama above).
+When running with Docker, use `host.docker.internal` if vLLM is on your host machine (same as llama.cpp above).
 
 ### Self-hosted: Dev Containers
 
@@ -282,21 +274,24 @@ Key environment variables for self-hosted deployments (see `apps/sim/.env.exampl
 | `BETTER_AUTH_URL` | Yes | Your app URL (e.g., `http://localhost:3000`) |
 | `NEXT_PUBLIC_APP_URL` | Yes | Public app URL (same as above) |
 | `ENCRYPTION_KEY` | Yes | Encryption key (`openssl rand -hex 32`) |
-| `OLLAMA_URL` | No | Ollama server URL (default: `http://localhost:11434`) |
+| `LLAMACPP_BASE_URL` | No | llama.cpp server URL for local models |
+| `LLAMACPP_API_KEY` | No | Optional API key for llama.cpp server |
 | `VLLM_BASE_URL` | No | vLLM server URL for self-hosted models |
 | `COPILOT_API_KEY` | No | API key from sim.ai for Copilot features |
 
 ## Troubleshooting
 
-### Ollama models not showing in dropdown (Docker)
+### Local models not showing in dropdown (Docker)
 
-If you're running Ollama on your host machine and Sim in Docker, change `OLLAMA_URL` from `localhost` to `host.docker.internal`:
+If you're running llama.cpp or vLLM on your host machine and Sim in Docker, change the URL from `localhost` to `host.docker.internal`:
 
 ```bash
-OLLAMA_URL=http://host.docker.internal:11434 docker compose -f docker-compose.prod.yml up -d
+LLAMACPP_BASE_URL=http://host.docker.internal:8080 docker compose -f docker-compose.prod.yml up -d
+# Or for vLLM:
+VLLM_BASE_URL=http://host.docker.internal:8000 docker compose -f docker-compose.prod.yml up -d
 ```
 
-See [Using an External Ollama Instance](#using-an-external-ollama-instance) for details.
+See [Using Local Models with llama.cpp](#using-local-models-with-llamacpp) for details.
 
 ### Database connection issues
 

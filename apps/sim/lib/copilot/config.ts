@@ -18,7 +18,7 @@ const VALID_PROVIDER_IDS: readonly ProviderId[] = [
   'cerebras',
   'mistral',
   'groq',
-  'ollama',
+  'llamacpp',
 ] as const
 
 /**

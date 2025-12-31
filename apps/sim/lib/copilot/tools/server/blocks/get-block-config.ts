@@ -30,7 +30,7 @@ function getStaticModelOptions(): string[] {
 
   for (const provider of Object.values(PROVIDER_DEFINITIONS)) {
     // Skip providers with dynamic/fetched models
-    if (provider.id === 'ollama' || provider.id === 'vllm' || provider.id === 'openrouter') {
+    if (provider.id === 'llamacpp' || provider.id === 'vllm' || provider.id === 'openrouter') {
       continue
     }
     if (provider?.models) {
@@ -52,7 +52,7 @@ function callOptionsWithFallback(optionsFn: () => any[]): any[] | undefined {
   const mockProvidersState = {
     providers: {
       base: { models: staticModels },
-      ollama: { models: [] },
+      llamacpp: { models: [] },
       vllm: { models: [] },
       openrouter: { models: [] },
     },
