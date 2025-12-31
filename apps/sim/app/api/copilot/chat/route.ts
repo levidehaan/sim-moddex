@@ -9,6 +9,12 @@ import { generateChatTitle } from '@/lib/copilot/chat-title'
 import { getCopilotModel } from '@/lib/copilot/config'
 import { SIM_AGENT_API_URL_DEFAULT, SIM_AGENT_VERSION } from '@/lib/copilot/constants'
 import {
+  COPILOT_DEFAULT_MODEL,
+  COPILOT_FREE_MODEL,
+  getOpenRouterApiKey,
+  streamOpenRouterChat,
+} from '@/lib/copilot/openrouter'
+import {
   authenticateCopilotRequestSessionOnly,
   createBadRequestResponse,
   createInternalServerErrorResponse,
@@ -459,31 +465,90 @@ export async function POST(req: NextRequest) {
       })
     } catch {}
 
-    const simAgentResponse = await fetch(`${SIM_AGENT_API_URL}/api/chat-completion-streaming`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(env.COPILOT_API_KEY ? { 'x-api-key': env.COPILOT_API_KEY } : {}),
-      },
-      body: JSON.stringify(requestPayload),
-    })
+    // Check if we should use OpenRouter fallback (no hosted service configured)
+    const useOpenRouterFallback = !env.COPILOT_API_KEY
+    let openRouterApiKey: string | null = null
 
-    if (!simAgentResponse.ok) {
-      if (simAgentResponse.status === 401 || simAgentResponse.status === 402) {
-        // Rethrow status only; client will render appropriate assistant message
-        return new NextResponse(null, { status: simAgentResponse.status })
+    if (useOpenRouterFallback) {
+      openRouterApiKey = await getOpenRouterApiKey(authenticatedUserId)
+      if (!openRouterApiKey) {
+        logger.warn(`[${tracker.requestId}] No AI provider configured for copilot`)
+        return NextResponse.json(
+          {
+            error:
+              'No AI provider configured. Please configure OpenRouter in Settings > AI Providers to use the copilot.',
+          },
+          { status: 503 }
+        )
       }
+      logger.info(`[${tracker.requestId}] Using OpenRouter fallback for copilot`)
+    }
 
-      const errorText = await simAgentResponse.text().catch(() => '')
-      logger.error(`[${tracker.requestId}] Sim agent API error:`, {
-        status: simAgentResponse.status,
-        error: errorText,
+    let simAgentResponse: Response
+
+    if (useOpenRouterFallback && openRouterApiKey) {
+      // Use OpenRouter directly for self-hosted users
+      const systemPrompt = `You are a helpful AI assistant for Sim, a workflow automation platform. You help users build and understand their workflows. Be concise and helpful.
+
+${agentContexts.length > 0 ? 'Context:\n' + agentContexts.map((c) => `[${c.type}]\n${c.content}`).join('\n\n') : ''}`
+
+      const messages = [
+        { role: 'system' as const, content: systemPrompt },
+        ...conversationHistory
+          .filter((m: any) => m.role === 'user' || m.role === 'assistant')
+          .map((m: any) => ({
+            role: m.role as 'user' | 'assistant',
+            content: typeof m.content === 'string' ? m.content : JSON.stringify(m.content),
+          })),
+        { role: 'user' as const, content: message },
+      ]
+
+      simAgentResponse = await streamOpenRouterChat(openRouterApiKey, {
+        model: COPILOT_DEFAULT_MODEL,
+        messages,
+        temperature: 0.3,
+        max_tokens: 8192,
       })
 
-      return NextResponse.json(
-        { error: `Sim agent API error: ${simAgentResponse.statusText}` },
-        { status: simAgentResponse.status }
-      )
+      if (!simAgentResponse.ok) {
+        const errorText = await simAgentResponse.text().catch(() => '')
+        logger.error(`[${tracker.requestId}] OpenRouter API error:`, {
+          status: simAgentResponse.status,
+          error: errorText,
+        })
+        return NextResponse.json(
+          { error: `OpenRouter API error: ${simAgentResponse.statusText}` },
+          { status: simAgentResponse.status }
+        )
+      }
+    } else {
+      // Use hosted sim agent service
+      simAgentResponse = await fetch(`${SIM_AGENT_API_URL}/api/chat-completion-streaming`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(env.COPILOT_API_KEY ? { 'x-api-key': env.COPILOT_API_KEY } : {}),
+        },
+        body: JSON.stringify(requestPayload),
+      })
+
+      if (!simAgentResponse.ok) {
+        if (simAgentResponse.status === 401 || simAgentResponse.status === 402) {
+          // Rethrow status only; client will render appropriate assistant message
+          return new NextResponse(null, { status: simAgentResponse.status })
+        }
+
+        const errorText = await simAgentResponse.text().catch(() => '')
+        logger.error(`[${tracker.requestId}] Sim agent API error:`, {
+          status: simAgentResponse.status,
+          error: errorText,
+        })
+
+        return NextResponse.json(
+          { error: `Sim agent API error: ${simAgentResponse.statusText}` },
+          { status: simAgentResponse.status }
+        )
+      }
     }
 
     // If streaming is requested, forward the stream and update chat later
@@ -557,9 +622,10 @@ export async function POST(req: NextRequest) {
             logger.debug(`[${tracker.requestId}] Skipping title generation`)
           }
 
-          // Forward the sim agent stream and capture assistant response
+          // Forward the stream and capture assistant response
           const reader = simAgentResponse.body!.getReader()
           const decoder = new TextDecoder()
+          const isOpenRouterStream = useOpenRouterFallback
 
           try {
             while (true) {
@@ -580,7 +646,20 @@ export async function POST(req: NextRequest) {
 
                 if (line.startsWith('data: ') && line.length > 6) {
                   try {
-                    const jsonStr = line.slice(6)
+                    const jsonStr = line.slice(6).trim()
+
+                    // Handle OpenRouter [DONE] signal
+                    if (jsonStr === '[DONE]') {
+                      if (isOpenRouterStream) {
+                        // Send done event in sim agent format
+                        const doneEvent = `data: ${JSON.stringify({
+                          type: 'done',
+                          responseId: crypto.randomUUID(),
+                        })}\n\n`
+                        controller.enqueue(encoder.encode(doneEvent))
+                      }
+                      continue
+                    }
 
                     // Check if the JSON string is unusually large (potential streaming issue)
                     if (jsonStr.length > 50000) {
@@ -592,6 +671,19 @@ export async function POST(req: NextRequest) {
                     }
 
                     const event = JSON.parse(jsonStr)
+
+                    // Transform OpenRouter format to sim agent format
+                    if (isOpenRouterStream && event.choices?.[0]?.delta?.content) {
+                      const content = event.choices[0].delta.content
+                      assistantContent += content
+                      // Convert to sim agent format
+                      const transformedEvent = `data: ${JSON.stringify({
+                        type: 'content',
+                        data: content,
+                      })}\n\n`
+                      controller.enqueue(encoder.encode(transformedEvent))
+                      continue
+                    }
 
                     // Log different event types comprehensively
                     switch (event.type) {

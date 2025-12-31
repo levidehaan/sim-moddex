@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden'
 import { useQueryClient } from '@tanstack/react-query'
-import { Files, KeySquare, LogIn, Settings, User, Users, Wrench } from 'lucide-react'
+import { Cpu, Files, KeySquare, LogIn, Settings, User, Users, Wrench } from 'lucide-react'
 import {
   Card,
   Connections,
@@ -29,6 +29,7 @@ import { getEnv, isTruthy } from '@/lib/core/config/env'
 import { isHosted } from '@/lib/core/config/feature-flags'
 import { getUserRole } from '@/lib/workspaces/organization'
 import {
+  AIProviders,
   ApiKeys,
   BYOK,
   Copilot,
@@ -64,6 +65,7 @@ type SettingsSection =
   | 'integrations'
   | 'apikeys'
   | 'byok'
+  | 'ai-providers'
   | 'files'
   | 'subscription'
   | 'team'
@@ -114,6 +116,7 @@ const allNavigationItems: NavigationItem[] = [
   { id: 'integrations', label: 'Integrations', icon: Connections, section: 'tools' },
   { id: 'custom-tools', label: 'Custom Tools', icon: Wrench, section: 'tools' },
   { id: 'mcp', label: 'MCPs', icon: McpIcon, section: 'tools' },
+  { id: 'ai-providers', label: 'AI Providers', icon: Cpu, section: 'system' },
   { id: 'environment', label: 'Environment', icon: FolderCode, section: 'system' },
   { id: 'apikeys', label: 'API Keys', icon: Key, section: 'system' },
   {
@@ -460,6 +463,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
               />
             )}
             {activeSection === 'apikeys' && <ApiKeys onOpenChange={onOpenChange} />}
+            {activeSection === 'ai-providers' && <AIProviders />}
             {activeSection === 'files' && <FileUploads />}
             {isBillingEnabled && activeSection === 'subscription' && <Subscription />}
             {isBillingEnabled && activeSection === 'team' && <TeamManagement />}

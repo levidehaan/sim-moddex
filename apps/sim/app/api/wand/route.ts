@@ -1,5 +1,5 @@
 import { db } from '@sim/db'
-import { userStats, workflow } from '@sim/db/schema'
+import { settings, userStats, workflow } from '@sim/db/schema'
 import { createLogger } from '@sim/logger'
 import { eq, sql } from 'drizzle-orm'
 import { type NextRequest, NextResponse } from 'next/server'
@@ -19,14 +19,34 @@ export const maxDuration = 60
 
 const logger = createLogger('WandGenerateAPI')
 
-// Using OpenRouter for wand generation
-const openrouterApiKey = env.OPENROUTER_API_KEY
 const wandModelName = 'meta-llama/llama-3.1-8b-instruct:free'
 
-if (!openrouterApiKey) {
-  logger.warn('OPENROUTER_API_KEY not found. Wand generation API will not function.')
-} else {
-  logger.info('Using OpenRouter for wand generation')
+/**
+ * Gets OpenRouter API key - first from user settings, then from environment
+ */
+async function getOpenRouterKey(userId: string): Promise<string | null> {
+  try {
+    const result = await db.select().from(settings).where(eq(settings.userId, userId)).limit(1)
+
+    if (result.length > 0) {
+      const aiSettings = result[0].aiProviderSettings as Record<string, any> | null
+      const openrouterSettings = aiSettings?.openrouter as { apiKey?: string; enabled?: boolean } | undefined
+
+      if (openrouterSettings?.enabled !== false && openrouterSettings?.apiKey) {
+        logger.info('Using user-configured OpenRouter API key for wand')
+        return openrouterSettings.apiKey
+      }
+    }
+  } catch (error) {
+    logger.warn('Failed to fetch user OpenRouter settings', { error })
+  }
+
+  // Fall back to environment variable
+  if (env.OPENROUTER_API_KEY) {
+    return env.OPENROUTER_API_KEY
+  }
+
+  return null
 }
 
 interface ChatMessage {
@@ -181,11 +201,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Check if OpenRouter API key is configured
+    // Get OpenRouter API key from user settings or environment
+    const openrouterApiKey = await getOpenRouterKey(session.user.id)
     if (!openrouterApiKey) {
       logger.error(`[${requestId}] OpenRouter API key not configured.`)
       return NextResponse.json(
-        { success: false, error: 'Wand generation service is not configured.' },
+        { success: false, error: 'OpenRouter API key not configured. Please configure it in Settings > AI Providers.' },
         { status: 503 }
       )
     }
