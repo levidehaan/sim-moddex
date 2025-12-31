@@ -29,65 +29,35 @@ async function getEmbeddingConfig(
   embeddingModel = 'text-embedding-3-small',
   workspaceId?: string | null
 ): Promise<EmbeddingConfig> {
-  const azureApiKey = env.AZURE_OPENAI_API_KEY
-  const azureEndpoint = env.AZURE_OPENAI_ENDPOINT
-  const azureApiVersion = env.AZURE_OPENAI_API_VERSION
-  const kbModelName = env.KB_OPENAI_MODEL_NAME || embeddingModel
+  // Using OpenRouter for embeddings - proprietary API keys removed
+  const openrouterApiKey = env.OPENROUTER_API_KEY
 
-  const useAzure = !!(azureApiKey && azureEndpoint)
-
-  if (useAzure) {
-    return {
-      useAzure: true,
-      apiUrl: `${azureEndpoint}/openai/deployments/${kbModelName}/embeddings?api-version=${azureApiVersion}`,
-      headers: {
-        'api-key': azureApiKey!,
-        'Content-Type': 'application/json',
-      },
-      modelName: kbModelName,
-    }
+  if (!openrouterApiKey) {
+    throw new Error('OPENROUTER_API_KEY must be configured for embeddings')
   }
 
-  let openaiApiKey = env.OPENAI_API_KEY
-
-  if (workspaceId) {
-    const byokResult = await getBYOKKey(workspaceId, 'openai')
-    if (byokResult) {
-      logger.info('Using workspace BYOK key for OpenAI embeddings')
-      openaiApiKey = byokResult.apiKey
-    }
-  }
-
-  if (!openaiApiKey) {
-    throw new Error(
-      'Either OPENAI_API_KEY or Azure OpenAI configuration (AZURE_OPENAI_API_KEY + AZURE_OPENAI_ENDPOINT) must be configured'
-    )
-  }
+  // OpenRouter supports OpenAI embedding models via their API
+  const modelName = `openai/${embeddingModel}`
 
   return {
     useAzure: false,
-    apiUrl: 'https://api.openai.com/v1/embeddings',
+    apiUrl: 'https://openrouter.ai/api/v1/embeddings',
     headers: {
-      Authorization: `Bearer ${openaiApiKey}`,
+      Authorization: `Bearer ${openrouterApiKey}`,
       'Content-Type': 'application/json',
     },
-    modelName: embeddingModel,
+    modelName,
   }
 }
 
 async function callEmbeddingAPI(inputs: string[], config: EmbeddingConfig): Promise<number[][]> {
   return retryWithExponentialBackoff(
     async () => {
-      const requestBody = config.useAzure
-        ? {
-            input: inputs,
-            encoding_format: 'float',
-          }
-        : {
-            input: inputs,
-            model: config.modelName,
-            encoding_format: 'float',
-          }
+      const requestBody = {
+        input: inputs,
+        model: config.modelName,
+        encoding_format: 'float',
+      }
 
       const response = await fetch(config.apiUrl, {
         method: 'POST',
@@ -131,9 +101,7 @@ export async function generateEmbeddings(
 ): Promise<number[][]> {
   const config = await getEmbeddingConfig(embeddingModel, workspaceId)
 
-  logger.info(
-    `Using ${config.useAzure ? 'Azure OpenAI' : 'OpenAI'} for embeddings generation (${texts.length} texts)`
-  )
+  logger.info(`Using OpenRouter for embeddings generation (${texts.length} texts)`)
 
   const batches = batchByTokenLimit(texts, MAX_TOKENS_PER_REQUEST, embeddingModel)
 
@@ -183,9 +151,7 @@ export async function generateSearchEmbedding(
 ): Promise<number[]> {
   const config = await getEmbeddingConfig(embeddingModel, workspaceId)
 
-  logger.info(
-    `Using ${config.useAzure ? 'Azure OpenAI' : 'OpenAI'} for search embedding generation`
-  )
+  logger.info('Using OpenRouter for search embedding generation')
 
   const embeddings = await callEmbeddingAPI([query], config)
   return embeddings[0]

@@ -3,7 +3,6 @@ import { userStats, workflow } from '@sim/db/schema'
 import { createLogger } from '@sim/logger'
 import { eq, sql } from 'drizzle-orm'
 import { type NextRequest, NextResponse } from 'next/server'
-import OpenAI, { AzureOpenAI } from 'openai'
 import { getBYOKKey } from '@/lib/api-key/byok'
 import { getSession } from '@/lib/auth'
 import { logModelUsage } from '@/lib/billing/core/usage-log'
@@ -20,32 +19,14 @@ export const maxDuration = 60
 
 const logger = createLogger('WandGenerateAPI')
 
-const azureApiKey = env.AZURE_OPENAI_API_KEY
-const azureEndpoint = env.AZURE_OPENAI_ENDPOINT
-const azureApiVersion = env.AZURE_OPENAI_API_VERSION
-const wandModelName = env.WAND_OPENAI_MODEL_NAME || 'gpt-4o'
-const openaiApiKey = env.OPENAI_API_KEY
+// Using OpenRouter for wand generation
+const openrouterApiKey = env.OPENROUTER_API_KEY
+const wandModelName = 'meta-llama/llama-3.1-8b-instruct:free'
 
-const useWandAzure = azureApiKey && azureEndpoint && azureApiVersion
-
-const client = useWandAzure
-  ? new AzureOpenAI({
-      apiKey: azureApiKey,
-      apiVersion: azureApiVersion,
-      endpoint: azureEndpoint,
-    })
-  : openaiApiKey
-    ? new OpenAI({
-        apiKey: openaiApiKey,
-      })
-    : null
-
-if (!useWandAzure && !openaiApiKey) {
-  logger.warn(
-    'Neither Azure OpenAI nor OpenAI API key found. Wand generation API will not function.'
-  )
+if (!openrouterApiKey) {
+  logger.warn('OPENROUTER_API_KEY not found. Wand generation API will not function.')
 } else {
-  logger.info(`Using ${useWandAzure ? 'Azure OpenAI' : 'OpenAI'} for wand generation`)
+  logger.info('Using OpenRouter for wand generation')
 }
 
 interface ChatMessage {
@@ -94,7 +75,7 @@ async function updateUserStatsForWand(
     const promptTokens = usage.prompt_tokens || 0
     const completionTokens = usage.completion_tokens || 0
 
-    const modelName = useWandAzure ? wandModelName : 'gpt-4o'
+    const modelName = wandModelName
     let costToStore = 0
 
     if (!isBYOK) {
@@ -200,22 +181,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    let isBYOK = false
-    let activeClient = client
-    let byokApiKey: string | null = null
-
-    if (workspaceId && !useWandAzure) {
-      const byokResult = await getBYOKKey(workspaceId, 'openai')
-      if (byokResult) {
-        isBYOK = true
-        byokApiKey = byokResult.apiKey
-        activeClient = new OpenAI({ apiKey: byokResult.apiKey })
-        logger.info(`[${requestId}] Using BYOK OpenAI key for wand generation`)
-      }
-    }
-
-    if (!activeClient) {
-      logger.error(`[${requestId}] AI client not initialized. Missing API key.`)
+    // Check if OpenRouter API key is configured
+    if (!openrouterApiKey) {
+      logger.error(`[${requestId}] OpenRouter API key not configured.`)
       return NextResponse.json(
         { success: false, error: 'Wand generation service is not configured.' },
         { status: 503 }
@@ -232,39 +200,24 @@ export async function POST(req: NextRequest) {
 
     messages.push({ role: 'user', content: prompt })
 
-    logger.debug(
-      `[${requestId}] Calling ${useWandAzure ? 'Azure OpenAI' : 'OpenAI'} API for wand generation`,
-      {
-        stream,
-        historyLength: history.length,
-        endpoint: useWandAzure ? azureEndpoint : 'api.openai.com',
-        model: useWandAzure ? wandModelName : 'gpt-4o',
-        apiVersion: useWandAzure ? azureApiVersion : 'N/A',
-      }
-    )
+    logger.debug(`[${requestId}] Calling OpenRouter API for wand generation`, {
+      stream,
+      historyLength: history.length,
+      endpoint: 'openrouter.ai',
+      model: wandModelName,
+    })
 
     if (stream) {
       try {
-        logger.debug(
-          `[${requestId}] Starting streaming request to ${useWandAzure ? 'Azure OpenAI' : 'OpenAI'}`
-        )
+        logger.debug(`[${requestId}] Starting streaming request to OpenRouter`)
 
-        logger.info(
-          `[${requestId}] About to create stream with model: ${useWandAzure ? wandModelName : 'gpt-4o'}`
-        )
+        logger.info(`[${requestId}] About to create stream with model: ${wandModelName}`)
 
-        const apiUrl = useWandAzure
-          ? `${azureEndpoint}/openai/deployments/${wandModelName}/chat/completions?api-version=${azureApiVersion}`
-          : 'https://api.openai.com/v1/chat/completions'
+        const apiUrl = 'https://openrouter.ai/api/v1/chat/completions'
 
         const headers: Record<string, string> = {
           'Content-Type': 'application/json',
-        }
-
-        if (useWandAzure) {
-          headers['api-key'] = azureApiKey!
-        } else {
-          headers.Authorization = `Bearer ${byokApiKey || openaiApiKey}`
+          Authorization: `Bearer ${openrouterApiKey}`,
         }
 
         logger.debug(`[${requestId}] Making streaming request to: ${apiUrl}`)
@@ -273,7 +226,7 @@ export async function POST(req: NextRequest) {
           method: 'POST',
           headers,
           body: JSON.stringify({
-            model: useWandAzure ? wandModelName : 'gpt-4o',
+            model: wandModelName,
             messages: messages,
             temperature: 0.2,
             max_tokens: 10000,
@@ -333,7 +286,7 @@ export async function POST(req: NextRequest) {
                       logger.info(`[${requestId}] Received [DONE] signal`)
 
                       if (finalUsage) {
-                        await updateUserStatsForWand(session.user.id, finalUsage, requestId, isBYOK)
+                        await updateUserStatsForWand(session.user.id, finalUsage, requestId, false)
                       }
 
                       controller.enqueue(
@@ -405,10 +358,8 @@ export async function POST(req: NextRequest) {
           responseStatus: error?.response?.status,
           responseData: error?.response?.data ? safeStringify(error.response.data) : undefined,
           stack: error?.stack,
-          useWandAzure,
-          model: useWandAzure ? wandModelName : 'gpt-4o',
-          endpoint: useWandAzure ? azureEndpoint : 'api.openai.com',
-          apiVersion: useWandAzure ? azureApiVersion : 'N/A',
+          model: wandModelName,
+          endpoint: 'openrouter.ai',
         })
 
         return NextResponse.json(
@@ -418,19 +369,39 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const completion = await activeClient.chat.completions.create({
-      model: useWandAzure ? wandModelName : 'gpt-4o',
-      messages: messages,
-      temperature: 0.3,
-      max_tokens: 10000,
+    // Non-streaming request
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${openrouterApiKey}`,
+      },
+      body: JSON.stringify({
+        model: wandModelName,
+        messages: messages,
+        temperature: 0.3,
+        max_tokens: 10000,
+      }),
     })
 
+    if (!response.ok) {
+      const errorText = await response.text()
+      logger.error(`[${requestId}] OpenRouter API request failed`, {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorText,
+      })
+      return NextResponse.json(
+        { success: false, error: 'Failed to generate content from OpenRouter API.' },
+        { status: response.status }
+      )
+    }
+
+    const completion = await response.json()
     const generatedContent = completion.choices[0]?.message?.content?.trim()
 
     if (!generatedContent) {
-      logger.error(
-        `[${requestId}] ${useWandAzure ? 'Azure OpenAI' : 'OpenAI'} response was empty or invalid.`
-      )
+      logger.error(`[${requestId}] OpenRouter response was empty or invalid.`)
       return NextResponse.json(
         { success: false, error: 'Failed to generate content. AI response was empty.' },
         { status: 500 }
@@ -440,7 +411,7 @@ export async function POST(req: NextRequest) {
     logger.info(`[${requestId}] Wand generation successful`)
 
     if (completion.usage) {
-      await updateUserStatsForWand(session.user.id, completion.usage, requestId, isBYOK)
+      await updateUserStatsForWand(session.user.id, completion.usage, requestId, false)
     }
 
     return NextResponse.json({ success: true, content: generatedContent })
@@ -450,26 +421,20 @@ export async function POST(req: NextRequest) {
       message: error?.message || 'Unknown error',
       code: error?.code,
       status: error?.status,
-      responseStatus: error instanceof OpenAI.APIError ? error.status : error?.response?.status,
+      responseStatus: error?.response?.status,
       responseData: (error as any)?.response?.data
         ? safeStringify((error as any).response.data)
         : undefined,
       stack: error?.stack,
-      useWandAzure,
-      model: useWandAzure ? wandModelName : 'gpt-4o',
-      endpoint: useWandAzure ? azureEndpoint : 'api.openai.com',
-      apiVersion: useWandAzure ? azureApiVersion : 'N/A',
+      model: wandModelName,
+      endpoint: 'openrouter.ai',
     })
 
     let clientErrorMessage = 'Wand generation failed. Please try again later.'
     let status = 500
 
-    if (error instanceof OpenAI.APIError) {
-      status = error.status || 500
-      logger.error(
-        `[${requestId}] ${useWandAzure ? 'Azure OpenAI' : 'OpenAI'} API Error: ${status} - ${error.message}`
-      )
-
+    if (error?.status) {
+      status = error.status
       if (status === 401) {
         clientErrorMessage = 'Authentication failed. Please check your API key configuration.'
       } else if (status === 429) {
@@ -478,10 +443,6 @@ export async function POST(req: NextRequest) {
         clientErrorMessage =
           'The wand generation service is currently unavailable. Please try again later.'
       }
-    } else if (useWandAzure && error.message?.includes('DeploymentNotFound')) {
-      clientErrorMessage =
-        'Azure OpenAI deployment not found. Please check your model deployment configuration.'
-      status = 404
     }
 
     return NextResponse.json(

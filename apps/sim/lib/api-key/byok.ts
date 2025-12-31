@@ -54,10 +54,10 @@ export async function getApiKeyWithBYOK(
   const { isHosted } = await import('@/lib/core/config/feature-flags')
   const { useProvidersStore } = await import('@/stores/providers/store')
 
-  const isOllamaModel =
-    provider === 'ollama' || useProvidersStore.getState().providers.ollama.models.includes(model)
-  if (isOllamaModel) {
-    return { apiKey: 'empty', isBYOK: false }
+  const isLlamaCppModel =
+    provider === 'llamacpp' || useProvidersStore.getState().providers.llamacpp.models.includes(model)
+  if (isLlamaCppModel) {
+    return { apiKey: userProvidedKey || 'empty', isBYOK: false }
   }
 
   const isVllmModel =

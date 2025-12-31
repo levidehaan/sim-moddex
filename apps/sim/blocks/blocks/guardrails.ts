@@ -5,9 +5,9 @@ import { getHostedModels, getProviderIcon } from '@/providers/utils'
 import { useProvidersStore } from '@/stores/providers/store'
 import type { ToolResponse } from '@/tools/types'
 
-const getCurrentOllamaModels = () => {
+const getCurrentLlamaCppModels = () => {
   const providersState = useProvidersStore.getState()
-  return providersState.providers.ollama.models
+  return providersState.providers.llamacpp.models
 }
 
 export interface GuardrailsResponse extends ToolResponse {
@@ -95,9 +95,9 @@ export const GuardrailsBlock: BlockConfig<GuardrailsResponse> = {
       options: () => {
         const providersState = useProvidersStore.getState()
         const baseModels = providersState.providers.base.models
-        const ollamaModels = providersState.providers.ollama.models
+        const llamacppModels = providersState.providers.llamacpp.models
         const openrouterModels = providersState.providers.openrouter.models
-        const allModels = Array.from(new Set([...baseModels, ...ollamaModels, ...openrouterModels]))
+        const allModels = Array.from(new Set([...baseModels, ...llamacppModels, ...openrouterModels]))
 
         return allModels.map((model) => {
           const icon = getProviderIcon(model)
@@ -145,7 +145,7 @@ export const GuardrailsBlock: BlockConfig<GuardrailsResponse> = {
       connectionDroppable: false,
       required: true,
       // Show API key field only for hallucination validation
-      // Hide for hosted models and Ollama models
+      // Hide for hosted models and llama.cpp models
       condition: () => {
         const baseCondition = {
           field: 'validationType' as const,
@@ -163,13 +163,13 @@ export const GuardrailsBlock: BlockConfig<GuardrailsResponse> = {
             },
           }
         }
-        // In self-hosted mode, hide for Ollama models
+        // In self-hosted mode, hide for llama.cpp models
         return {
           ...baseCondition,
           and: {
             field: 'model' as const,
-            value: getCurrentOllamaModels(),
-            not: true, // Show for all models EXCEPT Ollama ones
+            value: getCurrentLlamaCppModels(),
+            not: true, // Show for all models EXCEPT llama.cpp ones
           },
         }
       },

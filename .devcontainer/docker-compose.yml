@@ -20,7 +20,7 @@ services:
       - ENCRYPTION_KEY=${ENCRYPTION_KEY:-your_encryption_key_here}
       - COPILOT_API_KEY=${COPILOT_API_KEY}
       - SIM_AGENT_API_URL=${SIM_AGENT_API_URL}
-      - OLLAMA_URL=${OLLAMA_URL:-http://localhost:11434}
+      - LLAMACPP_BASE_URL=${LLAMACPP_BASE_URL:-}
       - NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL:-http://localhost:3002}
       - BUN_INSTALL_CACHE_DIR=/home/bun/.bun/cache
     depends_on:

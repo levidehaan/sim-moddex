@@ -15,8 +15,8 @@ import {
   DeepseekIcon,
   GeminiIcon,
   GroqIcon,
+  LlamaCppIcon,
   MistralIcon,
-  OllamaIcon,
   OpenAIIcon,
   OpenRouterIcon,
   VertexIcon,
@@ -1619,15 +1619,16 @@ export const PROVIDER_DEFINITIONS: Record<string, ProviderDefinition> = {
       },
     ],
   },
-  ollama: {
-    id: 'ollama',
-    name: 'Ollama',
-    description: 'Local LLM models via Ollama',
+  llamacpp: {
+    id: 'llamacpp',
+    name: 'llama.cpp',
+    description: 'Local llama.cpp server (llama-server/llama-cli)',
     defaultModel: '',
-    modelPatterns: [],
-    icon: OllamaIcon,
+    modelPatterns: [/^llamacpp\//],
+    icon: LlamaCppIcon,
     capabilities: {
-      toolUsageControl: false, // Ollama does not support tool_choice parameter
+      temperature: { min: 0, max: 2 },
+      toolUsageControl: true,
     },
     contextInformationAvailable: false,
     models: [], // Populated dynamically
@@ -1754,15 +1755,17 @@ export function supportsToolUsageControl(providerId: string): boolean {
   return getProvidersWithToolUsageControl().includes(providerId)
 }
 
-export function updateOllamaModels(models: string[]): void {
-  PROVIDER_DEFINITIONS.ollama.models = models.map((modelId) => ({
+export function updateLlamaCppModels(models: string[]): void {
+  PROVIDER_DEFINITIONS.llamacpp.models = models.map((modelId) => ({
     id: modelId,
     pricing: {
       input: 0,
       output: 0,
       updatedAt: new Date().toISOString().split('T')[0],
     },
-    capabilities: {},
+    capabilities: {
+      temperature: { min: 0, max: 2 },
+    },
   }))
 }
 

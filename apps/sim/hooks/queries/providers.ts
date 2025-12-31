@@ -6,7 +6,7 @@ const logger = createLogger('ProviderModelsQuery')
 
 const providerEndpoints: Record<ProviderName, string> = {
   base: '/api/providers/base/models',
-  ollama: '/api/providers/ollama/models',
+  llamacpp: '/api/providers/llamacpp/models',
   vllm: '/api/providers/vllm/models',
   openrouter: '/api/providers/openrouter/models',
 }

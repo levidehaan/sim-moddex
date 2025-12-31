@@ -4,47 +4,80 @@ import type { ChatCompletionCreateParamsStreaming } from 'openai/resources/chat/
 import { env } from '@/lib/core/config/env'
 import type { StreamingExecution } from '@/executor/types'
 import { MAX_TOOL_ITERATIONS } from '@/providers'
-import type { ModelsObject } from '@/providers/ollama/types'
-import { createReadableStreamFromOllamaStream } from '@/providers/ollama/utils'
+import { getProviderDefaultModel, getProviderModels } from '@/providers/models'
 import type {
   ProviderConfig,
   ProviderRequest,
   ProviderResponse,
   TimeSegment,
 } from '@/providers/types'
-import { calculateCost, prepareToolExecution } from '@/providers/utils'
+import {
+  calculateCost,
+  prepareToolExecution,
+  prepareToolsWithUsageControl,
+  trackForcedToolUsage,
+} from '@/providers/utils'
+import { createReadableStreamFromLlamaCppStream } from '@/providers/llamacpp/utils'
 import { useProvidersStore } from '@/stores/providers/store'
 import { executeTool } from '@/tools'
 
-const logger = createLogger('OllamaProvider')
-const OLLAMA_HOST = env.OLLAMA_URL || 'http://localhost:11434'
+const logger = createLogger('LlamaCppProvider')
+const LLAMACPP_VERSION = '1.0.0'
 
-export const ollamaProvider: ProviderConfig = {
-  id: 'ollama',
-  name: 'Ollama',
-  description: 'Local Ollama server for LLM inference',
-  version: '1.0.0',
-  models: [],
-  defaultModel: '',
+/**
+ * llama.cpp server provider
+ * Supports llama-server (llama.cpp) with OpenAI-compatible API
+ *
+ * Start a llama.cpp server:
+ *   llama-server -m model.gguf --port 8080
+ *   # or with llama-cli:
+ *   llama-cli --server -m model.gguf --port 8080
+ */
+export const llamacppProvider: ProviderConfig = {
+  id: 'llamacpp',
+  name: 'llama.cpp',
+  description: 'Local llama.cpp server with OpenAI-compatible API',
+  version: LLAMACPP_VERSION,
+  models: getProviderModels('llamacpp'),
+  defaultModel: getProviderDefaultModel('llamacpp'),
 
   async initialize() {
     if (typeof window !== 'undefined') {
-      logger.info('Skipping Ollama initialization on client side to avoid CORS issues')
+      logger.info('Skipping llama.cpp initialization on client side to avoid CORS issues')
+      return
+    }
+
+    const baseUrl = (env.LLAMACPP_BASE_URL || '').replace(/\/$/, '')
+    if (!baseUrl) {
+      logger.info('LLAMACPP_BASE_URL not configured, skipping initialization')
       return
     }
 
     try {
-      const response = await fetch(`${OLLAMA_HOST}/api/tags`)
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+
+      if (env.LLAMACPP_API_KEY) {
+        headers.Authorization = `Bearer ${env.LLAMACPP_API_KEY}`
+      }
+
+      const response = await fetch(`${baseUrl}/v1/models`, { headers })
       if (!response.ok) {
-        useProvidersStore.getState().setProviderModels('ollama', [])
-        logger.warn('Ollama service is not available. The provider will be disabled.')
+        useProvidersStore.getState().setProviderModels('llamacpp', [])
+        logger.warn('llama.cpp server is not available. The provider will be disabled.')
         return
       }
-      const data = (await response.json()) as ModelsObject
-      this.models = data.models.map((model) => model.name)
-      useProvidersStore.getState().setProviderModels('ollama', this.models)
+
+      const data = (await response.json()) as { data: Array<{ id: string }> }
+      const models = data.data.map((model) => `llamacpp/${model.id}`)
+
+      this.models = models
+      useProvidersStore.getState().setProviderModels('llamacpp', models)
+
+      logger.info(`Discovered ${models.length} llama.cpp model(s):`, { models })
     } catch (error) {
-      logger.warn('Ollama model instantiation failed. The provider will be disabled.', {
+      logger.warn('llama.cpp model instantiation failed. The provider will be disabled.', {
         error: error instanceof Error ? error.message : 'Unknown error',
       })
     }
@@ -53,7 +86,7 @@ export const ollamaProvider: ProviderConfig = {
   executeRequest: async (
     request: ProviderRequest
   ): Promise<ProviderResponse | StreamingExecution> => {
-    logger.info('Preparing Ollama request', {
+    logger.info('Preparing llama.cpp request', {
       model: request.model,
       hasSystemPrompt: !!request.systemPrompt,
       hasMessages: !!request.messages?.length,
@@ -63,12 +96,18 @@ export const ollamaProvider: ProviderConfig = {
       stream: !!request.stream,
     })
 
-    const ollama = new OpenAI({
-      apiKey: 'empty',
-      baseURL: `${OLLAMA_HOST}/v1`,
+    const baseUrl = (request.azureEndpoint || env.LLAMACPP_BASE_URL || '').replace(/\/$/, '')
+    if (!baseUrl) {
+      throw new Error('LLAMACPP_BASE_URL is required for llama.cpp provider')
+    }
+
+    const apiKey = request.apiKey || env.LLAMACPP_API_KEY || 'empty'
+    const llamacpp = new OpenAI({
+      apiKey,
+      baseURL: `${baseUrl}/v1`,
     })
 
-    const allMessages = []
+    const allMessages = [] as any[]
 
     if (request.systemPrompt) {
       allMessages.push({
@@ -100,7 +139,7 @@ export const ollamaProvider: ProviderConfig = {
       : undefined
 
     const payload: any = {
-      model: request.model,
+      model: request.model.replace(/^llamacpp\//, ''),
       messages: allMessages,
     }
 
@@ -117,38 +156,30 @@ export const ollamaProvider: ProviderConfig = {
         },
       }
 
-      logger.info('Added JSON schema response format to Ollama request')
+      logger.info('Added JSON schema response format to llama.cpp request')
     }
 
+    let preparedTools: ReturnType<typeof prepareToolsWithUsageControl> | null = null
+    let hasActiveTools = false
+
     if (tools?.length) {
-      const filteredTools = tools.filter((tool) => {
-        const toolId = tool.function?.name
-        const toolConfig = request.tools?.find((t) => t.id === toolId)
-        return toolConfig?.usageControl !== 'none'
-      })
+      preparedTools = prepareToolsWithUsageControl(tools, request.tools, logger, 'llamacpp')
+      const { tools: filteredTools, toolChoice } = preparedTools
 
-      const hasForcedTools = tools.some((tool) => {
-        const toolId = tool.function?.name
-        const toolConfig = request.tools?.find((t) => t.id === toolId)
-        return toolConfig?.usageControl === 'force'
-      })
-
-      if (hasForcedTools) {
-        logger.warn(
-          'Ollama does not support forced tool selection (tool_choice parameter is ignored). ' +
-            'Tools marked with usageControl="force" will behave as "auto" instead.'
-        )
-      }
-
-      if (filteredTools?.length) {
+      if (filteredTools?.length && toolChoice) {
         payload.tools = filteredTools
-        payload.tool_choice = 'auto'
+        payload.tool_choice = toolChoice
+        hasActiveTools = true
 
-        logger.info('Ollama request configuration:', {
+        logger.info('llama.cpp request configuration:', {
           toolCount: filteredTools.length,
-          toolChoice: 'auto',
-          forcedToolsIgnored: hasForcedTools,
-          model: request.model,
+          toolChoice:
+            typeof toolChoice === 'string'
+              ? toolChoice
+              : toolChoice.type === 'function'
+                ? `force:${toolChoice.function.name}`
+                : 'unknown',
+          model: payload.model,
         })
       }
     }
@@ -157,26 +188,24 @@ export const ollamaProvider: ProviderConfig = {
     const providerStartTimeISO = new Date(providerStartTime).toISOString()
 
     try {
-      if (request.stream && (!tools || tools.length === 0)) {
-        logger.info('Using streaming response for Ollama request')
+      if (request.stream && (!tools || tools.length === 0 || !hasActiveTools)) {
+        logger.info('Using streaming response for llama.cpp request')
 
         const streamingParams: ChatCompletionCreateParamsStreaming = {
           ...payload,
           stream: true,
           stream_options: { include_usage: true },
         }
-        const streamResponse = await ollama.chat.completions.create(streamingParams)
+        const streamResponse = await llamacpp.chat.completions.create(streamingParams)
 
         const streamingResult = {
-          stream: createReadableStreamFromOllamaStream(streamResponse, (content, usage) => {
-            streamingResult.execution.output.content = content
-
-            if (content) {
-              streamingResult.execution.output.content = content
-                .replace(/```json\n?|\n?```/g, '')
-                .trim()
+          stream: createReadableStreamFromLlamaCppStream(streamResponse, (content, usage) => {
+            let cleanContent = content
+            if (cleanContent && request.responseFormat) {
+              cleanContent = cleanContent.replace(/```json\n?|\n?```/g, '').trim()
             }
 
+            streamingResult.execution.output.content = cleanContent
             streamingResult.execution.output.tokens = {
               input: usage.prompt_tokens,
               output: usage.completion_tokens,
@@ -247,14 +276,37 @@ export const ollamaProvider: ProviderConfig = {
 
       const initialCallTime = Date.now()
 
-      let currentResponse = await ollama.chat.completions.create(payload)
+      const originalToolChoice = payload.tool_choice
+
+      const forcedTools = preparedTools?.forcedTools || []
+      let usedForcedTools: string[] = []
+
+      const checkForForcedToolUsage = (
+        response: any,
+        toolChoice: string | { type: string; function?: { name: string }; name?: string; any?: any }
+      ) => {
+        if (typeof toolChoice === 'object' && response.choices[0]?.message?.tool_calls) {
+          const toolCallsResponse = response.choices[0].message.tool_calls
+          const result = trackForcedToolUsage(
+            toolCallsResponse,
+            toolChoice,
+            logger,
+            'llamacpp',
+            forcedTools,
+            usedForcedTools
+          )
+          hasUsedForcedTool = result.hasUsedForcedTool
+          usedForcedTools = result.usedForcedTools
+        }
+      }
+
+      let currentResponse = await llamacpp.chat.completions.create(payload)
       const firstResponseTime = Date.now() - initialCallTime
 
       let content = currentResponse.choices[0]?.message?.content || ''
 
-      if (content) {
-        content = content.replace(/```json\n?|\n?```/g, '')
-        content = content.trim()
+      if (content && request.responseFormat) {
+        content = content.replace(/```json\n?|\n?```/g, '').trim()
       }
 
       const tokens = {
@@ -270,6 +322,8 @@ export const ollamaProvider: ProviderConfig = {
       let modelTime = firstResponseTime
       let toolsTime = 0
 
+      let hasUsedForcedTool = false
+
       const timeSegments: TimeSegment[] = [
         {
           type: 'model',
@@ -280,9 +334,14 @@ export const ollamaProvider: ProviderConfig = {
         },
       ]
 
+      checkForForcedToolUsage(currentResponse, originalToolChoice)
+
       while (iterationCount < MAX_TOOL_ITERATIONS) {
         if (currentResponse.choices[0]?.message?.content) {
           content = currentResponse.choices[0].message.content
+          if (request.responseFormat) {
+            content = content.replace(/```json\n?|\n?```/g, '').trim()
+          }
         }
 
         const toolCallsInResponse = currentResponse.choices[0]?.message?.tool_calls
@@ -405,9 +464,26 @@ export const ollamaProvider: ProviderConfig = {
           messages: currentMessages,
         }
 
+        if (typeof originalToolChoice === 'object' && hasUsedForcedTool && forcedTools.length > 0) {
+          const remainingTools = forcedTools.filter((tool) => !usedForcedTools.includes(tool))
+
+          if (remainingTools.length > 0) {
+            nextPayload.tool_choice = {
+              type: 'function',
+              function: { name: remainingTools[0] },
+            }
+            logger.info(`Forcing next tool: ${remainingTools[0]}`)
+          } else {
+            nextPayload.tool_choice = 'auto'
+            logger.info('All forced tools have been used, switching to auto tool_choice')
+          }
+        }
+
         const nextModelStartTime = Date.now()
 
-        currentResponse = await ollama.chat.completions.create(nextPayload)
+        currentResponse = await llamacpp.chat.completions.create(nextPayload)
+
+        checkForForcedToolUsage(currentResponse, nextPayload.tool_choice)
 
         const nextModelEndTime = Date.now()
         const thisModelTime = nextModelEndTime - nextModelStartTime
@@ -424,8 +500,9 @@ export const ollamaProvider: ProviderConfig = {
 
         if (currentResponse.choices[0]?.message?.content) {
           content = currentResponse.choices[0].message.content
-          content = content.replace(/```json\n?|\n?```/g, '')
-          content = content.trim()
+          if (request.responseFormat) {
+            content = content.replace(/```json\n?|\n?```/g, '').trim()
+          }
         }
 
         if (currentResponse.usage) {
@@ -449,18 +526,16 @@ export const ollamaProvider: ProviderConfig = {
           stream: true,
           stream_options: { include_usage: true },
         }
-        const streamResponse = await ollama.chat.completions.create(streamingParams)
+        const streamResponse = await llamacpp.chat.completions.create(streamingParams)
 
         const streamingResult = {
-          stream: createReadableStreamFromOllamaStream(streamResponse, (content, usage) => {
-            streamingResult.execution.output.content = content
-
-            if (content) {
-              streamingResult.execution.output.content = content
-                .replace(/```json\n?|\n?```/g, '')
-                .trim()
+          stream: createReadableStreamFromLlamaCppStream(streamResponse, (content, usage) => {
+            let cleanContent = content
+            if (cleanContent && request.responseFormat) {
+              cleanContent = cleanContent.replace(/```json\n?|\n?```/g, '').trim()
             }
 
+            streamingResult.execution.output.content = cleanContent
             streamingResult.execution.output.tokens = {
               input: tokens.input + usage.prompt_tokens,
               output: tokens.output + usage.completion_tokens,
@@ -549,17 +624,40 @@ export const ollamaProvider: ProviderConfig = {
       const providerEndTimeISO = new Date(providerEndTime).toISOString()
       const totalDuration = providerEndTime - providerStartTime
 
-      logger.error('Error in Ollama request:', {
-        error,
+      let errorMessage = error instanceof Error ? error.message : String(error)
+      let errorType: string | undefined
+      let errorCode: number | undefined
+
+      if (error && typeof error === 'object' && 'error' in error) {
+        const llamacppError = error.error as any
+        if (llamacppError && typeof llamacppError === 'object') {
+          errorMessage = llamacppError.message || errorMessage
+          errorType = llamacppError.type
+          errorCode = llamacppError.code
+        }
+      }
+
+      logger.error('Error in llama.cpp request:', {
+        error: errorMessage,
+        errorType,
+        errorCode,
         duration: totalDuration,
       })
 
-      const enhancedError = new Error(error instanceof Error ? error.message : String(error))
+      const enhancedError = new Error(errorMessage)
       // @ts-ignore
       enhancedError.timing = {
         startTime: providerStartTimeISO,
         endTime: providerEndTimeISO,
         duration: totalDuration,
+      }
+      if (errorType) {
+        // @ts-ignore
+        enhancedError.llamacppErrorType = errorType
+      }
+      if (errorCode) {
+        // @ts-ignore
+        enhancedError.llamacppErrorCode = errorCode
       }
 
       throw enhancedError

@@ -51,7 +51,7 @@ export const TOKENIZATION_CONFIG = {
       confidence: 'medium',
       supportedMethods: ['heuristic', 'fallback'],
     },
-    ollama: {
+    llamacpp: {
       avgCharsPerToken: 4,
       confidence: 'low',
       supportedMethods: ['fallback'],

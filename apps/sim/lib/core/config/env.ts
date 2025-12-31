@@ -68,8 +68,9 @@ export const env = createEnv({
     TWILIO_AUTH_TOKEN:                     z.string().min(1).optional(),           // Twilio Auth Token for API authentication
     TWILIO_PHONE_NUMBER:                   z.string().min(1).optional(),           // Twilio phone number for sending SMS
 
-    // AI/LLM Provider API Keys - Supported providers: Ollama, vLLM, OpenRouter, DeepSeek
-    OLLAMA_URL:                            z.string().url().optional(),            // Ollama local LLM server URL
+    // AI/LLM Provider API Keys - Supported providers: llama.cpp, vLLM, OpenRouter, DeepSeek
+    LLAMACPP_BASE_URL:                     z.string().url().optional(),            // llama.cpp server URL (llama-server/llama-cli)
+    LLAMACPP_API_KEY:                      z.string().optional(),                  // Optional bearer token for llama.cpp
     VLLM_BASE_URL:                         z.string().url().optional(),            // vLLM self-hosted base URL (OpenAI-compatible)
     VLLM_API_KEY:                          z.string().optional(),                  // Optional bearer token for vLLM
     OPENROUTER_API_KEY:                    z.string().min(1).optional(),           // OpenRouter API key for accessing multiple models

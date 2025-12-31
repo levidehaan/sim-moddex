@@ -246,7 +246,7 @@ export const AndroidBlock: BlockConfig<AndroidBlockResponse> = {
   },
   outputs: {
     result: {
-      type: 'object',
+      type: 'any',
       description: 'Operation result (varies by operation type)',
     },
     message: {

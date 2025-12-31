@@ -78,7 +78,7 @@ export const buildTimeCSPDirectives: CSPDirectives = {
     "'self'",
     env.NEXT_PUBLIC_APP_URL || '',
     // Only include localhost fallbacks in development mode
-    ...(env.OLLAMA_URL ? [env.OLLAMA_URL] : isDev ? ['http://localhost:11434'] : []),
+    ...(env.LLAMACPP_BASE_URL ? [env.LLAMACPP_BASE_URL] : isDev ? ['http://localhost:8080'] : []),
     ...(env.NEXT_PUBLIC_SOCKET_URL
       ? [
           env.NEXT_PUBLIC_SOCKET_URL,
@@ -140,7 +140,7 @@ export function generateRuntimeCSP(): string {
     : isDev
       ? 'ws://localhost:3002'
       : ''
-  const ollamaUrl = getEnv('OLLAMA_URL') || (isDev ? 'http://localhost:11434' : '')
+  const llamacppUrl = getEnv('LLAMACPP_BASE_URL') || (isDev ? 'http://localhost:8080' : '')
 
   const brandLogoDomains = getHostnameFromUrl(getEnv('NEXT_PUBLIC_BRAND_LOGO_URL'))
   const brandFaviconDomains = getHostnameFromUrl(getEnv('NEXT_PUBLIC_BRAND_FAVICON_URL'))
@@ -165,7 +165,7 @@ export function generateRuntimeCSP(): string {
     img-src 'self' data: blob: https://*.googleusercontent.com https://*.google.com https://*.atlassian.com https://cdn.discordapp.com https://*.githubusercontent.com https://*.s3.amazonaws.com https://s3.amazonaws.com https://*.amazonaws.com https://*.blob.core.windows.net https://github.com/* ${brandLogoDomain} ${brandFaviconDomain};
     media-src 'self' blob:;
     font-src 'self' https://fonts.gstatic.com;
-    connect-src 'self' ${appUrl} ${ollamaUrl} ${socketUrl} ${socketWsUrl} https://api.browser-use.com https://api.exa.ai https://api.firecrawl.dev https://*.googleapis.com https://*.amazonaws.com https://*.s3.amazonaws.com https://*.blob.core.windows.net https://api.github.com https://github.com/* https://*.atlassian.com https://*.supabase.co ${dynamicDomainsStr};
+    connect-src 'self' ${appUrl} ${llamacppUrl} ${socketUrl} ${socketWsUrl} https://api.browser-use.com https://api.exa.ai https://api.firecrawl.dev https://*.googleapis.com https://*.amazonaws.com https://*.s3.amazonaws.com https://*.blob.core.windows.net https://api.github.com https://github.com/* https://*.atlassian.com https://*.supabase.co ${dynamicDomainsStr};
     frame-src https://drive.google.com https://docs.google.com https://*.google.com;
     frame-ancestors 'self';
     form-action 'self';

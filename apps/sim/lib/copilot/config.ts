@@ -1,14 +1,13 @@
 import { createLogger } from '@sim/logger'
 import { AGENT_MODE_SYSTEM_PROMPT } from '@/lib/copilot/prompts'
 import { getProviderDefaultModel } from '@/providers/models'
-import type { ProviderId } from '@/providers/types'
 
 const logger = createLogger('CopilotConfig')
 
 /**
- * Valid provider IDs for validation
+ * Valid provider IDs for copilot internal use (not limited to ProviderId type)
  */
-const VALID_PROVIDER_IDS: readonly ProviderId[] = [
+const VALID_PROVIDER_IDS: readonly string[] = [
   'openai',
   'azure-openai',
   'anthropic',
@@ -18,7 +17,9 @@ const VALID_PROVIDER_IDS: readonly ProviderId[] = [
   'cerebras',
   'mistral',
   'groq',
-  'ollama',
+  'llamacpp',
+  'openrouter',
+  'vllm',
 ] as const
 
 /**
@@ -51,7 +52,7 @@ export interface ValidationResult {
 export interface CopilotConfig {
   // Chat LLM configuration
   chat: {
-    defaultProvider: ProviderId
+    defaultProvider: string
     defaultModel: string
     temperature: number
     maxTokens: number
@@ -59,7 +60,7 @@ export interface CopilotConfig {
   }
   // RAG (documentation search) LLM configuration
   rag: {
-    defaultProvider: ProviderId
+    defaultProvider: string
     defaultModel: string
     temperature: number
     maxTokens: number
@@ -75,9 +76,9 @@ export interface CopilotConfig {
   }
 }
 
-function validateProviderId(value: string | undefined): ProviderId | null {
+function validateProviderId(value: string | undefined): string | null {
   if (!value) return null
-  return VALID_PROVIDER_IDS.includes(value as ProviderId) ? (value as ProviderId) : null
+  return VALID_PROVIDER_IDS.includes(value) ? value : null
 }
 
 function parseFloatEnv(value: string | undefined, name: string): number | null {
@@ -226,7 +227,7 @@ export function getCopilotConfig(): CopilotConfig {
 }
 
 export function getCopilotModel(type: CopilotModelType): {
-  provider: ProviderId
+  provider: string
   model: string
 } {
   const config = getCopilotConfig()

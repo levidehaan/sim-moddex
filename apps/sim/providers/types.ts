@@ -2,12 +2,12 @@ import type { StreamingExecution } from '@/executor/types'
 
 /**
  * Supported AI providers:
- * - ollama: Local LLM server
+ * - llamacpp: Local llama.cpp server (llama-server/llama-cli)
  * - vllm: Self-hosted vLLM with OpenAI-compatible API
  * - openrouter: Open gateway to many models
  * - deepseek: DeepSeek AI models
  */
-export type ProviderId = 'deepseek' | 'ollama' | 'openrouter' | 'vllm'
+export type ProviderId = 'deepseek' | 'llamacpp' | 'openrouter' | 'vllm'
 
 /**
  * Model pricing information per million tokens

@@ -30,12 +30,12 @@ export const vertexProvider: ProviderConfig = {
   executeRequest: async (
     request: ProviderRequest
   ): Promise<ProviderResponse | StreamingExecution> => {
-    const vertexProject = env.VERTEX_PROJECT || request.vertexProject
-    const vertexLocation = env.VERTEX_LOCATION || request.vertexLocation || 'us-central1'
+    const vertexProject = request.vertexProject
+    const vertexLocation = request.vertexLocation || 'us-central1'
 
     if (!vertexProject) {
       throw new Error(
-        'Vertex AI project is required. Please provide it via VERTEX_PROJECT environment variable or vertexProject parameter.'
+        'Vertex AI project is required. Please provide it via vertexProject parameter.'
       )
     }
 

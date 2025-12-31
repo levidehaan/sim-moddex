@@ -10,7 +10,7 @@ const modelProviderIcons = [
   { icon: Icons.xAIIcon, label: 'xAI' },
   { icon: Icons.GroqIcon, label: 'Groq' },
   { icon: Icons.HuggingFaceIcon, label: 'HuggingFace' },
-  { icon: Icons.OllamaIcon, label: 'Ollama' },
+  { icon: Icons.LlamaCppIcon, label: 'llama.cpp' },
   { icon: Icons.DeepseekIcon, label: 'Deepseek' },
   { icon: Icons.ElevenLabsIcon, label: 'ElevenLabs' },
   { icon: Icons.VllmIcon, label: 'vLLM' },

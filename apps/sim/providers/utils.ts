@@ -25,7 +25,7 @@ import {
   PROVIDER_DEFINITIONS,
   supportsTemperature as supportsTemperatureFromDefinitions,
   supportsToolUsageControl as supportsToolUsageControlFromDefinitions,
-  updateOllamaModels as updateOllamaModelsInDefinitions,
+  updateLlamaCppModels as updateLlamaCppModelsInDefinitions,
 } from '@/providers/models'
 import type { ProviderId, ProviderToolConfig } from '@/providers/types'
 import { useCustomToolsStore } from '@/stores/custom-tools/store'
@@ -67,32 +67,15 @@ function buildProviderMetadata(providerId: ProviderId): ProviderMetadata {
 }
 
 export const providers: Record<ProviderId, ProviderMetadata> = {
-  openai: {
-    ...buildProviderMetadata('openai'),
-    computerUseModels: ['computer-use-preview'],
-  },
-  anthropic: {
-    ...buildProviderMetadata('anthropic'),
-    computerUseModels: getComputerUseModels().filter((model) =>
-      getProviderModelsFromDefinitions('anthropic').includes(model)
-    ),
-  },
-  google: buildProviderMetadata('google'),
-  vertex: buildProviderMetadata('vertex'),
   deepseek: buildProviderMetadata('deepseek'),
-  xai: buildProviderMetadata('xai'),
-  cerebras: buildProviderMetadata('cerebras'),
-  groq: buildProviderMetadata('groq'),
   vllm: buildProviderMetadata('vllm'),
-  mistral: buildProviderMetadata('mistral'),
-  'azure-openai': buildProviderMetadata('azure-openai'),
   openrouter: buildProviderMetadata('openrouter'),
-  ollama: buildProviderMetadata('ollama'),
+  llamacpp: buildProviderMetadata('llamacpp'),
 }
 
-export function updateOllamaProviderModels(models: string[]): void {
-  updateOllamaModelsInDefinitions(models)
-  providers.ollama.models = getProviderModelsFromDefinitions('ollama')
+export function updateLlamaCppProviderModels(models: string[]): void {
+  updateLlamaCppModelsInDefinitions(models)
+  providers.llamacpp.models = getProviderModelsFromDefinitions('llamacpp')
 }
 
 export function updateVLLMProviderModels(models: string[]): void {
@@ -111,7 +94,7 @@ export function getBaseModelProviders(): Record<string, ProviderId> {
   const allProviders = Object.entries(providers)
     .filter(
       ([providerId]) =>
-        providerId !== 'ollama' && providerId !== 'vllm' && providerId !== 'openrouter'
+        providerId !== 'llamacpp' && providerId !== 'vllm' && providerId !== 'openrouter'
     )
     .reduce(
       (map, [providerId, config]) => {
@@ -166,8 +149,8 @@ export function getProviderFromModel(model: string): ProviderId {
     }
   }
 
-  logger.warn(`No provider found for model: ${model}, defaulting to ollama`)
-  return 'ollama'
+  logger.warn(`No provider found for model: ${model}, defaulting to llamacpp`)
+  return 'llamacpp'
 }
 
 export function getProvider(id: string): ProviderMetadata | undefined {
@@ -583,10 +566,10 @@ export function shouldBillModelUsage(model: string): boolean {
 export function getApiKey(provider: string, model: string, userProvidedKey?: string): string {
   const hasUserKey = !!userProvidedKey
 
-  const isOllamaModel =
-    provider === 'ollama' || useProvidersStore.getState().providers.ollama.models.includes(model)
-  if (isOllamaModel) {
-    return 'empty'
+  const isLlamaCppModel =
+    provider === 'llamacpp' || useProvidersStore.getState().providers.llamacpp.models.includes(model)
+  if (isLlamaCppModel) {
+    return userProvidedKey || 'empty'
   }
 
   const isVllmModel =

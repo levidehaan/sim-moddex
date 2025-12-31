@@ -1,6 +1,6 @@
 import { createLogger } from '@sim/logger'
 import { deepseekProvider } from '@/providers/deepseek'
-import { ollamaProvider } from '@/providers/ollama'
+import { llamacppProvider } from '@/providers/llamacpp'
 import { openRouterProvider } from '@/providers/openrouter'
 import type { ProviderConfig, ProviderId } from '@/providers/types'
 import { vllmProvider } from '@/providers/vllm'
@@ -9,7 +9,7 @@ const logger = createLogger('ProviderRegistry')
 
 /**
  * Provider registry with only local and open-source friendly providers:
- * - ollama: Local LLM server
+ * - llamacpp: Local llama.cpp server (llama-server/llama-cli)
  * - vllm: Self-hosted vLLM with OpenAI-compatible API
  * - openrouter: Open gateway to many models
  * - deepseek: DeepSeek AI models
@@ -18,7 +18,7 @@ const providerRegistry: Partial<Record<ProviderId, ProviderConfig>> = {
   deepseek: deepseekProvider,
   vllm: vllmProvider,
   openrouter: openRouterProvider,
-  ollama: ollamaProvider,
+  llamacpp: llamacppProvider,
 }
 
 export async function getProviderExecutor(
