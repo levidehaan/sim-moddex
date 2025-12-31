@@ -480,6 +480,9 @@ export const settings = pgTable('settings', {
   // Copilot auto-allowed integration tools - array of tool IDs that can run without confirmation
   copilotAutoAllowedTools: jsonb('copilot_auto_allowed_tools').notNull().default('[]'),
 
+  // AI Provider settings - stores OpenRouter API key, llama.cpp server URL, etc.
+  aiProviderSettings: jsonb('ai_provider_settings').notNull().default('{}'),
+
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
 
