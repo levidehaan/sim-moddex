@@ -14,6 +14,15 @@ import {
   airtableListRecordsTool,
   airtableUpdateRecordTool,
 } from '@/tools/airtable'
+import {
+  alpacaGetAccountTool,
+  alpacaGetOptionBarsTool,
+  alpacaGetOptionChainTool,
+  alpacaGetPositionsTool,
+  alpacaGetStockBarsTool,
+  alpacaGetStockQuotesTool,
+  alpacaGetStockSnapshotTool,
+} from '@/tools/alpaca'
 import { apifyRunActorAsyncTool, apifyRunActorSyncTool } from '@/tools/apify'
 import {
   apolloAccountBulkCreateTool,
@@ -823,6 +832,12 @@ import {
   postgresQueryTool,
   postgresUpdateTool,
 } from '@/tools/postgresql'
+import {
+  pushoverCancelEmergencyTool,
+  pushoverGetReceiptTool,
+  pushoverGetSoundsTool,
+  pushoverSendNotificationTool,
+} from '@/tools/pushover'
 import { qdrantFetchTool, qdrantSearchTool, qdrantUpsertTool } from '@/tools/qdrant'
 import {
   rdsDeleteTool,
@@ -1828,6 +1843,17 @@ export const tools: Record<string, ToolConfig> = {
   airtable_get_record: airtableGetRecordTool,
   airtable_list_records: airtableListRecordsTool,
   airtable_update_record: airtableUpdateRecordTool,
+  alpaca_get_stock_bars: alpacaGetStockBarsTool,
+  alpaca_get_stock_quotes: alpacaGetStockQuotesTool,
+  alpaca_get_stock_snapshot: alpacaGetStockSnapshotTool,
+  alpaca_get_option_bars: alpacaGetOptionBarsTool,
+  alpaca_get_option_chain: alpacaGetOptionChainTool,
+  alpaca_get_account: alpacaGetAccountTool,
+  alpaca_get_positions: alpacaGetPositionsTool,
+  pushover_send_notification: pushoverSendNotificationTool,
+  pushover_get_sounds: pushoverGetSoundsTool,
+  pushover_get_receipt: pushoverGetReceiptTool,
+  pushover_cancel_emergency: pushoverCancelEmergencyTool,
   ahrefs_domain_rating: ahrefsDomainRatingTool,
   ahrefs_backlinks: ahrefsBacklinksTool,
   ahrefs_backlinks_stats: ahrefsBacklinksStatsTool,

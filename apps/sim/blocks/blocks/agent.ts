@@ -16,17 +16,64 @@ import {
   MODELS_WITH_VERBOSITY,
   supportsTemperature,
 } from '@/providers/utils'
-
-const getCurrentLlamaCppModels = () => {
-  return useProvidersStore.getState().providers.llamacpp.models
-}
-
-const getCurrentVLLMModels = () => {
-  return useProvidersStore.getState().providers.vllm.models
-}
-
 import { useProvidersStore } from '@/stores/providers/store'
+import { useAIProviderSettingsStore } from '@/stores/settings/ai-providers'
 import type { ToolResponse } from '@/tools/types'
+
+/**
+ * Check if API key field should be hidden for a model
+ * Returns true if the model has a provider configured in settings
+ */
+const shouldHideApiKeyForModel = (model: string): boolean => {
+  const state = useAIProviderSettingsStore.getState()
+
+  // Check if model is from llama.cpp
+  if (model.startsWith('llamacpp/')) {
+    return !!(state.llamacpp.enabled && state.llamacpp.baseUrl)
+  }
+
+  // Check if model is from vLLM
+  if (model.startsWith('vllm/')) {
+    return !!(state.vllm.enabled && state.vllm.baseUrl)
+  }
+
+  // For all other models (OpenRouter), check if OpenRouter is configured
+  return !!(state.openrouter.enabled && state.openrouter.apiKey)
+}
+
+/**
+ * Get the default model from settings
+ */
+const getDefaultModel = (): string => {
+  const state = useAIProviderSettingsStore.getState()
+  return state.defaultModel || 'anthropic/claude-3.5-sonnet'
+}
+
+/**
+ * Get all models that have providers configured
+ */
+const getModelsWithConfiguredProviders = (): string[] => {
+  const state = useAIProviderSettingsStore.getState()
+  const providersState = useProvidersStore.getState()
+  const models: string[] = []
+
+  // Add OpenRouter models if configured
+  if (state.openrouter.enabled && state.openrouter.apiKey) {
+    models.push(...providersState.providers.openrouter.models)
+  }
+
+  // Add llama.cpp models if configured
+  if (state.llamacpp.enabled && state.llamacpp.baseUrl) {
+    models.push(...providersState.providers.llamacpp.models)
+  }
+
+  // Add vLLM models if configured
+  if (state.vllm.enabled && state.vllm.baseUrl) {
+    models.push(...providersState.providers.vllm.models)
+  }
+
+  return models
+}
 
 const logger = createLogger('AgentBlock')
 
@@ -92,16 +139,17 @@ export const AgentBlock: BlockConfig<AgentResponse> = {
       type: 'combobox',
       placeholder: 'Type or select a model...',
       required: true,
-      defaultValue: 'claude-sonnet-4-5',
+      defaultValue: () => getDefaultModel(),
       searchable: true,
       options: () => {
         const providersState = useProvidersStore.getState()
-        const baseModels = providersState.providers.base.models
+        const openrouterModels = providersState.providers.openrouter.models
         const llamacppModels = providersState.providers.llamacpp.models
         const vllmModels = providersState.providers.vllm.models
-        const openrouterModels = providersState.providers.openrouter.models
+
+        // Combine all available models
         const allModels = Array.from(
-          new Set([...baseModels, ...llamacppModels, ...vllmModels, ...openrouterModels])
+          new Set([...openrouterModels, ...llamacppModels, ...vllmModels])
         )
 
         return allModels.map((model) => {
@@ -281,19 +329,27 @@ export const AgentBlock: BlockConfig<AgentResponse> = {
       placeholder: 'Enter your API key',
       password: true,
       connectionDroppable: false,
-      required: true,
-      // Hide API key for hosted models, llama.cpp models, and vLLM models
+      required: false, // Not required when provider is configured
+      // Hide API key when provider is configured in settings
       condition: isHosted
         ? {
             field: 'model',
             value: getHostedModels(),
             not: true, // Show for all models EXCEPT hosted models
           }
-        : () => ({
-            field: 'model',
-            value: [...getCurrentLlamaCppModels(), ...getCurrentVLLMModels()],
-            not: true, // Show for all models EXCEPT llama.cpp and vLLM models
-          }),
+        : () => {
+            // For self-hosted, hide API key for models with configured providers
+            const modelsWithProviders = getModelsWithConfiguredProviders()
+            if (modelsWithProviders.length > 0) {
+              return {
+                field: 'model',
+                value: modelsWithProviders,
+                not: true, // Show ONLY for models WITHOUT configured providers
+              }
+            }
+            // If no providers configured, show for all models
+            return { field: 'model', value: [] }
+          },
     },
     {
       id: 'memoryType',

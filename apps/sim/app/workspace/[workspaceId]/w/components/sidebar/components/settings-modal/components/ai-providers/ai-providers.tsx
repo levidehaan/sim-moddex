@@ -2,11 +2,14 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { createLogger } from '@sim/logger'
-import { Check, Eye, EyeOff, Loader2, RefreshCw, Server } from 'lucide-react'
-import { Button, Label, Switch } from '@/components/emcn'
+import { Check, Eye, EyeOff, Loader2, RefreshCw, Server, Sparkles } from 'lucide-react'
+import { Button, Combobox, Label, Switch } from '@/components/emcn'
 import { Input, Skeleton } from '@/components/ui'
 import type { AIProviderSettings } from '@/app/api/users/me/ai-providers/route'
 import { useQueryClient } from '@tanstack/react-query'
+import { useProvidersStore } from '@/stores/providers/store'
+import { getProviderIcon } from '@/providers/utils'
+import { aiProviderSettingsKeys } from '@/hooks/queries/ai-provider-settings'
 
 const logger = createLogger('AIProviders')
 
@@ -95,8 +98,9 @@ export function AIProviders() {
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 2000)
 
-      // Invalidate provider models queries to refresh the model lists
+      // Invalidate queries to refresh the model lists and settings
       queryClient.invalidateQueries({ queryKey: ['provider-models'] })
+      queryClient.invalidateQueries({ queryKey: aiProviderSettingsKeys.all })
     } catch (err) {
       logger.error('Error saving AI provider settings:', err)
       setError('Failed to save settings')
@@ -494,6 +498,14 @@ export function AIProviders() {
         </div>
       </div>
 
+      {/* Default Model Section */}
+      <DefaultModelSection
+        defaultModel={settings?.defaultModel || ''}
+        onModelChange={(model) => {
+          setSettings((prev) => (prev ? { ...prev, defaultModel: model } : prev))
+        }}
+      />
+
       {/* Save Button */}
       <div className='mt-auto flex items-center gap-2'>
         <Button onClick={handleSave} disabled={isSaving} variant='tertiary'>
@@ -511,6 +523,61 @@ export function AIProviders() {
             'Save Changes'
           )}
         </Button>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Default model selection component
+ */
+function DefaultModelSection({
+  defaultModel,
+  onModelChange,
+}: {
+  defaultModel: string
+  onModelChange: (model: string) => void
+}) {
+  const openrouterModels = useProvidersStore((state) => state.providers.openrouter.models)
+  const llamacppModels = useProvidersStore((state) => state.providers.llamacpp.models)
+  const vllmModels = useProvidersStore((state) => state.providers.vllm.models)
+
+  const allModels = Array.from(new Set([...openrouterModels, ...llamacppModels, ...vllmModels]))
+
+  const modelOptions = allModels.map((model) => {
+    const icon = getProviderIcon(model)
+    return { label: model, value: model, ...(icon && { icon }) }
+  })
+
+  return (
+    <div className='rounded-lg border border-[var(--border)] p-4'>
+      <div className='flex items-center gap-2'>
+        <Sparkles className='h-4 w-4 text-[var(--text-secondary)]' />
+        <h4 className='font-medium text-[13px]'>Default Model</h4>
+      </div>
+      <p className='mt-1 text-[11px] text-[var(--text-muted)]'>
+        Select a default model for new agent blocks. This will be pre-selected when adding agents to
+        workflows.
+      </p>
+
+      <div className='mt-3'>
+        <Combobox
+          value={defaultModel}
+          onChange={onModelChange}
+          placeholder='Select default model...'
+          searchable
+          options={modelOptions}
+          emptyMessage={
+            allModels.length === 0
+              ? 'No models available. Configure a provider above first.'
+              : 'No matching models'
+          }
+        />
+        {allModels.length === 0 && (
+          <p className='mt-2 text-[11px] text-[var(--text-muted)]'>
+            Configure OpenRouter or a local server above to see available models.
+          </p>
+        )}
       </div>
     </div>
   )

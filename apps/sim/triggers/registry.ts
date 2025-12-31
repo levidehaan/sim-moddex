@@ -12,6 +12,8 @@ import {
 } from '@/triggers/circleback'
 import { genericWebhookTrigger } from '@/triggers/generic'
 import {
+  githubFilesAddedTrigger,
+  githubFilesDeletedTrigger,
   githubIssueClosedTrigger,
   githubIssueCommentTrigger,
   githubIssueOpenedTrigger,
@@ -20,6 +22,7 @@ import {
   githubPRMergedTrigger,
   githubPROpenedTrigger,
   githubPRReviewedTrigger,
+  githubPushToBranchTrigger,
   githubPushTrigger,
   githubReleasePublishedTrigger,
   githubWebhookTrigger,
@@ -119,6 +122,9 @@ export const TRIGGER_REGISTRY: TriggerRegistry = {
   github_pr_comment: githubPRCommentTrigger,
   github_pr_reviewed: githubPRReviewedTrigger,
   github_push: githubPushTrigger,
+  github_push_to_branch: githubPushToBranchTrigger,
+  github_files_added: githubFilesAddedTrigger,
+  github_files_deleted: githubFilesDeletedTrigger,
   github_release_published: githubReleasePublishedTrigger,
   github_workflow_run: githubWorkflowRunTrigger,
   gmail_poller: gmailPollingTrigger,

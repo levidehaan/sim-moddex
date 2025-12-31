@@ -1,6 +1,7 @@
 import { AgentBlock } from '@/blocks/blocks/agent'
 import { AhrefsBlock } from '@/blocks/blocks/ahrefs'
 import { AirtableBlock } from '@/blocks/blocks/airtable'
+import { AlpacaBlock } from '@/blocks/blocks/alpaca'
 import { ApiBlock } from '@/blocks/blocks/api'
 import { ApiTriggerBlock } from '@/blocks/blocks/api_trigger'
 import { ApifyBlock } from '@/blocks/blocks/apify'
@@ -84,6 +85,7 @@ import { PipedriveBlock } from '@/blocks/blocks/pipedrive'
 import { PolymarketBlock } from '@/blocks/blocks/polymarket'
 import { PostgreSQLBlock } from '@/blocks/blocks/postgresql'
 import { PostHogBlock } from '@/blocks/blocks/posthog'
+import { PushoverBlock } from '@/blocks/blocks/pushover'
 import { QdrantBlock } from '@/blocks/blocks/qdrant'
 import { RDSBlock } from '@/blocks/blocks/rds'
 import { RedditBlock } from '@/blocks/blocks/reddit'
@@ -149,6 +151,7 @@ export const registry: Record<string, BlockConfig> = {
   android: AndroidBlock,
   ahrefs: AhrefsBlock,
   airtable: AirtableBlock,
+  alpaca: AlpacaBlock,
   api: ApiBlock,
   api_trigger: ApiTriggerBlock,
   apify: ApifyBlock,
@@ -231,6 +234,7 @@ export const registry: Record<string, BlockConfig> = {
   polymarket: PolymarketBlock,
   postgresql: PostgreSQLBlock,
   posthog: PostHogBlock,
+  pushover: PushoverBlock,
   qdrant: QdrantBlock,
   rds: RDSBlock,
   sqs: SQSBlock,
