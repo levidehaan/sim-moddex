@@ -91,8 +91,8 @@ export async function GET(request: NextRequest) {
 
     const data = (await response.json()) as OpenRouterResponse
 
-    let modelInfo: Record<string, OpenRouterModelInfo> = {}
-    let allModels: string[] = []
+    const modelInfo: Record<string, OpenRouterModelInfo> = {}
+    const allModels: string[] = []
 
     for (const model of data.data ?? []) {
       const modelId = `openrouter/${model.id}`

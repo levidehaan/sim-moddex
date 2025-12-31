@@ -34,6 +34,7 @@ const AIProviderSettingsSchema = z.object({
       enabled: z.boolean().optional(),
     })
     .optional(),
+  defaultModel: z.string().optional(),
 })
 
 export type AIProviderSettings = z.infer<typeof AIProviderSettingsSchema>
@@ -53,6 +54,7 @@ const defaultSettings: AIProviderSettings = {
     apiKey: '',
     enabled: false,
   },
+  defaultModel: '',
 }
 
 /**
@@ -94,6 +96,7 @@ export async function GET() {
         ...defaultSettings.vllm,
         ...aiProviderSettings.vllm,
       },
+      defaultModel: aiProviderSettings.defaultModel || '',
     }
 
     return NextResponse.json({ data: mergedSettings }, { status: 200 })
@@ -148,6 +151,7 @@ export async function PATCH(request: Request) {
           ...existingAiSettings.vllm,
           ...validatedData.vllm,
         },
+        defaultModel: validatedData.defaultModel ?? existingAiSettings.defaultModel ?? '',
       }
 
       await db

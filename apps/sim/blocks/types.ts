@@ -191,7 +191,7 @@ export interface SubBlockConfig {
           not?: boolean
         }
       })
-  defaultValue?: string | number | boolean | Record<string, unknown> | Array<unknown>
+  defaultValue?: string | number | boolean | Record<string, unknown> | Array<unknown> | (() => string)
   options?:
     | {
         label: string

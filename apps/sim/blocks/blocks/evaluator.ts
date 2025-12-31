@@ -5,16 +5,38 @@ import type { BlockConfig, ParamType } from '@/blocks/types'
 import type { ProviderId } from '@/providers/types'
 import { getAllModelProviders, getHostedModels, getProviderIcon } from '@/providers/utils'
 import { useProvidersStore } from '@/stores/providers/store'
+import { useAIProviderSettingsStore } from '@/stores/settings/ai-providers'
 import type { ToolResponse } from '@/tools/types'
 
 const logger = createLogger('EvaluatorBlock')
 
-const getCurrentLlamaCppModels = () => {
-  return useProvidersStore.getState().providers.llamacpp.models
+/**
+ * Get the default model from settings
+ */
+const getDefaultModel = (): string => {
+  const state = useAIProviderSettingsStore.getState()
+  return state.defaultModel || 'anthropic/claude-3.5-sonnet'
 }
 
-const getCurrentVLLMModels = () => {
-  return useProvidersStore.getState().providers.vllm.models
+/**
+ * Get all models that have providers configured
+ */
+const getModelsWithConfiguredProviders = (): string[] => {
+  const state = useAIProviderSettingsStore.getState()
+  const providersState = useProvidersStore.getState()
+  const models: string[] = []
+
+  if (state.openrouter.enabled && state.openrouter.apiKey) {
+    models.push(...providersState.providers.openrouter.models)
+  }
+  if (state.llamacpp.enabled && state.llamacpp.baseUrl) {
+    models.push(...providersState.providers.llamacpp.models)
+  }
+  if (state.vllm.enabled && state.vllm.baseUrl) {
+    models.push(...providersState.providers.vllm.models)
+  }
+
+  return models
 }
 
 interface Metric {
@@ -182,15 +204,15 @@ export const EvaluatorBlock: BlockConfig<EvaluatorResponse> = {
       type: 'combobox',
       placeholder: 'Type or select a model...',
       required: true,
-      defaultValue: 'claude-sonnet-4-5',
+      defaultValue: () => getDefaultModel(),
       options: () => {
         const providersState = useProvidersStore.getState()
-        const baseModels = providersState.providers.base.models
+        const openrouterModels = providersState.providers.openrouter.models
         const llamacppModels = providersState.providers.llamacpp.models
         const vllmModels = providersState.providers.vllm.models
-        const openrouterModels = providersState.providers.openrouter.models
+
         const allModels = Array.from(
-          new Set([...baseModels, ...llamacppModels, ...vllmModels, ...openrouterModels])
+          new Set([...openrouterModels, ...llamacppModels, ...vllmModels])
         )
 
         return allModels.map((model) => {
@@ -206,19 +228,24 @@ export const EvaluatorBlock: BlockConfig<EvaluatorResponse> = {
       placeholder: 'Enter your API key',
       password: true,
       connectionDroppable: false,
-      required: true,
-      // Hide API key for hosted models, llama.cpp models, and vLLM models
+      required: false,
       condition: isHosted
         ? {
             field: 'model',
             value: getHostedModels(),
-            not: true, // Show for all models EXCEPT hosted models
+            not: true,
           }
-        : () => ({
-            field: 'model',
-            value: [...getCurrentLlamaCppModels(), ...getCurrentVLLMModels()],
-            not: true, // Show for all models EXCEPT llama.cpp and vLLM models
-          }),
+        : () => {
+            const modelsWithProviders = getModelsWithConfiguredProviders()
+            if (modelsWithProviders.length > 0) {
+              return {
+                field: 'model',
+                value: modelsWithProviders,
+                not: true,
+              }
+            }
+            return { field: 'model', value: [] }
+          },
     },
     {
       id: 'temperature',

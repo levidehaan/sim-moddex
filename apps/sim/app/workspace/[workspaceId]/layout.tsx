@@ -1,6 +1,7 @@
 'use client'
 
 import { Tooltip } from '@/components/emcn'
+import { AIProviderSettingsLoader } from '@/app/workspace/[workspaceId]/providers/ai-provider-settings-loader'
 import { GlobalCommandsProvider } from '@/app/workspace/[workspaceId]/providers/global-commands-provider'
 import { ProviderModelsLoader } from '@/app/workspace/[workspaceId]/providers/provider-models-loader'
 import { SettingsLoader } from '@/app/workspace/[workspaceId]/providers/settings-loader'
@@ -11,6 +12,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
   return (
     <>
       <SettingsLoader />
+      <AIProviderSettingsLoader />
       <ProviderModelsLoader />
       <GlobalCommandsProvider>
         <Tooltip.Provider delayDuration={600} skipDelayDuration={0}>

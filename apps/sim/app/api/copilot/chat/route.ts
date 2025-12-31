@@ -10,7 +10,6 @@ import { getCopilotModel } from '@/lib/copilot/config'
 import { SIM_AGENT_API_URL_DEFAULT, SIM_AGENT_VERSION } from '@/lib/copilot/constants'
 import {
   COPILOT_DEFAULT_MODEL,
-  COPILOT_FREE_MODEL,
   getOpenRouterApiKey,
   streamOpenRouterChat,
 } from '@/lib/copilot/openrouter'
