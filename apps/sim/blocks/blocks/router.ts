@@ -15,27 +15,6 @@ const getDefaultModel = (): string => {
   return state.defaultModel || 'anthropic/claude-3.5-sonnet'
 }
 
-/**
- * Get all models that have providers configured
- */
-const getModelsWithConfiguredProviders = (): string[] => {
-  const state = useAIProviderSettingsStore.getState()
-  const providersState = useProvidersStore.getState()
-  const models: string[] = []
-
-  if (state.openrouter.enabled && state.openrouter.apiKey) {
-    models.push(...providersState.providers.openrouter.models)
-  }
-  if (state.llamacpp.enabled && state.llamacpp.baseUrl) {
-    models.push(...providersState.providers.llamacpp.models)
-  }
-  if (state.vllm.enabled && state.vllm.baseUrl) {
-    models.push(...providersState.providers.vllm.models)
-  }
-
-  return models
-}
-
 interface RouterResponse extends ToolResponse {
   output: {
     prompt: string
@@ -177,23 +156,15 @@ export const RouterBlock: BlockConfig<RouterResponse> = {
       password: true,
       connectionDroppable: false,
       required: false,
+      // For hosted: show for non-hosted models
+      // For self-hosted: always hide (use settings instead)
       condition: isHosted
         ? {
             field: 'model',
             value: getHostedModels(),
             not: true,
           }
-        : () => {
-            const modelsWithProviders = getModelsWithConfiguredProviders()
-            if (modelsWithProviders.length > 0) {
-              return {
-                field: 'model',
-                value: modelsWithProviders,
-                not: true,
-              }
-            }
-            return { field: 'model', value: [] }
-          },
+        : { field: 'model', value: '__never_match__' },
     },
     {
       id: 'temperature',
