@@ -148,8 +148,8 @@ export function getProviderFromModel(model: string): ProviderId {
     }
   }
 
-  logger.warn(`No provider found for model: ${model}, defaulting to llamacpp`)
-  return 'llamacpp'
+  logger.warn(`No provider found for model: ${model}, defaulting to openrouter`)
+  return 'openrouter'
 }
 
 export function getProvider(id: string): ProviderMetadata | undefined {
