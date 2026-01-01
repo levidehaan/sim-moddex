@@ -45,6 +45,41 @@ export async function getBYOKKey(
   }
 }
 
+/**
+ * Gets the API key for self-hosted providers from AI Provider Settings.
+ * This is used for OpenRouter, DeepSeek, vLLM, and llama.cpp in self-hosted deployments.
+ */
+async function getApiKeyFromSettings(
+  provider: 'openrouter' | 'llamacpp' | 'vllm' | 'deepseek'
+): Promise<string | undefined> {
+  try {
+    const { useAIProviderSettingsStore } = await import('@/stores/settings/ai-providers/store')
+    const state = useAIProviderSettingsStore.getState()
+
+    if (provider === 'openrouter' || provider === 'deepseek') {
+      // DeepSeek uses OpenRouter as the gateway
+      if (state.openrouter.enabled && state.openrouter.apiKey) {
+        return state.openrouter.apiKey
+      }
+    } else if (provider === 'llamacpp') {
+      // llama.cpp doesn't require an API key (optional auth token)
+      if (state.llamacpp.enabled) {
+        return state.llamacpp.apiKey || 'empty'
+      }
+    } else if (provider === 'vllm') {
+      // vLLM doesn't require an API key (optional auth token)
+      if (state.vllm.enabled) {
+        return state.vllm.apiKey || 'empty'
+      }
+    }
+
+    return undefined
+  } catch (error) {
+    logger.debug('Could not access AI Provider Settings store', { provider, error })
+    return undefined
+  }
+}
+
 export async function getApiKeyWithBYOK(
   provider: string,
   model: string,
@@ -54,19 +89,43 @@ export async function getApiKeyWithBYOK(
   const { isHosted } = await import('@/lib/core/config/feature-flags')
   const { useProvidersStore } = await import('@/stores/providers/store')
 
+  // Handle local/self-hosted providers (llamacpp, vllm)
   const isLlamaCppModel =
     provider === 'llamacpp' ||
     useProvidersStore.getState().providers.llamacpp.models.includes(model)
   if (isLlamaCppModel) {
-    return { apiKey: userProvidedKey || 'empty', isBYOK: false }
+    const settingsKey = await getApiKeyFromSettings('llamacpp')
+    return { apiKey: userProvidedKey || settingsKey || 'empty', isBYOK: false }
   }
 
   const isVllmModel =
     provider === 'vllm' || useProvidersStore.getState().providers.vllm.models.includes(model)
   if (isVllmModel) {
-    return { apiKey: userProvidedKey || 'empty', isBYOK: false }
+    const settingsKey = await getApiKeyFromSettings('vllm')
+    return { apiKey: userProvidedKey || settingsKey || 'empty', isBYOK: false }
   }
 
+  // Handle OpenRouter (includes DeepSeek which routes through OpenRouter)
+  const isOpenRouterModel =
+    provider === 'openrouter' ||
+    provider === 'deepseek' ||
+    model.toLowerCase().startsWith('openrouter/')
+  if (isOpenRouterModel) {
+    if (userProvidedKey) {
+      return { apiKey: userProvidedKey, isBYOK: false }
+    }
+    const settingsKey = await getApiKeyFromSettings('openrouter')
+    if (settingsKey) {
+      logger.debug('Using OpenRouter API key from settings', { provider, model })
+      return { apiKey: settingsKey, isBYOK: false }
+    }
+    logger.debug('No OpenRouter API key found in settings', { provider, model })
+    throw new Error(
+      `OpenRouter API key is required. Please configure it in Settings > AI Providers.`
+    )
+  }
+
+  // Handle hosted providers (OpenAI, Anthropic, Google, Mistral)
   const isOpenAIModel = provider === 'openai'
   const isClaudeModel = provider === 'anthropic'
   const isGeminiModel = provider === 'google'

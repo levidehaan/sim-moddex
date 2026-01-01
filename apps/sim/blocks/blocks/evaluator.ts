@@ -2,8 +2,7 @@ import { createLogger } from '@sim/logger'
 import { ChartBarIcon } from '@/components/icons'
 import { isHosted } from '@/lib/core/config/feature-flags'
 import type { BlockConfig, ParamType } from '@/blocks/types'
-import type { ProviderId } from '@/providers/types'
-import { getAllModelProviders, getHostedModels, getProviderIcon } from '@/providers/utils'
+import { getHostedModels, getProviderFromModel, getProviderIcon } from '@/providers/utils'
 import { useProvidersStore } from '@/stores/providers/store'
 import { useAIProviderSettingsStore } from '@/stores/settings/ai-providers'
 import type { ToolResponse } from '@/tools/types'
@@ -286,10 +285,8 @@ export const EvaluatorBlock: BlockConfig<EvaluatorResponse> = {
         if (!model) {
           throw new Error('No model selected')
         }
-        const tool = getAllModelProviders()[model as ProviderId]
-        if (!tool) {
-          throw new Error(`Invalid model selected: ${model}`)
-        }
+        // Use getProviderFromModel which handles both static models and pattern-based matching
+        const tool = getProviderFromModel(model)
         return tool
       },
     },

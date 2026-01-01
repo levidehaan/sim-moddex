@@ -7,6 +7,7 @@ import {
   getAllModelProviders,
   getHostedModels,
   getMaxTemperature,
+  getProviderFromModel,
   getProviderIcon,
   getReasoningEffortValuesForModel,
   getThinkingLevelsForModel,
@@ -488,10 +489,9 @@ Example 3 (Array Input):
         if (!model) {
           throw new Error('No model selected')
         }
-        const tool = getAllModelProviders()[model]
-        if (!tool) {
-          throw new Error(`Invalid model selected: ${model}`)
-        }
+        // Use getProviderFromModel which handles both static models and pattern-based matching
+        // (e.g., for dynamically loaded OpenRouter models like openrouter/google/gemini-3-flash)
+        const tool = getProviderFromModel(model)
         return tool
       },
       params: (params: Record<string, any>) => {
