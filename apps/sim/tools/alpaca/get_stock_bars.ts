@@ -97,8 +97,25 @@ export const alpacaGetStockBarsTool: ToolConfig<
       const queryParams = new URLSearchParams()
       queryParams.append('symbols', params.symbols)
       queryParams.append('timeframe', params.timeframe)
-      if (params.start) queryParams.append('start', params.start)
-      if (params.end) queryParams.append('end', params.end)
+
+      // Calculate default date range if not provided
+      // Without a start date, Alpaca returns only current day data (empty if market closed)
+      const now = new Date()
+      let startDate = params.start
+      const endDate = params.end
+
+      if (!startDate) {
+        // For intraday timeframes, default to 7 days ago (IEX limit)
+        // For daily/weekly/monthly, default to 30 days ago
+        const isIntraday = ['1Min', '5Min', '15Min', '30Min', '1Hour'].includes(params.timeframe)
+        const daysBack = isIntraday ? 7 : 30
+        const defaultStart = new Date(now)
+        defaultStart.setDate(defaultStart.getDate() - daysBack)
+        startDate = defaultStart.toISOString().split('T')[0]
+      }
+
+      queryParams.append('start', startDate)
+      if (endDate) queryParams.append('end', endDate)
       if (params.limit) queryParams.append('limit', params.limit.toString())
       if (params.adjustment) queryParams.append('adjustment', params.adjustment)
       if (params.feed) queryParams.append('feed', params.feed)
