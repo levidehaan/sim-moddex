@@ -132,6 +132,34 @@ export function getAllModelProviders(): Record<string, ProviderId> {
   )
 }
 
+/**
+ * Gets the provider for a model, checking both static model lists and patterns.
+ * This is used for model validation where we need to verify a model is valid
+ * even if it hasn't been loaded into the static model list yet.
+ */
+export function getProviderForModelValidation(model: string): ProviderId | undefined {
+  const normalizedModel = model.toLowerCase()
+
+  // First check static model list
+  const staticProvider = getAllModelProviders()[normalizedModel]
+  if (staticProvider) {
+    return staticProvider
+  }
+
+  // Then check model patterns (for dynamically loaded models like OpenRouter)
+  for (const [providerId, config] of Object.entries(providers)) {
+    if (config.modelPatterns) {
+      for (const pattern of config.modelPatterns) {
+        if (pattern.test(normalizedModel)) {
+          return providerId as ProviderId
+        }
+      }
+    }
+  }
+
+  return undefined
+}
+
 export function getProviderFromModel(model: string): ProviderId {
   const normalizedModel = model.toLowerCase()
   if (normalizedModel in getAllModelProviders()) {
