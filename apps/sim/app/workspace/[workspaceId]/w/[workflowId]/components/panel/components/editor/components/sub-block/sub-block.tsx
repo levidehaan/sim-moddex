@@ -469,10 +469,10 @@ function SubBlockComponent({
         const comboDefaultValue =
           typeof config.value === 'function'
             ? config.value({})
-            : config.value ??
+            : (config.value ??
               (typeof config.defaultValue === 'function'
                 ? config.defaultValue()
-                : config.defaultValue)
+                : config.defaultValue))
         return (
           <div onMouseDown={handleMouseDown}>
             <ComboBox

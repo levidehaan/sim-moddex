@@ -227,12 +227,13 @@ export const KafkaBlock: BlockConfig<KafkaResponse> = {
         if (operation === 'produce') {
           const parsedMessages = parseJson(messages, 'messages')
           if (parsedMessages !== undefined) result.messages = parsedMessages
-          if (acks !== undefined) result.acks = parseInt(acks as string, 10)
+          if (acks !== undefined) result.acks = Number.parseInt(acks as string, 10)
         } else if (operation === 'consume') {
           result.groupId = groupId
           if (fromBeginning !== undefined) result.fromBeginning = fromBeginning
-          if (maxMessages !== undefined) result.maxMessages = parseInt(maxMessages as string, 10)
-          if (timeout !== undefined) result.timeout = parseInt(timeout as string, 10)
+          if (maxMessages !== undefined)
+            result.maxMessages = Number.parseInt(maxMessages as string, 10)
+          if (timeout !== undefined) result.timeout = Number.parseInt(timeout as string, 10)
           if (condition) result.condition = condition
         }
 

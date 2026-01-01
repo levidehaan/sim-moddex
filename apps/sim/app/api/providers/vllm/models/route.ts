@@ -22,7 +22,11 @@ async function getUserVLLMSettings(): Promise<VLLMSettings | null> {
     const session = await getSession()
     if (!session?.user?.id) return null
 
-    const result = await db.select().from(settings).where(eq(settings.userId, session.user.id)).limit(1)
+    const result = await db
+      .select()
+      .from(settings)
+      .where(eq(settings.userId, session.user.id))
+      .limit(1)
 
     if (!result.length) return null
 

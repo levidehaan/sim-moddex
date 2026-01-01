@@ -51,7 +51,9 @@ export const TranslateBlock: BlockConfig = {
         const baseModels = providersState.providers.base.models
         const llamacppModels = providersState.providers.llamacpp.models
         const openrouterModels = providersState.providers.openrouter.models
-        const allModels = Array.from(new Set([...baseModels, ...llamacppModels, ...openrouterModels]))
+        const allModels = Array.from(
+          new Set([...baseModels, ...llamacppModels, ...openrouterModels])
+        )
 
         return allModels.map((model) => {
           const icon = getProviderIcon(model)

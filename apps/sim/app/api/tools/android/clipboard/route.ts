@@ -30,18 +30,17 @@ export async function POST(request: NextRequest) {
         text: stdout,
         message: 'Clipboard content retrieved',
       })
-    } else {
-      if (!params.text) {
-        return NextResponse.json({ error: 'Text is required for set operation' }, { status: 400 })
-      }
-
-      await executeTermuxApi('clipboard-set', [], params.text)
-
-      return NextResponse.json({
-        text: params.text,
-        message: 'Clipboard content set',
-      })
     }
+    if (!params.text) {
+      return NextResponse.json({ error: 'Text is required for set operation' }, { status: 400 })
+    }
+
+    await executeTermuxApi('clipboard-set', [], params.text)
+
+    return NextResponse.json({
+      text: params.text,
+      message: 'Clipboard content set',
+    })
   } catch (error) {
     if (error instanceof z.ZodError) {
       logger.warn(`[${requestId}] Invalid request data`, { errors: error.errors })

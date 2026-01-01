@@ -4,6 +4,7 @@ import type { ChatCompletionCreateParamsStreaming } from 'openai/resources/chat/
 import { env } from '@/lib/core/config/env'
 import type { StreamingExecution } from '@/executor/types'
 import { MAX_TOOL_ITERATIONS } from '@/providers'
+import { createReadableStreamFromLlamaCppStream } from '@/providers/llamacpp/utils'
 import { getProviderDefaultModel, getProviderModels } from '@/providers/models'
 import type {
   ProviderConfig,
@@ -17,7 +18,6 @@ import {
   prepareToolsWithUsageControl,
   trackForcedToolUsage,
 } from '@/providers/utils'
-import { createReadableStreamFromLlamaCppStream } from '@/providers/llamacpp/utils'
 import { useProvidersStore } from '@/stores/providers/store'
 import { executeTool } from '@/tools'
 

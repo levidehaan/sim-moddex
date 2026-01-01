@@ -66,6 +66,7 @@ import {
   jiraWebhookTrigger,
   jiraWorklogCreatedTrigger,
 } from '@/triggers/jira'
+import { kafkaPollingTrigger } from '@/triggers/kafka'
 import {
   linearCommentCreatedTrigger,
   linearCommentUpdatedTrigger,
@@ -89,7 +90,6 @@ import {
 } from '@/triggers/microsoftteams'
 import { outlookPollingTrigger } from '@/triggers/outlook'
 import { rssPollingTrigger } from '@/triggers/rss'
-import { kafkaPollingTrigger } from '@/triggers/kafka'
 import { slackWebhookTrigger } from '@/triggers/slack'
 import { stripeWebhookTrigger } from '@/triggers/stripe'
 import { telegramWebhookTrigger } from '@/triggers/telegram'

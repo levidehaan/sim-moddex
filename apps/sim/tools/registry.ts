@@ -1340,8 +1340,6 @@ import {
   zoomListRecordingsTool,
   zoomUpdateMeetingTool,
 } from '@/tools/zoom'
-import { sqsSendTool } from './sqs'
-import { kafkaConsumeTool, kafkaProduceTool } from './kafka'
 import {
   androidBatteryTool,
   androidClipboardTool,
@@ -1352,6 +1350,8 @@ import {
   androidVibrateTool,
   androidWifiTool,
 } from './android'
+import { kafkaConsumeTool, kafkaProduceTool } from './kafka'
+import { sqsSendTool } from './sqs'
 
 // Registry of all available tools
 export const tools: Record<string, ToolConfig> = {

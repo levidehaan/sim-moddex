@@ -94,10 +94,7 @@ export async function streamOpenRouterChat(
 /**
  * Makes a non-streaming chat completion request to OpenRouter
  */
-export async function chatOpenRouter(
-  apiKey: string,
-  request: OpenRouterChatRequest
-): Promise<any> {
+export async function chatOpenRouter(apiKey: string, request: OpenRouterChatRequest): Promise<any> {
   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {

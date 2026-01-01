@@ -12,7 +12,8 @@ export const consumeTool: ToolConfig<KafkaConsumeParams, KafkaConsumeResponse> =
       type: 'string',
       required: true,
       visibility: 'user-only',
-      description: 'Comma-separated list of Kafka broker addresses (e.g., localhost:9092,localhost:9093)',
+      description:
+        'Comma-separated list of Kafka broker addresses (e.g., localhost:9092,localhost:9093)',
     },
     clientId: {
       type: 'string',

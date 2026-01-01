@@ -215,7 +215,9 @@ export const AndroidBlock: BlockConfig<AndroidBlockResponse> = {
             }
           case 'vibrate':
             return {
-              duration: params.vibrateDuration ? parseInt(params.vibrateDuration as string, 10) : undefined,
+              duration: params.vibrateDuration
+                ? Number.parseInt(params.vibrateDuration as string, 10)
+                : undefined,
             }
           case 'tts':
             return {

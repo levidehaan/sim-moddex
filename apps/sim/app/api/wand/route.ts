@@ -3,7 +3,6 @@ import { settings, userStats, workflow } from '@sim/db/schema'
 import { createLogger } from '@sim/logger'
 import { eq, sql } from 'drizzle-orm'
 import { type NextRequest, NextResponse } from 'next/server'
-import { getBYOKKey } from '@/lib/api-key/byok'
 import { getSession } from '@/lib/auth'
 import { logModelUsage } from '@/lib/billing/core/usage-log'
 import { checkAndBillOverageThreshold } from '@/lib/billing/threshold-billing'
@@ -30,7 +29,9 @@ async function getOpenRouterKey(userId: string): Promise<string | null> {
 
     if (result.length > 0) {
       const aiSettings = result[0].aiProviderSettings as Record<string, any> | null
-      const openrouterSettings = aiSettings?.openrouter as { apiKey?: string; enabled?: boolean } | undefined
+      const openrouterSettings = aiSettings?.openrouter as
+        | { apiKey?: string; enabled?: boolean }
+        | undefined
 
       if (openrouterSettings?.enabled !== false && openrouterSettings?.apiKey) {
         logger.info('Using user-configured OpenRouter API key for wand')
@@ -206,7 +207,11 @@ export async function POST(req: NextRequest) {
     if (!openrouterApiKey) {
       logger.error(`[${requestId}] OpenRouter API key not configured.`)
       return NextResponse.json(
-        { success: false, error: 'OpenRouter API key not configured. Please configure it in Settings > AI Providers.' },
+        {
+          success: false,
+          error:
+            'OpenRouter API key not configured. Please configure it in Settings > AI Providers.',
+        },
         { status: 503 }
       )
     }

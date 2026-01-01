@@ -33,7 +33,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const params = ProduceSchema.parse(body)
 
-    logger.info(`[${requestId}] Producing ${params.messages.length} messages to topic ${params.topic}`)
+    logger.info(
+      `[${requestId}] Producing ${params.messages.length} messages to topic ${params.topic}`
+    )
 
     const kafka = createKafkaClient({
       brokers: params.brokers,
@@ -52,7 +54,9 @@ export async function POST(request: NextRequest) {
       params.timeout
     )
 
-    logger.info(`[${requestId}] Successfully produced ${result.messageCount} messages to topic ${params.topic}`)
+    logger.info(
+      `[${requestId}] Successfully produced ${result.messageCount} messages to topic ${params.topic}`
+    )
 
     return NextResponse.json({
       message: `Successfully produced ${result.messageCount} messages to topic ${params.topic}`,

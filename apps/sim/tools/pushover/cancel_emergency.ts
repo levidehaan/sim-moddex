@@ -1,5 +1,5 @@
 import type { ToolConfig } from '@/tools/types'
-import { PUSHOVER_API_URL, handlePushoverError } from './types'
+import { handlePushoverError, PUSHOVER_API_URL } from './types'
 
 export interface PushoverCancelEmergencyParams {
   token: string
