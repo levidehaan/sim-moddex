@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { createLogger } from '@sim/logger'
-import { Check, ChevronDown, ExternalLink, Search } from 'lucide-react'
+import { Check, ChevronDown, ExternalLink, HelpCircle, Info, Search } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Button,
@@ -12,6 +12,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Tooltip,
 } from '@/components/emcn'
 import { Input, Skeleton } from '@/components/ui'
 import { cn } from '@/lib/core/utils/cn'
@@ -24,6 +25,65 @@ import {
 } from '@/hooks/queries/oauth-connections'
 
 const logger = createLogger('Integrations')
+
+/**
+ * Provider-level tooltips explaining what each provider group offers.
+ */
+const PROVIDER_TOOLTIPS: Record<
+  string,
+  { title: string; description: string; examples: string[] }
+> = {
+  google: {
+    title: 'Google Workspace',
+    description: 'Access Google apps including email, calendar, docs, and drive.',
+    examples: ['Send emails via Gmail', 'Create calendar events', 'Read/write Google Sheets'],
+  },
+  microsoft: {
+    title: 'Microsoft 365',
+    description: 'Access Microsoft apps including Outlook, Teams, Excel, and SharePoint.',
+    examples: ['Send Outlook emails', 'Post to Teams channels', 'Manage OneDrive files'],
+  },
+  github: {
+    title: 'GitHub',
+    description: 'Manage repositories, issues, and pull requests.',
+    examples: ['Create issues', 'Comment on PRs', 'Trigger on push events'],
+  },
+  slack: {
+    title: 'Slack',
+    description: 'Send messages and interact with Slack workspaces.',
+    examples: ['Post messages to channels', 'Send DMs', 'Upload files'],
+  },
+  notion: {
+    title: 'Notion',
+    description: 'Access and manage Notion pages and databases.',
+    examples: ['Create pages', 'Update database entries', 'Search content'],
+  },
+  linear: {
+    title: 'Linear',
+    description: 'Manage issues and projects in Linear.',
+    examples: ['Create issues', 'Update status', 'Assign to team members'],
+  },
+  jira: {
+    title: 'Jira',
+    description: 'Access Jira projects and manage issues.',
+    examples: ['Create issues', 'Add comments', 'Track sprint progress'],
+  },
+  airtable: {
+    title: 'Airtable',
+    description: 'Manage Airtable bases, tables, and records.',
+    examples: ['Read/write records', 'Create views', 'Trigger on record changes'],
+  },
+  hubspot: {
+    title: 'HubSpot CRM',
+    description: 'Manage contacts, deals, and tickets in HubSpot.',
+    examples: ['Create contacts', 'Update deals', 'Add notes'],
+  },
+  salesforce: {
+    title: 'Salesforce CRM',
+    description: 'Access and manage Salesforce records.',
+    examples: ['Create leads', 'Update opportunities', 'Query records'],
+  },
+}
 
 /**
  * Static skeleton structure matching OAUTH_PROVIDERS layout
@@ -274,6 +334,33 @@ export function Integrations({ onOpenChange, registerCloseHandler }: Integration
   return (
     <>
       <div className='flex h-full flex-col gap-[16px]'>
+        {/* Header Section */}
+        <div>
+          <div className='flex items-center gap-2'>
+            <h3 className='font-medium text-[14px]'>Service Integrations</h3>
+            <Tooltip.Provider delayDuration={150}>
+              <Tooltip.Root>
+                <Tooltip.Trigger asChild>
+                  <HelpCircle className='h-3.5 w-3.5 cursor-help text-[var(--text-muted)]' />
+                </Tooltip.Trigger>
+                <Tooltip.Content side='top' className='max-w-xs text-[11px]'>
+                  <p className='font-medium'>How Integrations Work</p>
+                  <ul className='mt-1 list-disc pl-3'>
+                    <li>Click "Connect" to authorize access to a service</li>
+                    <li>You'll be redirected to sign in with that service</li>
+                    <li>Once connected, workflow blocks can use your account</li>
+                    <li>Connections are shared with all household members</li>
+                  </ul>
+                </Tooltip.Content>
+              </Tooltip.Root>
+            </Tooltip.Provider>
+          </div>
+          <p className='mt-1 text-[12px] text-[var(--text-muted)]'>
+            Connect external services to enable workflow automation. Each connection allows
+            workflows to read and write data on your behalf.
+          </p>
+        </div>
+
         <div className='flex w-full items-center gap-[8px] rounded-[8px] border border-[var(--border)] bg-transparent px-[8px] py-[5px] transition-colors duration-100 dark:bg-[var(--surface-4)] dark:hover:border-[var(--border-1)] dark:hover:bg-[var(--surface-5)]'>
           <Search className='h-[14px] w-[14px] flex-shrink-0 text-[var(--text-tertiary)]' />
           <Input
@@ -314,9 +401,29 @@ export function Integrations({ onOpenChange, registerCloseHandler }: Integration
             <div className='flex flex-col gap-[16px]'>
               {Object.entries(filteredGroupedServices).map(([providerKey, providerServices]) => (
                 <div key={providerKey} className='flex flex-col gap-[8px]'>
-                  <Label className='text-[12px] text-[var(--text-tertiary)]'>
-                    {OAUTH_PROVIDERS[providerKey]?.name || 'Other Services'}
-                  </Label>
+                  <div className='flex items-center gap-1.5'>
+                    <Label className='text-[12px] text-[var(--text-tertiary)]'>
+                      {OAUTH_PROVIDERS[providerKey]?.name || 'Other Services'}
+                    </Label>
+                    {PROVIDER_TOOLTIPS[providerKey] && (
+                      <Tooltip.Provider delayDuration={150}>
+                        <Tooltip.Root>
+                          <Tooltip.Trigger asChild>
+                            <Info className='h-3 w-3 cursor-help text-[var(--text-muted)]' />
+                          </Tooltip.Trigger>
+                          <Tooltip.Content side='top' className='max-w-xs text-[11px]'>
+                            <p className='font-medium'>{PROVIDER_TOOLTIPS[providerKey].title}</p>
+                            <p className='mt-1'>{PROVIDER_TOOLTIPS[providerKey].description}</p>
+                            <ul className='mt-1.5 list-disc pl-3 text-[var(--text-muted)]'>
+                              {PROVIDER_TOOLTIPS[providerKey].examples.map((ex, i) => (
+                                <li key={i}>{ex}</li>
+                              ))}
+                            </ul>
+                          </Tooltip.Content>
+                        </Tooltip.Root>
+                      </Tooltip.Provider>
+                    )}
+                  </div>
                   {providerServices.map((service) => (
                     <div
                       key={service.id}
