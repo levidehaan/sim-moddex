@@ -77,7 +77,18 @@ export const alpacaGetStockQuotesTool: ToolConfig<
     url: (params) => {
       const queryParams = new URLSearchParams()
       queryParams.append('symbols', params.symbols)
-      if (params.start) queryParams.append('start', params.start)
+
+      // Calculate default date range if not provided
+      // Without a start date, Alpaca returns only current day data (empty if market closed)
+      let startDate = params.start
+      if (!startDate) {
+        // Default to 7 days ago for quotes (intraday data)
+        const defaultStart = new Date()
+        defaultStart.setDate(defaultStart.getDate() - 7)
+        startDate = defaultStart.toISOString().split('T')[0]
+      }
+
+      queryParams.append('start', startDate)
       if (params.end) queryParams.append('end', params.end)
       if (params.limit) queryParams.append('limit', params.limit.toString())
       if (params.feed) queryParams.append('feed', params.feed)
