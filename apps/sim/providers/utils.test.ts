@@ -615,8 +615,8 @@ describe('Provider Management', () => {
       expect(getProviderFromModel('claude-custom-model')).toBe('anthropic') // Matches /^claude/ pattern
     })
 
-    it.concurrent('should default to ollama for unknown models', () => {
-      expect(getProviderFromModel('unknown-model')).toBe('ollama')
+    it.concurrent('should default to openrouter for unknown models', () => {
+      expect(getProviderFromModel('unknown-model')).toBe('openrouter')
     })
 
     it.concurrent('should be case insensitive', () => {
