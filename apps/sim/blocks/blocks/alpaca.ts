@@ -126,12 +126,7 @@ export const AlpacaBlock: BlockConfig = {
       placeholder: 'Max results (e.g., 1000)',
       condition: {
         field: 'operation',
-        value: [
-          'get_stock_bars',
-          'get_stock_quotes',
-          'get_option_bars',
-          'get_option_chain',
-        ],
+        value: ['get_stock_bars', 'get_stock_quotes', 'get_option_bars', 'get_option_chain'],
       },
     },
     // Option chain filters
@@ -303,9 +298,9 @@ export const AlpacaBlock: BlockConfig = {
         }
 
         // Convert numeric fields
-        if (limit) cleanParams.limit = parseInt(limit, 10)
-        if (strike_price_gte) cleanParams.strike_price_gte = parseFloat(strike_price_gte)
-        if (strike_price_lte) cleanParams.strike_price_lte = parseFloat(strike_price_lte)
+        if (limit) cleanParams.limit = Number.parseInt(limit, 10)
+        if (strike_price_gte) cleanParams.strike_price_gte = Number.parseFloat(strike_price_gte)
+        if (strike_price_lte) cleanParams.strike_price_lte = Number.parseFloat(strike_price_lte)
 
         Object.entries(rest).forEach(([key, value]) => {
           if (value !== undefined && value !== null && value !== '') {

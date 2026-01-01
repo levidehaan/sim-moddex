@@ -489,7 +489,7 @@ export async function POST(req: NextRequest) {
       // Use OpenRouter directly for self-hosted users
       const systemPrompt = `You are a helpful AI assistant for Sim, a workflow automation platform. You help users build and understand their workflows. Be concise and helpful.
 
-${agentContexts.length > 0 ? 'Context:\n' + agentContexts.map((c) => `[${c.type}]\n${c.content}`).join('\n\n') : ''}`
+${agentContexts.length > 0 ? `Context:\n${agentContexts.map((c) => `[${c.type}]\n${c.content}`).join('\n\n')}` : ''}`
 
       const messages = [
         { role: 'system' as const, content: systemPrompt },

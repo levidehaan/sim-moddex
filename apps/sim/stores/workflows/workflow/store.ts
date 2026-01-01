@@ -69,6 +69,17 @@ function resolveInitialSubblockValue(config: SubBlockConfig): unknown {
   }
 
   if (config.defaultValue !== undefined) {
+    if (typeof config.defaultValue === 'function') {
+      try {
+        const resolved = config.defaultValue()
+        return cloneInitialSubblockValue(resolved)
+      } catch (error) {
+        logger.warn('Failed to resolve dynamic sub-block defaultValue', {
+          subBlockId: config.id,
+          error: error instanceof Error ? error.message : String(error),
+        })
+      }
+    }
     return cloneInitialSubblockValue(config.defaultValue)
   }
 

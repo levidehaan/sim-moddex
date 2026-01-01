@@ -210,15 +210,15 @@ export const PushoverBlock: BlockConfig = {
         const cleanParams: Record<string, any> = {}
 
         // Convert priority to number
-        if (priority) cleanParams.priority = parseInt(priority, 10)
+        if (priority) cleanParams.priority = Number.parseInt(priority, 10)
 
         // Convert html to boolean
         if (html === 'true') cleanParams.html = true
 
         // Convert numeric fields
-        if (ttl) cleanParams.ttl = parseInt(ttl, 10)
-        if (retry) cleanParams.retry = parseInt(retry, 10)
-        if (expire) cleanParams.expire = parseInt(expire, 10)
+        if (ttl) cleanParams.ttl = Number.parseInt(ttl, 10)
+        if (retry) cleanParams.retry = Number.parseInt(retry, 10)
+        if (expire) cleanParams.expire = Number.parseInt(expire, 10)
 
         Object.entries(rest).forEach(([key, value]) => {
           if (value !== undefined && value !== null && value !== '') {

@@ -1,6 +1,6 @@
+import { createLogger } from '@sim/logger'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { createLogger } from '@sim/logger'
 
 const logger = createLogger('AIProviderSettingsStore')
 

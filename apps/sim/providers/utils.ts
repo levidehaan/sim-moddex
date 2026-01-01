@@ -5,7 +5,6 @@ import { getEnv, isTruthy } from '@/lib/core/config/env'
 import { isHosted } from '@/lib/core/config/feature-flags'
 import { isCustomTool } from '@/executor/constants'
 import {
-  getComputerUseModels,
   getEmbeddingModelPricing,
   getHostedModels as getHostedModelsFromDefinitions,
   getMaxTemperature as getMaxTempFromDefinitions,
@@ -567,7 +566,8 @@ export function getApiKey(provider: string, model: string, userProvidedKey?: str
   const hasUserKey = !!userProvidedKey
 
   const isLlamaCppModel =
-    provider === 'llamacpp' || useProvidersStore.getState().providers.llamacpp.models.includes(model)
+    provider === 'llamacpp' ||
+    useProvidersStore.getState().providers.llamacpp.models.includes(model)
   if (isLlamaCppModel) {
     return userProvidedKey || 'empty'
   }

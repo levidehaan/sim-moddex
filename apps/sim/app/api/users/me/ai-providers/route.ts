@@ -134,8 +134,7 @@ export async function PATCH(request: Request) {
         .where(eq(settings.userId, userId))
         .limit(1)
 
-      const existingAiSettings =
-        (existingResult[0]?.aiProviderSettings as AIProviderSettings) || {}
+      const existingAiSettings = (existingResult[0]?.aiProviderSettings as AIProviderSettings) || {}
 
       // Merge new settings with existing ones
       const mergedSettings: AIProviderSettings = {

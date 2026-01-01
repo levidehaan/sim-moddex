@@ -34,6 +34,13 @@ function resolveInitialValue(subBlock: SubBlockConfig): unknown {
   }
 
   if (subBlock.defaultValue !== undefined) {
+    if (typeof subBlock.defaultValue === 'function') {
+      try {
+        return cloneDefaultValue(subBlock.defaultValue())
+      } catch (error) {
+        // Ignore resolution errors and fall back to default/null values
+      }
+    }
     return cloneDefaultValue(subBlock.defaultValue)
   }
 

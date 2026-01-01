@@ -465,14 +465,21 @@ function SubBlockComponent({
           </div>
         )
 
-      case 'combobox':
+      case 'combobox': {
+        const comboDefaultValue =
+          typeof config.value === 'function'
+            ? config.value({})
+            : (config.value ??
+              (typeof config.defaultValue === 'function'
+                ? config.defaultValue()
+                : config.defaultValue))
         return (
           <div onMouseDown={handleMouseDown}>
             <ComboBox
               blockId={blockId}
               subBlockId={config.id}
               options={config.options as { label: string; id: string }[]}
-              defaultValue={typeof config.value === 'function' ? config.value({}) : config.value}
+              defaultValue={comboDefaultValue as string | undefined}
               placeholder={config.placeholder}
               isPreview={isPreview}
               previewValue={previewValue as any}
@@ -481,6 +488,7 @@ function SubBlockComponent({
             />
           </div>
         )
+      }
 
       case 'slider':
         return (
@@ -527,7 +535,11 @@ function SubBlockComponent({
             readOnly={config.readOnly}
             collapsible={config.collapsible}
             defaultCollapsed={config.defaultCollapsed}
-            defaultValue={config.defaultValue}
+            defaultValue={
+              typeof config.defaultValue === 'function'
+                ? config.defaultValue()
+                : config.defaultValue
+            }
             showCopyButton={config.showCopyButton}
             onValidationChange={handleValidationChange}
             wandConfig={

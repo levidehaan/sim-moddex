@@ -55,7 +55,8 @@ export async function getApiKeyWithBYOK(
   const { useProvidersStore } = await import('@/stores/providers/store')
 
   const isLlamaCppModel =
-    provider === 'llamacpp' || useProvidersStore.getState().providers.llamacpp.models.includes(model)
+    provider === 'llamacpp' ||
+    useProvidersStore.getState().providers.llamacpp.models.includes(model)
   if (isLlamaCppModel) {
     return { apiKey: userProvidedKey || 'empty', isBYOK: false }
   }

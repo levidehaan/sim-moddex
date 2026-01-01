@@ -193,7 +193,7 @@ export function buildAlpacaDataUrl(path: string): string {
   return `${ALPACA_DATA_BASE_URL}${path}`
 }
 
-export function buildAlpacaTradingUrl(path: string, paper: boolean = false): string {
+export function buildAlpacaTradingUrl(path: string, paper = false): string {
   const baseUrl = paper ? ALPACA_PAPER_TRADING_BASE_URL : ALPACA_TRADING_BASE_URL
   return `${baseUrl}${path}`
 }

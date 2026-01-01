@@ -2,14 +2,25 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { createLogger } from '@sim/logger'
-import { Check, Eye, EyeOff, Loader2, RefreshCw, Server, Sparkles } from 'lucide-react'
-import { Button, Combobox, Label, Switch } from '@/components/emcn'
+import { useQueryClient } from '@tanstack/react-query'
+import {
+  Check,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  HelpCircle,
+  Info,
+  Loader2,
+  RefreshCw,
+  Server,
+  Sparkles,
+} from 'lucide-react'
+import { Button, Combobox, Label, Switch, Tooltip } from '@/components/emcn'
 import { Input, Skeleton } from '@/components/ui'
 import type { AIProviderSettings } from '@/app/api/users/me/ai-providers/route'
-import { useQueryClient } from '@tanstack/react-query'
-import { useProvidersStore } from '@/stores/providers/store'
-import { getProviderIcon } from '@/providers/utils'
 import { aiProviderSettingsKeys } from '@/hooks/queries/ai-provider-settings'
+import { getProviderIcon } from '@/providers/utils'
+import { useProvidersStore } from '@/stores/providers/store'
 
 const logger = createLogger('AIProviders')
 
@@ -259,12 +270,31 @@ export function AIProviders() {
 
       {error && <p className='text-[12px] text-[var(--text-error)]'>{error}</p>}
 
-      {/* OpenRouter Section */}
-      <div className='rounded-lg border border-[var(--border)] p-4'>
+      {/* OpenRouter Section - Primary provider for home users */}
+      <div className='rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] p-4'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-2'>
-            <Server className='h-4 w-4 text-[var(--text-secondary)]' />
+            <Server className='h-4 w-4 text-[var(--brand-primary)]' />
             <h4 className='font-medium text-[13px]'>OpenRouter</h4>
+            <span className='rounded-full bg-[var(--brand-primary)] px-2 py-0.5 font-medium text-[9px] text-white'>
+              Recommended
+            </span>
+            <Tooltip.Provider delayDuration={150}>
+              <Tooltip.Root>
+                <Tooltip.Trigger asChild>
+                  <HelpCircle className='h-3.5 w-3.5 cursor-help text-[var(--text-muted)]' />
+                </Tooltip.Trigger>
+                <Tooltip.Content side='top' className='max-w-xs text-[11px]'>
+                  <p className='font-medium'>Why OpenRouter?</p>
+                  <ul className='mt-1 list-disc pl-3'>
+                    <li>Access 200+ AI models with one API key</li>
+                    <li>Pay per token - no subscriptions required</li>
+                    <li>Includes Claude, GPT-4, Llama, Mistral & more</li>
+                    <li>$5 free credits for new accounts</li>
+                  </ul>
+                </Tooltip.Content>
+              </Tooltip.Root>
+            </Tooltip.Provider>
           </div>
           <Switch
             checked={settings?.openrouter?.enabled ?? true}
@@ -272,13 +302,32 @@ export function AIProviders() {
           />
         </div>
         <p className='mt-1 text-[11px] text-[var(--text-muted)]'>
-          Access 200+ AI models through OpenRouter's unified API
+          Access Claude, GPT-4, Llama, Mistral and 200+ other AI models through a single API
         </p>
 
         <div className='mt-3'>
-          <Label htmlFor='openrouter-key' className='text-[12px]'>
-            API Key
-          </Label>
+          <div className='flex items-center gap-1'>
+            <Label htmlFor='openrouter-key' className='text-[12px]'>
+              API Key
+            </Label>
+            <Tooltip.Provider delayDuration={150}>
+              <Tooltip.Root>
+                <Tooltip.Trigger asChild>
+                  <Info className='h-3 w-3 cursor-help text-[var(--text-muted)]' />
+                </Tooltip.Trigger>
+                <Tooltip.Content side='top' className='max-w-xs text-[11px]'>
+                  <p className='font-medium'>Quick Setup:</p>
+                  <ol className='mt-1 list-decimal pl-3'>
+                    <li>Go to openrouter.ai and sign up (free)</li>
+                    <li>Navigate to Keys section</li>
+                    <li>Click "Create Key" and copy it here</li>
+                    <li>Click Test to verify connection</li>
+                  </ol>
+                  <p className='mt-2 text-[var(--text-muted)]'>Your key starts with "sk-or-v1-"</p>
+                </Tooltip.Content>
+              </Tooltip.Root>
+            </Tooltip.Provider>
+          </div>
           <div className='mt-1 flex gap-2'>
             <div className='relative flex-1'>
               <Input
@@ -292,14 +341,10 @@ export function AIProviders() {
               <Button
                 variant='ghost'
                 size='sm'
-                className='absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2 p-0'
+                className='-translate-y-1/2 absolute top-1/2 right-1 h-6 w-6 p-0'
                 onClick={() => setShowOpenRouterKey(!showOpenRouterKey)}
               >
-                {showOpenRouterKey ? (
-                  <EyeOff className='h-3 w-3' />
-                ) : (
-                  <Eye className='h-3 w-3' />
-                )}
+                {showOpenRouterKey ? <EyeOff className='h-3 w-3' /> : <Eye className='h-3 w-3' />}
               </Button>
             </div>
             <Button
@@ -324,17 +369,26 @@ export function AIProviders() {
               {testResults.openrouter.message}
             </p>
           )}
-          <p className='mt-1 text-[11px] text-[var(--text-muted)]'>
-            Get your API key from{' '}
+          <div className='mt-2 flex items-center gap-2 text-[11px]'>
             <a
               href='https://openrouter.ai/keys'
               target='_blank'
               rel='noopener noreferrer'
-              className='text-[var(--text-primary)] underline'
+              className='flex items-center gap-1 text-[var(--brand-primary)] hover:underline'
             >
-              openrouter.ai/keys
+              <ExternalLink className='h-3 w-3' />
+              Get your API key
             </a>
-          </p>
+            <span className='text-[var(--text-muted)]'>•</span>
+            <a
+              href='https://openrouter.ai/models'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='flex items-center gap-1 text-[var(--text-muted)] hover:underline'
+            >
+              Browse models & pricing
+            </a>
+          </div>
         </div>
       </div>
 
@@ -344,6 +398,26 @@ export function AIProviders() {
           <div className='flex items-center gap-2'>
             <Server className='h-4 w-4 text-[var(--text-secondary)]' />
             <h4 className='font-medium text-[13px]'>llama.cpp Server</h4>
+            <span className='rounded-full bg-[var(--bg-tertiary)] px-2 py-0.5 text-[9px] text-[var(--text-muted)]'>
+              Local
+            </span>
+            <Tooltip.Provider delayDuration={150}>
+              <Tooltip.Root>
+                <Tooltip.Trigger asChild>
+                  <HelpCircle className='h-3.5 w-3.5 cursor-help text-[var(--text-muted)]' />
+                </Tooltip.Trigger>
+                <Tooltip.Content side='top' className='max-w-xs text-[11px]'>
+                  <p className='font-medium'>What is llama.cpp?</p>
+                  <p className='mt-1'>
+                    Run open-source LLMs locally on your hardware. Great for privacy-sensitive tasks
+                    or when you want to avoid API costs.
+                  </p>
+                  <p className='mt-2 text-[var(--text-muted)]'>
+                    Requires: Local server running llama.cpp with --api flag
+                  </p>
+                </Tooltip.Content>
+              </Tooltip.Root>
+            </Tooltip.Provider>
           </div>
           <Switch
             checked={settings?.llamacpp?.enabled ?? false}
@@ -351,14 +425,32 @@ export function AIProviders() {
           />
         </div>
         <p className='mt-1 text-[11px] text-[var(--text-muted)]'>
-          Connect to a local llama.cpp server with OpenAI-compatible API
+          Connect to a local llama.cpp server for private, offline AI inference
         </p>
 
         <div className='mt-3 space-y-3'>
           <div>
-            <Label htmlFor='llamacpp-url' className='text-[12px]'>
-              Server URL
-            </Label>
+            <div className='flex items-center gap-1'>
+              <Label htmlFor='llamacpp-url' className='text-[12px]'>
+                Server URL
+              </Label>
+              <Tooltip.Provider delayDuration={150}>
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
+                    <Info className='h-3 w-3 cursor-help text-[var(--text-muted)]' />
+                  </Tooltip.Trigger>
+                  <Tooltip.Content side='top' className='max-w-xs text-[11px]'>
+                    <p className='font-medium'>How to set up:</p>
+                    <ol className='mt-1 list-decimal pl-3'>
+                      <li>Download llama.cpp from GitHub</li>
+                      <li>Download a model (e.g., Llama 3, Mistral)</li>
+                      <li>Start: ./server -m model.gguf --port 8080</li>
+                      <li>Enter URL below (default: http://localhost:8080)</li>
+                    </ol>
+                  </Tooltip.Content>
+                </Tooltip.Root>
+              </Tooltip.Provider>
+            </div>
             <div className='mt-1 flex gap-2'>
               <Input
                 id='llamacpp-url'
@@ -408,7 +500,7 @@ export function AIProviders() {
               <Button
                 variant='ghost'
                 size='sm'
-                className='absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2 p-0'
+                className='-translate-y-1/2 absolute top-1/2 right-1 h-6 w-6 p-0'
                 onClick={() => setShowLlamaCppKey(!showLlamaCppKey)}
               >
                 {showLlamaCppKey ? <EyeOff className='h-3 w-3' /> : <Eye className='h-3 w-3' />}
@@ -424,6 +516,26 @@ export function AIProviders() {
           <div className='flex items-center gap-2'>
             <Server className='h-4 w-4 text-[var(--text-secondary)]' />
             <h4 className='font-medium text-[13px]'>vLLM Server</h4>
+            <span className='rounded-full bg-[var(--bg-tertiary)] px-2 py-0.5 text-[9px] text-[var(--text-muted)]'>
+              Local
+            </span>
+            <Tooltip.Provider delayDuration={150}>
+              <Tooltip.Root>
+                <Tooltip.Trigger asChild>
+                  <HelpCircle className='h-3.5 w-3.5 cursor-help text-[var(--text-muted)]' />
+                </Tooltip.Trigger>
+                <Tooltip.Content side='top' className='max-w-xs text-[11px]'>
+                  <p className='font-medium'>What is vLLM?</p>
+                  <p className='mt-1'>
+                    High-performance LLM inference server optimized for GPU. Best for serving models
+                    at scale with features like continuous batching.
+                  </p>
+                  <p className='mt-2 text-[var(--text-muted)]'>
+                    Requires: NVIDIA GPU and Python environment with vLLM installed
+                  </p>
+                </Tooltip.Content>
+              </Tooltip.Root>
+            </Tooltip.Provider>
           </div>
           <Switch
             checked={settings?.vllm?.enabled ?? false}
@@ -431,14 +543,32 @@ export function AIProviders() {
           />
         </div>
         <p className='mt-1 text-[11px] text-[var(--text-muted)]'>
-          Connect to a vLLM server for high-throughput inference
+          Connect to a vLLM server for high-throughput GPU-accelerated inference
         </p>
 
         <div className='mt-3 space-y-3'>
           <div>
-            <Label htmlFor='vllm-url' className='text-[12px]'>
-              Server URL
-            </Label>
+            <div className='flex items-center gap-1'>
+              <Label htmlFor='vllm-url' className='text-[12px]'>
+                Server URL
+              </Label>
+              <Tooltip.Provider delayDuration={150}>
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
+                    <Info className='h-3 w-3 cursor-help text-[var(--text-muted)]' />
+                  </Tooltip.Trigger>
+                  <Tooltip.Content side='top' className='max-w-xs text-[11px]'>
+                    <p className='font-medium'>How to set up:</p>
+                    <ol className='mt-1 list-decimal pl-3'>
+                      <li>Install: pip install vllm</li>
+                      <li>Start: python -m vllm.entrypoints.api_server --model MODEL_NAME</li>
+                      <li>Default port is 8000</li>
+                      <li>Enter URL below (default: http://localhost:8000)</li>
+                    </ol>
+                  </Tooltip.Content>
+                </Tooltip.Root>
+              </Tooltip.Provider>
+            </div>
             <div className='mt-1 flex gap-2'>
               <Input
                 id='vllm-url'
@@ -488,7 +618,7 @@ export function AIProviders() {
               <Button
                 variant='ghost'
                 size='sm'
-                className='absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2 p-0'
+                className='-translate-y-1/2 absolute top-1/2 right-1 h-6 w-6 p-0'
                 onClick={() => setShowVllmKey(!showVllmKey)}
               >
                 {showVllmKey ? <EyeOff className='h-3 w-3' /> : <Eye className='h-3 w-3' />}
@@ -554,10 +684,26 @@ function DefaultModelSection({
       <div className='flex items-center gap-2'>
         <Sparkles className='h-4 w-4 text-[var(--text-secondary)]' />
         <h4 className='font-medium text-[13px]'>Default Model</h4>
+        <Tooltip.Provider delayDuration={150}>
+          <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+              <HelpCircle className='h-3.5 w-3.5 cursor-help text-[var(--text-muted)]' />
+            </Tooltip.Trigger>
+            <Tooltip.Content side='top' className='max-w-xs text-[11px]'>
+              <p className='font-medium'>What is the default model?</p>
+              <p className='mt-1'>
+                When you add new Agent, Router, or Evaluator blocks to your workflows, this model
+                will be pre-selected. You can always change it per-block.
+              </p>
+              <p className='mt-2 text-[var(--text-muted)]'>
+                Tip: Pick a balanced model like Claude 3.5 Sonnet or GPT-4o for general use.
+              </p>
+            </Tooltip.Content>
+          </Tooltip.Root>
+        </Tooltip.Provider>
       </div>
       <p className='mt-1 text-[11px] text-[var(--text-muted)]'>
-        Select a default model for new agent blocks. This will be pre-selected when adding agents to
-        workflows.
+        Pre-selected model for new Agent, Router, and Evaluator blocks in your workflows.
       </p>
 
       <div className='mt-3'>

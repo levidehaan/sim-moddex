@@ -1,7 +1,6 @@
 import { createLogger } from '@sim/logger'
 import { getBYOKKey } from '@/lib/api-key/byok'
 import { type Chunk, JsonYamlChunker, StructuredDataChunker, TextChunker } from '@/lib/chunkers'
-import { env } from '@/lib/core/config/env'
 import { parseBuffer, parseFile } from '@/lib/file-parsers'
 import { retryWithExponentialBackoff } from '@/lib/knowledge/documents/utils'
 import { StorageService } from '@/lib/uploads'
@@ -327,14 +326,7 @@ async function parseWithAzureMistralOCR(
 
   const fallbackMistralKey = await getMistralApiKey(workspaceId)
   if (fallbackMistralKey) {
-    return parseWithMistralOCR(
-      fileUrl,
-      filename,
-      mimeType,
-      userId,
-      workspaceId,
-      fallbackMistralKey
-    )
+    return parseWithMistralOCR(fileUrl, filename, mimeType, userId, workspaceId, fallbackMistralKey)
   }
   return parseWithFileParser(fileUrl, filename, mimeType)
 }

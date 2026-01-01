@@ -1,6 +1,6 @@
 import type { ToolConfig } from '@/tools/types'
 import type { PushoverReceipt } from './types'
-import { PUSHOVER_API_URL, handlePushoverError } from './types'
+import { handlePushoverError, PUSHOVER_API_URL } from './types'
 
 export interface PushoverGetReceiptParams {
   token: string

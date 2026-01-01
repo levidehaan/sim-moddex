@@ -22,8 +22,7 @@ export const alpacaGetStockSnapshotTool: ToolConfig<
 > = {
   id: 'alpaca_get_stock_snapshot',
   name: 'Get Stock Snapshots from Alpaca',
-  description:
-    'Get current market snapshot for stocks including latest trade, quote, and bar data',
+  description: 'Get current market snapshot for stocks including latest trade, quote, and bar data',
   version: '1.0.0',
 
   params: {

@@ -1,4 +1,10 @@
-import { Kafka, type EachMessagePayload, type KafkaConfig, logLevel, type SASLOptions } from 'kafkajs'
+import {
+  type EachMessagePayload,
+  Kafka,
+  type KafkaConfig,
+  logLevel,
+  type SASLOptions,
+} from 'kafkajs'
 import type { KafkaConnectionConfig, KafkaConsumedMessage, KafkaMessage } from '@/tools/kafka/types'
 
 /**
@@ -98,13 +104,16 @@ export function evaluateCondition(condition: string, value: unknown): boolean {
     const safeValue = typeof value === 'object' ? value : { _value: value }
 
     // Build evaluation function with value in scope
-    const evalFn = new Function('value', `
+    const evalFn = new Function(
+      'value',
+      `
       try {
         return Boolean(${condition});
       } catch (e) {
         return false;
       }
-    `)
+    `
+    )
 
     return evalFn(safeValue)
   } catch {
