@@ -1,4 +1,7 @@
+import { db } from '@sim/db'
+import { settings } from '@sim/db/schema'
 import { createLogger } from '@sim/logger'
+import { eq } from 'drizzle-orm'
 import { env } from '@/lib/core/config/env'
 import { isRetryableError, retryWithExponentialBackoff } from '@/lib/knowledge/documents/utils'
 import { batchByTokenLimit, getTotalTokenCount } from '@/lib/tokenization'
@@ -24,15 +27,58 @@ interface EmbeddingConfig {
   modelName: string
 }
 
+/**
+ * Gets the OpenRouter API key from environment or database settings.
+ */
+async function getOpenRouterApiKey(): Promise<string | undefined> {
+  // First check environment variable
+  if (env.OPENROUTER_API_KEY) {
+    return env.OPENROUTER_API_KEY
+  }
+
+  // Server-side: try to get from database
+  if (typeof window === 'undefined') {
+    try {
+      const { getSession } = await import('@/lib/auth')
+      const session = await getSession()
+      const userId = session?.user?.id
+
+      if (userId) {
+        const result = await db
+          .select({ aiProviderSettings: settings.aiProviderSettings })
+          .from(settings)
+          .where(eq(settings.userId, userId))
+          .limit(1)
+
+        if (result.length > 0) {
+          const aiSettings = result[0].aiProviderSettings as {
+            openrouter?: { apiKey?: string; enabled?: boolean }
+          } | null
+
+          if (aiSettings?.openrouter?.enabled && aiSettings?.openrouter?.apiKey) {
+            logger.debug('Using OpenRouter API key from database settings for embeddings')
+            return aiSettings.openrouter.apiKey
+          }
+        }
+      }
+    } catch (error) {
+      logger.debug('Could not get OpenRouter API key from database', { error })
+    }
+  }
+
+  return undefined
+}
+
 async function getEmbeddingConfig(
   embeddingModel = 'text-embedding-3-small',
   workspaceId?: string | null
 ): Promise<EmbeddingConfig> {
-  // Using OpenRouter for embeddings - proprietary API keys removed
-  const openrouterApiKey = env.OPENROUTER_API_KEY
+  const openrouterApiKey = await getOpenRouterApiKey()
 
   if (!openrouterApiKey) {
-    throw new Error('OPENROUTER_API_KEY must be configured for embeddings')
+    throw new Error(
+      'OPENROUTER_API_KEY must be configured for embeddings. Set it in Settings > AI Providers or as an environment variable.'
+    )
   }
 
   // OpenRouter supports OpenAI embedding models via their API
