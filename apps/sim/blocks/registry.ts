@@ -18,6 +18,7 @@ import { ConditionBlock } from '@/blocks/blocks/condition'
 import { ConfluenceBlock } from '@/blocks/blocks/confluence'
 import { CursorBlock } from '@/blocks/blocks/cursor'
 import { DatadogBlock } from '@/blocks/blocks/datadog'
+import { DateTimeBlock } from '@/blocks/blocks/datetime'
 import { DiscordBlock } from '@/blocks/blocks/discord'
 import { DropboxBlock } from '@/blocks/blocks/dropbox'
 import { DuckDuckGoBlock } from '@/blocks/blocks/duckduckgo'
@@ -168,6 +169,7 @@ export const registry: Record<string, BlockConfig> = {
   confluence: ConfluenceBlock,
   cursor: CursorBlock,
   datadog: DatadogBlock,
+  datetime: DateTimeBlock,
   discord: DiscordBlock,
   dropbox: DropboxBlock,
   duckduckgo: DuckDuckGoBlock,

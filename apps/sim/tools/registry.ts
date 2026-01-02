@@ -114,6 +114,7 @@ import {
   datadogSendLogsTool,
   datadogSubmitMetricsTool,
 } from '@/tools/datadog'
+import { dateTimeTool } from '@/tools/datetime'
 import {
   discordAddReactionTool,
   discordArchiveThreadTool,
@@ -1370,6 +1371,7 @@ export const tools: Record<string, ToolConfig> = {
   huggingface_chat: huggingfaceChatTool,
   llm_chat: llmChatTool,
   function_execute: functionExecuteTool,
+  datetime_now: dateTimeTool,
   vision_tool: visionTool,
   file_parser: fileParseTool,
   firecrawl_scrape: firecrawlScrapeTool,
