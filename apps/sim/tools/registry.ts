@@ -15,13 +15,24 @@ import {
   airtableUpdateRecordTool,
 } from '@/tools/airtable'
 import {
+  alpacaCancelAllOrdersTool,
+  alpacaCancelOrderTool,
+  alpacaCloseAllPositionsTool,
+  alpacaClosePositionTool,
+  alpacaExerciseOptionTool,
   alpacaGetAccountTool,
   alpacaGetOptionBarsTool,
   alpacaGetOptionChainTool,
+  alpacaGetOrderTool,
   alpacaGetPositionsTool,
+  alpacaGetPositionTool,
   alpacaGetStockBarsTool,
   alpacaGetStockQuotesTool,
   alpacaGetStockSnapshotTool,
+  alpacaListOrdersTool,
+  alpacaReplaceOrderTool,
+  alpacaSubmitOptionOrderTool,
+  alpacaSubmitOrderTool,
 } from '@/tools/alpaca'
 import { apifyRunActorAsyncTool, apifyRunActorSyncTool } from '@/tools/apify'
 import {
@@ -114,6 +125,7 @@ import {
   datadogSendLogsTool,
   datadogSubmitMetricsTool,
 } from '@/tools/datadog'
+import { dateTimeTool } from '@/tools/datetime'
 import {
   discordAddReactionTool,
   discordArchiveThreadTool,
@@ -1243,6 +1255,16 @@ import {
   webflowListItemsTool,
   webflowUpdateItemTool,
 } from '@/tools/webflow'
+import {
+  webullCancelOrderTool,
+  webullGetAccountTool,
+  webullGetOptionChainTool,
+  webullGetPositionsTool,
+  webullGetQuoteTool,
+  webullListOrdersTool,
+  webullSubmitOptionOrderTool,
+  webullSubmitOrderTool,
+} from '@/tools/webull'
 import { whatsappSendMessageTool } from '@/tools/whatsapp'
 import {
   wikipediaPageContentTool,
@@ -1370,6 +1392,7 @@ export const tools: Record<string, ToolConfig> = {
   huggingface_chat: huggingfaceChatTool,
   llm_chat: llmChatTool,
   function_execute: functionExecuteTool,
+  datetime_now: dateTimeTool,
   vision_tool: visionTool,
   file_parser: fileParseTool,
   firecrawl_scrape: firecrawlScrapeTool,
@@ -1850,6 +1873,17 @@ export const tools: Record<string, ToolConfig> = {
   alpaca_get_option_chain: alpacaGetOptionChainTool,
   alpaca_get_account: alpacaGetAccountTool,
   alpaca_get_positions: alpacaGetPositionsTool,
+  alpaca_get_position: alpacaGetPositionTool,
+  alpaca_submit_order: alpacaSubmitOrderTool,
+  alpaca_submit_option_order: alpacaSubmitOptionOrderTool,
+  alpaca_cancel_order: alpacaCancelOrderTool,
+  alpaca_cancel_all_orders: alpacaCancelAllOrdersTool,
+  alpaca_list_orders: alpacaListOrdersTool,
+  alpaca_get_order: alpacaGetOrderTool,
+  alpaca_replace_order: alpacaReplaceOrderTool,
+  alpaca_close_position: alpacaClosePositionTool,
+  alpaca_close_all_positions: alpacaCloseAllPositionsTool,
+  alpaca_exercise_option: alpacaExerciseOptionTool,
   pushover_send_notification: pushoverSendNotificationTool,
   pushover_get_sounds: pushoverGetSoundsTool,
   pushover_get_receipt: pushoverGetReceiptTool,
@@ -2159,6 +2193,14 @@ export const tools: Record<string, ToolConfig> = {
   wikipedia_search: wikipediaSearchTool,
   wikipedia_content: wikipediaPageContentTool,
   wikipedia_random: wikipediaRandomPageTool,
+  webull_get_account: webullGetAccountTool,
+  webull_get_positions: webullGetPositionsTool,
+  webull_get_quote: webullGetQuoteTool,
+  webull_get_option_chain: webullGetOptionChainTool,
+  webull_submit_order: webullSubmitOrderTool,
+  webull_list_orders: webullListOrdersTool,
+  webull_cancel_order: webullCancelOrderTool,
+  webull_submit_option_order: webullSubmitOptionOrderTool,
   wordpress_create_post: wordpressCreatePostTool,
   wordpress_update_post: wordpressUpdatePostTool,
   wordpress_delete_post: wordpressDeletePostTool,

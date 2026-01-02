@@ -18,6 +18,7 @@ import { ConditionBlock } from '@/blocks/blocks/condition'
 import { ConfluenceBlock } from '@/blocks/blocks/confluence'
 import { CursorBlock } from '@/blocks/blocks/cursor'
 import { DatadogBlock } from '@/blocks/blocks/datadog'
+import { DateTimeBlock } from '@/blocks/blocks/datetime'
 import { DiscordBlock } from '@/blocks/blocks/discord'
 import { DropboxBlock } from '@/blocks/blocks/dropbox'
 import { DuckDuckGoBlock } from '@/blocks/blocks/duckduckgo'
@@ -130,6 +131,7 @@ import { WaitBlock } from '@/blocks/blocks/wait'
 import { WealthboxBlock } from '@/blocks/blocks/wealthbox'
 import { WebflowBlock } from '@/blocks/blocks/webflow'
 import { WebhookBlock } from '@/blocks/blocks/webhook'
+import { WebullBlock } from '@/blocks/blocks/webull'
 import { WhatsAppBlock } from '@/blocks/blocks/whatsapp'
 import { WikipediaBlock } from '@/blocks/blocks/wikipedia'
 import { WordPressBlock } from '@/blocks/blocks/wordpress'
@@ -168,6 +170,7 @@ export const registry: Record<string, BlockConfig> = {
   confluence: ConfluenceBlock,
   cursor: CursorBlock,
   datadog: DatadogBlock,
+  datetime: DateTimeBlock,
   discord: DiscordBlock,
   dropbox: DropboxBlock,
   duckduckgo: DuckDuckGoBlock,
@@ -281,6 +284,7 @@ export const registry: Record<string, BlockConfig> = {
   wait: WaitBlock,
   wealthbox: WealthboxBlock,
   webflow: WebflowBlock,
+  webull: WebullBlock,
   webhook: WebhookBlock,
   whatsapp: WhatsAppBlock,
   wikipedia: WikipediaBlock,
