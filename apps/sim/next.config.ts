@@ -3,6 +3,13 @@ import { env, getEnv, isTruthy } from './lib/core/config/env'
 import { isDev, isHosted } from './lib/core/config/feature-flags'
 import { getMainCSPPolicy, getWorkflowExecutionCSPPolicy } from './lib/core/security/csp'
 
+/**
+ * Check if local network access is enabled (for home network usage)
+ */
+function isLocalNetworkAccessEnabled(): boolean {
+  return isDev || getEnv('ALLOW_LOCAL_NETWORK') === 'true'
+}
+
 const nextConfig: NextConfig = {
   devIndicators: false,
   images: {
@@ -104,6 +111,16 @@ const nextConfig: NextConfig = {
         : []),
       'localhost:3000',
       'localhost:3001',
+      // Allow local network access (common private IP ranges)
+      '192.168.*.*:3000',
+      '192.168.*.*:3001',
+      '192.168.*.*:3002',
+      '10.*.*.*:3000',
+      '10.*.*.*:3001',
+      '10.*.*.*:3002',
+      '172.16.*.*:3000',
+      '172.16.*.*:3001',
+      '172.16.*.*:3002',
     ],
   }),
   transpilePackages: [
@@ -123,7 +140,7 @@ const nextConfig: NextConfig = {
           { key: 'Access-Control-Allow-Credentials', value: 'true' },
           {
             key: 'Access-Control-Allow-Origin',
-            value: env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001',
+            value: isLocalNetworkAccessEnabled() ? '*' : (env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'),
           },
           {
             key: 'Access-Control-Allow-Methods',

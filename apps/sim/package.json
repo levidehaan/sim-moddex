@@ -8,8 +8,8 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "dev": "next dev --port 3000",
-    "dev:webpack": "next dev --webpack",
+    "dev": "next dev --port 3000 --hostname 0.0.0.0",
+    "dev:webpack": "next dev --webpack --hostname 0.0.0.0",
     "dev:sockets": "bun run socket/index.ts",
     "dev:full": "concurrently -n \"App,Realtime\" -c \"cyan,magenta\" \"bun run dev\" \"bun run dev:sockets\"",
     "build": "next build",

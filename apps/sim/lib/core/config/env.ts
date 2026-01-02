@@ -159,6 +159,7 @@ export const env = createEnv({
     SOCKET_PORT:                           z.number().optional(),                  // Port for WebSocket server
     PORT:                                  z.number().optional(),                  // Main application port
     ALLOWED_ORIGINS:                       z.string().optional(),                  // CORS allowed origins
+    ALLOW_LOCAL_NETWORK:                   z.string().optional(),                  // Allow access from local network devices (tablets, phones, etc.)
 
     // OAuth Integration Credentials - All optional, enables third-party integrations
     GOOGLE_CLIENT_ID:                      z.string().optional(),                  // Google OAuth client ID for Google services

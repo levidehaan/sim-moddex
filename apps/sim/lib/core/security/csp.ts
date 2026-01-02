@@ -2,6 +2,13 @@ import { env, getEnv } from '../config/env'
 import { isDev } from '../config/feature-flags'
 
 /**
+ * Check if local network access is enabled
+ */
+function isLocalNetworkAccessEnabled(): boolean {
+  return isDev || getEnv('ALLOW_LOCAL_NETWORK') === 'true'
+}
+
+/**
  * Content Security Policy (CSP) configuration builder
  */
 
@@ -77,6 +84,8 @@ export const buildTimeCSPDirectives: CSPDirectives = {
   'connect-src': [
     "'self'",
     env.NEXT_PUBLIC_APP_URL || '',
+    // Allow all HTTP/WS connections when local network access is enabled
+    ...(isLocalNetworkAccessEnabled() ? ['http:', 'https:', 'ws:', 'wss:'] : []),
     // Only include localhost fallbacks in development mode
     ...(env.LLAMACPP_BASE_URL ? [env.LLAMACPP_BASE_URL] : isDev ? ['http://localhost:8080'] : []),
     ...(env.NEXT_PUBLIC_SOCKET_URL
@@ -132,6 +141,7 @@ export function buildCSPString(directives: CSPDirectives): string {
  */
 export function generateRuntimeCSP(): string {
   const appUrl = getEnv('NEXT_PUBLIC_APP_URL') || ''
+  const localNetworkAccess = isLocalNetworkAccessEnabled()
 
   // Only include localhost URLs in development or when explicitly configured
   const socketUrl = getEnv('NEXT_PUBLIC_SOCKET_URL') || (isDev ? 'http://localhost:3002' : '')
@@ -158,6 +168,9 @@ export function generateRuntimeCSP(): string {
   const brandLogoDomain = brandLogoDomains[0] || ''
   const brandFaviconDomain = brandFaviconDomains[0] || ''
 
+  // When local network access is enabled, allow all HTTP/WS connections
+  const localNetworkSources = localNetworkAccess ? 'http: https: ws: wss:' : ''
+
   return `
     default-src 'self';
     script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.google.com https://apis.google.com;
@@ -165,7 +178,7 @@ export function generateRuntimeCSP(): string {
     img-src 'self' data: blob: https://*.googleusercontent.com https://*.google.com https://*.atlassian.com https://cdn.discordapp.com https://*.githubusercontent.com https://*.s3.amazonaws.com https://s3.amazonaws.com https://*.amazonaws.com https://*.blob.core.windows.net https://github.com/* ${brandLogoDomain} ${brandFaviconDomain};
     media-src 'self' blob:;
     font-src 'self' https://fonts.gstatic.com;
-    connect-src 'self' ${appUrl} ${llamacppUrl} ${socketUrl} ${socketWsUrl} https://api.browser-use.com https://api.exa.ai https://api.firecrawl.dev https://*.googleapis.com https://*.amazonaws.com https://*.s3.amazonaws.com https://*.blob.core.windows.net https://api.github.com https://github.com/* https://*.atlassian.com https://*.supabase.co ${dynamicDomainsStr};
+    connect-src 'self' ${localNetworkSources} ${appUrl} ${llamacppUrl} ${socketUrl} ${socketWsUrl} https://api.browser-use.com https://api.exa.ai https://api.firecrawl.dev https://*.googleapis.com https://*.amazonaws.com https://*.s3.amazonaws.com https://*.blob.core.windows.net https://api.github.com https://github.com/* https://*.atlassian.com https://*.supabase.co ${dynamicDomainsStr};
     frame-src https://drive.google.com https://docs.google.com https://*.google.com;
     frame-ancestors 'self';
     form-action 'self';

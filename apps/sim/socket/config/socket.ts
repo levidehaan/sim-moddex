@@ -2,15 +2,29 @@ import type { Server as HttpServer } from 'http'
 import { createLogger } from '@sim/logger'
 import { Server } from 'socket.io'
 import { env } from '@/lib/core/config/env'
-import { isProd } from '@/lib/core/config/feature-flags'
+import { isDev, isProd } from '@/lib/core/config/feature-flags'
 import { getBaseUrl } from '@/lib/core/utils/urls'
 
 const logger = createLogger('SocketIOConfig')
 
 /**
+ * Check if local network access is enabled (for home network usage)
+ */
+function isLocalNetworkAccessEnabled(): boolean {
+  return isDev || env.ALLOW_LOCAL_NETWORK === 'true'
+}
+
+/**
  * Get allowed origins for Socket.IO CORS configuration
  */
-function getAllowedOrigins(): string[] {
+function getAllowedOrigins(): string[] | ((origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => void) {
+  if (isLocalNetworkAccessEnabled()) {
+    logger.info('Socket.IO CORS: Local network access enabled - allowing all origins')
+    return (origin, callback) => {
+      callback(null, true)
+    }
+  }
+
   const allowedOrigins = [
     getBaseUrl(),
     'http://localhost:3000',
