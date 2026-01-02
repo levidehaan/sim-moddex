@@ -1255,6 +1255,16 @@ import {
   webflowListItemsTool,
   webflowUpdateItemTool,
 } from '@/tools/webflow'
+import {
+  webullCancelOrderTool,
+  webullGetAccountTool,
+  webullGetOptionChainTool,
+  webullGetPositionsTool,
+  webullGetQuoteTool,
+  webullListOrdersTool,
+  webullSubmitOptionOrderTool,
+  webullSubmitOrderTool,
+} from '@/tools/webull'
 import { whatsappSendMessageTool } from '@/tools/whatsapp'
 import {
   wikipediaPageContentTool,
@@ -2183,6 +2193,14 @@ export const tools: Record<string, ToolConfig> = {
   wikipedia_search: wikipediaSearchTool,
   wikipedia_content: wikipediaPageContentTool,
   wikipedia_random: wikipediaRandomPageTool,
+  webull_get_account: webullGetAccountTool,
+  webull_get_positions: webullGetPositionsTool,
+  webull_get_quote: webullGetQuoteTool,
+  webull_get_option_chain: webullGetOptionChainTool,
+  webull_submit_order: webullSubmitOrderTool,
+  webull_list_orders: webullListOrdersTool,
+  webull_cancel_order: webullCancelOrderTool,
+  webull_submit_option_order: webullSubmitOptionOrderTool,
   wordpress_create_post: wordpressCreatePostTool,
   wordpress_update_post: wordpressUpdatePostTool,
   wordpress_delete_post: wordpressDeletePostTool,
