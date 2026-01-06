@@ -128,6 +128,13 @@ This fork includes extensive enhancements beyond the original SIM Studio:
 
 **Note**: If you prefer not to use OpenRouter, you'll need to modify the codebase to use alternative AI providers (OpenAI, Anthropic, etc.).
 
+### Local Model Support (Experimental)
+SIM Moddex includes support for local AI models via:
+- **llama.cpp server** - Run local GGUF models
+- **vLLM** - High-performance inference server
+
+⚠️ **These features have not been fully tested yet.** Use at your own risk and expect potential issues.
+
 ## Quickstart
 
 ### Self-hosted: NPM Package
