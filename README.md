@@ -227,8 +227,8 @@ When running with Docker, use `host.docker.internal` if vLLM is on your host mac
 1. Clone and install dependencies:
 
 ```bash
-git clone https://github.com/simstudioai/sim.git
-cd sim
+git clone https://github.com/levidehaan/sim-moddex.git
+cd sim-moddex
 bun install
 ```
 
