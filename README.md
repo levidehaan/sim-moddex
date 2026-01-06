@@ -56,18 +56,6 @@ This fork extends the original with additional features including enhanced MCP s
 - Persistent memory with knowledge graphs
 - RAG (Retrieval Augmented Generation) support
 
-### 🔒 Enterprise Ready
-- Self-hosted deployment options
-- SOC2 and HIPAA compliance ready
-- Role-based access control
-- Audit logging and monitoring
-
-### 📱 Multi-Platform
-- Web application
-- Android support via Termux
-- Docker deployment
-- Kubernetes/Helm charts
-
 ## Quickstart
 
 ### Self-hosted: NPM Package
