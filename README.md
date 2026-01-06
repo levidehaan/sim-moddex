@@ -10,18 +10,18 @@
   Build, deploy, and scale agentic workflows with visual drag-and-drop canvas, MCP server support, and enterprise-ready features.
 </p>
 
+For questions about this mod, contact @levidehaan on twitter.
+---
+
+## 🙏 Attribution
+
+**SIM Moddex** is a heavily modified fork of the original [SIM Studio](https://github.com/simstudioai/sim) project.
 <p align="center">
   <a href="https://sim.ai" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/sim.ai-6F3DFA" alt="Sim.ai"></a>
   <a href="https://discord.gg/Hr4UWYEcTT" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/Discord-Join%20Server-5865F2?logo=discord&logoColor=white" alt="Discord"></a>
   <a href="https://x.com/simdotai" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/twitter/follow/simstudioai?style=social" alt="Twitter"></a>
   <a href="https://docs.sim.ai" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/Docs-6F3DFA.svg" alt="Documentation"></a>
 </p>
-
----
-
-## 🙏 Attribution
-
-**SIM Moddex** is a heavily modified fork of the original [SIM Studio](https://github.com/simstudioai/sim) project.
 
 We are deeply grateful to the SIM Studio team for creating the foundational open-source AI agent workflow builder that made this project possible. All original work and credit belongs to the [SIM Studio team](https://github.com/simstudioai).
 
