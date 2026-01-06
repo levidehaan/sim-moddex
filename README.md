@@ -1,10 +1,14 @@
 <p align="center">
-  <a href="https://sim.ai" target="_blank" rel="noopener noreferrer">
-    <img src="apps/sim/public/logo/reverse/text/large.png" alt="Sim Logo" width="500"/>
-  </a>
+  <h1 align="center">🚀 SIM Moddex</h1>
 </p>
 
-<p align="center">Build and deploy AI agent workflows in minutes.</p>
+<p align="center">
+  <strong>Open-source AI agent workflow builder with 150+ integrations</strong>
+</p>
+
+<p align="center">
+  Build, deploy, and scale agentic workflows with visual drag-and-drop canvas, MCP server support, and enterprise-ready features.
+</p>
 
 <p align="center">
   <a href="https://sim.ai" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/sim.ai-6F3DFA" alt="Sim.ai"></a>
@@ -13,26 +17,46 @@
   <a href="https://docs.sim.ai" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/Docs-6F3DFA.svg" alt="Documentation"></a>
 </p>
 
-### Build Workflows with Ease
-Design agent workflows visually on a canvas—connect agents, tools, and blocks, then run them instantly.
+---
 
-<p align="center">
-  <img src="apps/sim/public/static/workflow.gif" alt="Workflow Builder Demo" width="800"/>
-</p>
+## ✨ Features
 
-### Supercharge with Copilot
-Leverage Copilot to generate nodes, fix errors, and iterate on flows directly from natural language.
+### 🎨 Visual Workflow Builder
+- Drag-and-drop canvas for building AI agent workflows
+- 150+ pre-built blocks and integrations
+- Real-time collaboration with team members
+- Version control and workflow templates
 
-<p align="center">
-  <img src="apps/sim/public/static/copilot.gif" alt="Copilot Demo" width="800"/>
-</p>
+### 🤖 AI-Powered Development
+- **Copilot**: Generate workflows from natural language
+- **Auto-fix**: Intelligent error detection and resolution
+- **Smart suggestions**: Context-aware block recommendations
+- **Code execution**: Sandboxed Python and JavaScript runtime
 
-### Integrate Vector Databases
-Upload documents to a vector store and let agents answer questions grounded in your specific content.
+### 🔌 Extensive Integrations
+- **APIs**: GitHub, Linear, Jira, Slack, Discord, Notion, Airtable
+- **Databases**: PostgreSQL, MySQL, MongoDB, Redis, Supabase
+- **AI Models**: OpenAI, Anthropic, Google, Mistral, local models (llama.cpp, vLLM)
+- **MCP Servers**: Model Context Protocol support with 14+ verified servers
+- **Triggers**: Webhooks, schedules, API calls, chat interfaces
 
-<p align="center">
-  <img src="apps/sim/public/static/knowledge.gif" alt="Knowledge Uploads and Retrieval Demo" width="800"/>
-</p>
+### 🧠 Knowledge & Memory
+- Vector database integration (Pinecone, Qdrant, Supabase)
+- Document upload and semantic search
+- Persistent memory with knowledge graphs
+- RAG (Retrieval Augmented Generation) support
+
+### 🔒 Enterprise Ready
+- Self-hosted deployment options
+- SOC2 and HIPAA compliance ready
+- Role-based access control
+- Audit logging and monitoring
+
+### 📱 Multi-Platform
+- Web application
+- Android support via Termux
+- Docker deployment
+- Kubernetes/Helm charts
 
 ## Quickstart
 
@@ -209,7 +233,7 @@ bun run dev:sockets
 
 ### Self-hosted: Android (Termux)
 
-Run Sim Studio directly on your Android device using [Termux](https://f-droid.org/packages/com.termux/). This enables mobile workflows with access to Android sensors, notifications, GPS, and more.
+Run SIM Moddex directly on your Android device using [Termux](https://f-droid.org/packages/com.termux/). This enables mobile workflows with access to Android sensors, notifications, GPS, and more.
 
 **Requirements:**
 - Android device (ARM64 recommended)
@@ -243,10 +267,10 @@ sim logs         # View server logs
 sim open         # Open in browser
 ```
 
-**Optional:** Install [Termux:Boot](https://f-droid.org/packages/com.termux.boot/) to auto-start Sim Studio when your device boots.
+**Optional:** Install [Termux:Boot](https://f-droid.org/packages/com.termux.boot/) to auto-start SIM Moddex when your device boots.
 
 **Android Integration:**
-When running on Android, Sim Studio can access device features through workflow blocks:
+When running on Android, SIM Moddex can access device features through workflow blocks:
 - 📍 GPS location and geofencing
 - 📱 Device sensors (accelerometer, gyroscope, light, proximity)
 - 🔔 Android notifications
@@ -329,4 +353,4 @@ We welcome contributions! Please see our [Contributing Guide](.github/CONTRIBUTI
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
-<p align="center">Made with ❤️ by the Sim Team</p>
+<p align="center">Made with ❤️ by the SIM Moddex Team</p>
