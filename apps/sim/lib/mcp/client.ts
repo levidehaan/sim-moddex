@@ -10,6 +10,7 @@
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import type { ListToolsResult, Tool } from '@modelcontextprotocol/sdk/types.js'
 import { createLogger } from '@sim/logger'
 import {
@@ -30,7 +31,7 @@ const logger = createLogger('McpClient')
 
 export class McpClient {
   private client: Client
-  private transport: StreamableHTTPClientTransport
+  private transport: StreamableHTTPClientTransport | StdioClientTransport
   private config: McpServerConfig
   private connectionStatus: McpConnectionStatus
   private securityPolicy: McpSecurityPolicy
@@ -60,15 +61,42 @@ export class McpClient {
       maxToolExecutionsPerHour: 1000,
     }
 
-    if (!this.config.url) {
-      throw new McpError('URL required for Streamable HTTP transport')
-    }
+    // Create appropriate transport based on config
+    if (config.transport === 'stdio') {
+      // For stdio transport with npm packages, use npx
+      let command: string
+      let args: string[] = []
 
-    this.transport = new StreamableHTTPClientTransport(new URL(this.config.url), {
-      requestInit: {
-        headers: this.config.headers,
-      },
-    })
+      if (config.source === 'npm' && config.package) {
+        command = 'npx'
+        args = ['-y', config.package, ...(config.args || [])]
+      } else if (config.source === 'python') {
+        command = config.command || 'python'
+        args = config.args || []
+      } else if (config.source === 'node') {
+        command = 'node'
+        args = config.command ? [config.command, ...(config.args || [])] : (config.args || [])
+      } else {
+        throw new McpError(`Unsupported stdio source: ${config.source}`)
+      }
+
+      this.transport = new StdioClientTransport({
+        command,
+        args,
+        env: config.env,
+      })
+    } else {
+      // Streamable HTTP transport
+      if (!this.config.url) {
+        throw new McpError('URL required for Streamable HTTP transport')
+      }
+
+      this.transport = new StreamableHTTPClientTransport(new URL(this.config.url), {
+        requestInit: {
+          headers: this.config.headers,
+        },
+      })
+    }
 
     this.client = new Client(
       {
@@ -265,7 +293,11 @@ export class McpClient {
   }
 
   getSessionId(): string | undefined {
-    return this.transport.sessionId
+    // Only HTTP transport has sessionId
+    if (this.transport instanceof StreamableHTTPClientTransport) {
+      return this.transport.sessionId
+    }
+    return undefined
   }
 
   /**

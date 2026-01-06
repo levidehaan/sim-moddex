@@ -3,8 +3,21 @@
  */
 
 // MCP Transport Types
-// Modern MCP uses Streamable HTTP which handles both HTTP POST and SSE responses
-export type McpTransport = 'streamable-http'
+// Modern MCP supports multiple transport mechanisms
+export type McpTransport = 
+  | 'streamable-http'  // Remote HTTP/SSE server
+  | 'stdio'            // Local stdio process
+  | 'sse'              // Server-Sent Events only
+  | 'websocket'        // WebSocket connection
+
+// MCP Server Source Types
+export type McpServerSource =
+  | 'remote'           // Remote HTTP server
+  | 'npm'              // NPM package (npx)
+  | 'python'           // Python package/script
+  | 'node'             // Node.js script
+  | 'docker'           // Docker container
+  | 'repository'       // Well-known MCP repository
 
 export interface McpServerStatusConfig {
   consecutiveFailures: number
@@ -16,10 +29,48 @@ export interface McpServerConfig {
   name: string
   description?: string
   transport: McpTransport
+  source: McpServerSource
 
-  // HTTP/SSE transport config
+  // Remote server config (HTTP/SSE/WebSocket)
   url?: string
   headers?: Record<string, string>
+
+  // Local execution config (stdio)
+  command?: string              // Command to execute
+  args?: string[]              // Command arguments
+  env?: Record<string, string> // Environment variables
+  cwd?: string                 // Working directory
+
+  // NPM/Python package config
+  package?: string             // Package name
+  version?: string             // Package version
+  installCommand?: string      // Custom install command
+
+  // Repository config
+  repositoryUrl?: string       // GitHub/GitLab URL
+  repositoryRef?: string       // Branch/tag/commit
+
+  // Docker config
+  dockerImage?: string         // Docker image name
+  dockerTag?: string           // Docker image tag
+  dockerPorts?: Record<string, number> // Port mappings
+
+  // Security and sandboxing
+  sandboxed?: boolean          // Run in sandbox
+  allowedPaths?: string[]      // Allowed filesystem paths
+  allowedHosts?: string[]      // Allowed network hosts
+  maxMemory?: number           // Max memory in MB
+  maxCpu?: number              // Max CPU percentage
+
+  // Auto-deploy settings
+  autoDeploy?: boolean         // Auto-deploy on workspace load
+  autoRestart?: boolean        // Auto-restart on failure
+  healthCheckUrl?: string      // Health check endpoint
+  healthCheckInterval?: number // Health check interval in ms
+
+  // Dynamic configuration
+  configSchema?: McpConfigSchema // Schema for dynamic config
+  configValues?: Record<string, any> // User-provided config values
 
   // Common config
   timeout?: number
@@ -125,17 +176,59 @@ export class McpConnectionError extends McpError {
   }
 }
 
+// Dynamic configuration schema for MCP servers
+export interface McpConfigSchema {
+  type: 'object'
+  properties: Record<string, McpConfigProperty>
+  required?: string[]
+}
+
+export interface McpConfigProperty {
+  type: 'string' | 'number' | 'boolean' | 'array' | 'object'
+  title?: string
+  description?: string
+  default?: any
+  enum?: any[]
+  items?: McpConfigProperty
+  properties?: Record<string, McpConfigProperty>
+  required?: string[]
+  secret?: boolean // Mark as password/secret field
+}
+
+// MCP Server Repository Entry
+export interface McpRepositoryEntry {
+  id: string
+  name: string
+  description: string
+  author: string
+  source: McpServerSource
+  package?: string
+  repositoryUrl?: string
+  dockerImage?: string
+  category: string
+  tags: string[]
+  configSchema?: McpConfigSchema
+  documentation?: string
+  examples?: string[]
+  verified?: boolean
+  downloads?: number
+  rating?: number
+}
+
 export interface McpServerSummary {
   id: string
   name: string
   url?: string
   transport?: McpTransport
-  status: 'connected' | 'disconnected' | 'error'
+  source?: McpServerSource
+  status: 'connected' | 'disconnected' | 'error' | 'starting' | 'stopping'
   toolCount: number
   resourceCount?: number
   promptCount?: number
   lastSeen?: Date
   error?: string
+  pid?: number // Process ID for local servers
+  uptime?: number // Uptime in seconds
 }
 
 // API Response Types

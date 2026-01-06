@@ -27,6 +27,7 @@ import type {
 import { MCP_CONSTANTS } from '@/lib/mcp/utils'
 import { REFERENCE } from '@/executor/constants'
 import { createEnvVarPattern } from '@/executor/utils/reference-validation'
+import { launchServer, isServerRunning, getActiveServer } from '@/lib/mcp/launcher'
 
 const logger = createLogger('McpService')
 
@@ -142,8 +143,13 @@ class McpService {
       id: server.id,
       name: server.name,
       description: server.description || undefined,
-      transport: 'streamable-http' as const,
+      transport: (server.transport as McpTransport) || 'streamable-http',
+      source: (server.source as any) || 'remote',
       url: server.url || undefined,
+      command: server.command || undefined,
+      args: server.args as string[] | undefined,
+      env: server.env as Record<string, string> | undefined,
+      package: server.package || undefined,
       headers: (server.headers as Record<string, string>) || {},
       timeout: server.timeout || 30000,
       retries: server.retries || 3,
@@ -172,8 +178,13 @@ class McpService {
       id: server.id,
       name: server.name,
       description: server.description || undefined,
-      transport: server.transport as McpTransport,
+      transport: (server.transport as McpTransport) || 'streamable-http',
+      source: (server.source as any) || 'remote',
       url: server.url || undefined,
+      command: server.command || undefined,
+      args: server.args as string[] | undefined,
+      env: server.env as Record<string, string> | undefined,
+      package: server.package || undefined,
       headers: (server.headers as Record<string, string>) || {},
       timeout: server.timeout || 30000,
       retries: server.retries || 3,
@@ -185,6 +196,7 @@ class McpService {
 
   /**
    * Create and connect to an MCP client
+   * For stdio transport, the client will handle process launching
    */
   private async createClient(config: McpServerConfig): Promise<McpClient> {
     const securityPolicy = {
