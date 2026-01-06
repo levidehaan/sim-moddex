@@ -19,6 +19,16 @@
 
 ---
 
+## 🙏 Attribution
+
+**SIM Moddex** is a heavily modified fork of the original [SIM Studio](https://github.com/simstudioai/sim) project.
+
+We are deeply grateful to the SIM Studio team for creating the foundational open-source AI agent workflow builder that made this project possible. All original work and credit belongs to the [SIM Studio team](https://github.com/simstudioai).
+
+This fork extends the original with additional features including enhanced MCP server support, expanded integrations, and custom modifications for specific use cases.
+
+---
+
 ## ✨ Features
 
 ### 🎨 Visual Workflow Builder
