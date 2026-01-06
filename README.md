@@ -158,10 +158,10 @@ Docker must be installed and running on your machine.
 
 ```bash
 # Clone the repository
-git clone https://github.com/simstudioai/sim.git
+git clone https://github.com/levidehaan/sim-moddex.git
 
 # Navigate to the project directory
-cd sim
+cd sim-moddex
 
 # Start Sim
 docker compose -f docker-compose.prod.yml up -d
