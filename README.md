@@ -56,6 +56,78 @@ This fork extends the original with additional features including enhanced MCP s
 - Persistent memory with knowledge graphs
 - RAG (Retrieval Augmented Generation) support
 
+## 🆕 SIM Moddex Additions
+
+This fork includes extensive enhancements beyond the original SIM Studio:
+
+### 🚀 MCP Server Integration
+- **Built-in MCP Server Launcher**: Install and manage MCP servers directly from the UI
+- **14+ Verified MCP Servers**: Filesystem, Git, Memory, Puppeteer, GitHub, PostgreSQL, and more
+- **Stdio Transport Support**: Run local MCP servers with automatic process management
+- **Repository Browser**: Browse and install MCP servers with one click
+
+### 📈 Trading & Finance Integrations
+- **Alpaca Trading**: Real-time stock/options data, order execution, portfolio management
+- **Alpaca Scanner**: Advanced stock scanning with technical indicators
+- **Alpaca Price Triggers**: Monitor stock/option prices and trigger workflows
+- **Webull Trading**: Stock/options data and price monitoring
+- **Webull Price Triggers**: Real-time price alerts and automation
+- **CoinGecko**: Cryptocurrency market data and price tracking
+- **DeFi Llama**: DeFi protocol analytics and TVL data
+- **Finnhub**: Stock market data, news, and financial metrics
+- **FRED**: Federal Reserve Economic Data integration
+
+### 🌤️ Weather & Environmental Data
+- **Open-Meteo**: Comprehensive weather forecasting and historical data
+- **National Weather Service (NWS)**: Official US weather alerts and forecasts
+- **USGS Earthquake**: Real-time earthquake data and monitoring
+
+### 🏛️ Government & Public Data
+- **Congress.gov**: US Congressional bills, votes, and legislative data
+- **OpenFDA**: FDA drug, device, and food recall information
+
+### 🛒 E-Commerce & Retail
+- **Best Buy**: Product search, pricing, and availability
+- **Kroger**: Grocery product data and store information
+
+### 🎨 Media & Content
+- **ComfyUI**: Advanced AI image generation workflows
+- **Image Processing**: Built-in image manipulation and transformation
+- **TMDB**: Movie and TV show database integration
+- **Hacker News**: Tech news aggregation and monitoring
+
+### 🏠 Smart Home & IoT
+- **Home Assistant**: Smart home device control and automation
+- **Ntfy**: Push notification service integration
+
+### ✈️ Transportation & Travel
+- **OpenSky Network**: Real-time flight tracking and aviation data
+
+### 🔒 Security & Research
+- **Shodan**: Internet-connected device search and security research
+
+### 🛠️ Utility Blocks
+- **Math Operations**: Advanced mathematical calculations
+- **JSON Transform**: Complex JSON data manipulation and transformation
+- **Enhanced Kafka**: Improved Kafka integration with better consumer management
+- **Enhanced DateTime**: Advanced date/time operations and formatting
+
+### 📊 Total New Integrations
+- **27+ new blocks** added to the original platform
+- **150+ total integrations** including original SIM Studio blocks
+- **Real-time triggers** for trading, weather, and data monitoring
+- **Enhanced API coverage** across finance, government, weather, and more
+
+## ⚙️ Requirements
+
+### OpenRouter.ai Account
+**SIM Moddex requires an [OpenRouter.ai](https://openrouter.ai) account** for AI model access. You'll need to:
+1. Sign up at [openrouter.ai](https://openrouter.ai)
+2. Generate an API key
+3. Configure it in your environment variables
+
+**Note**: If you prefer not to use OpenRouter, you'll need to modify the codebase to use alternative AI providers (OpenAI, Anthropic, etc.).
+
 ## Quickstart
 
 ### Self-hosted: NPM Package
