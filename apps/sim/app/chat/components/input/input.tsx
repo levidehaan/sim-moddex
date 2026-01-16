@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { AlertCircle, Paperclip, Send, Square, X } from 'lucide-react'
 import { Tooltip } from '@/components/emcn'
+import { generateUUID } from '@/lib/core/utils/uuid'
 import { VoiceInput } from '@/app/chat/components/input/voice-input'
 
 const logger = createLogger('ChatInput')
@@ -147,7 +148,7 @@ export const ChatInput: React.FC<{
       }
 
       newFiles.push({
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         name: file.name,
         size: file.size,
         type: file.type,

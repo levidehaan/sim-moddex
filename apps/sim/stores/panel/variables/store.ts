@@ -1,3 +1,4 @@
+import { generateUUID } from '@/lib/core/utils/uuid'
 import { createLogger } from '@sim/logger'
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'

@@ -2,6 +2,7 @@ import { createLogger } from '@sim/logger'
 import { client } from '@/lib/auth/auth-client'
 import { useOperationQueueStore } from '@/stores/operation-queue/store'
 import type { WorkflowState } from '@/stores/workflows/workflow/types'
+import { generateUUID } from '@/lib/core/utils/uuid'
 
 const logger = createLogger('WorkflowSocketOperations')
 

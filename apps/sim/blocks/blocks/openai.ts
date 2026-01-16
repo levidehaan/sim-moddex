@@ -1,6 +1,7 @@
 import { OpenAIIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
 import { AuthMode } from '@/blocks/types'
+import { useAIProviderSettingsStore } from '@/stores/settings/ai-providers'
 
 export const OpenAIBlock: BlockConfig = {
   type: 'openai',
@@ -23,21 +24,27 @@ export const OpenAIBlock: BlockConfig = {
     {
       id: 'model',
       title: 'Model',
-      type: 'dropdown',
-      options: [
-        { label: 'text-embedding-3-small', id: 'text-embedding-3-small' },
-        { label: 'text-embedding-3-large', id: 'text-embedding-3-large' },
-        { label: 'text-embedding-ada-002', id: 'text-embedding-ada-002' },
+      type: 'combobox',
+      placeholder: 'Type or select an embedding model...',
+      required: true,
+      defaultValue: () => 'openai/text-embedding-3-small',
+      options: () => [
+        { label: 'openai/text-embedding-3-small', id: 'openai/text-embedding-3-small' },
+        { label: 'openai/text-embedding-3-large', id: 'openai/text-embedding-3-large' },
+        { label: 'openai/text-embedding-ada-002', id: 'openai/text-embedding-ada-002' },
+        { label: 'voyage/voyage-3', id: 'voyage/voyage-3' },
+        { label: 'voyage/voyage-3-lite', id: 'voyage/voyage-3-lite' },
+        { label: 'cohere/embed-english-v3.0', id: 'cohere/embed-english-v3.0' },
+        { label: 'cohere/embed-multilingual-v3.0', id: 'cohere/embed-multilingual-v3.0' },
       ],
-      value: () => 'text-embedding-3-small',
     },
     {
       id: 'apiKey',
-      title: 'API Key',
+      title: 'OpenRouter API Key',
       type: 'short-input',
-      placeholder: 'Enter your OpenAI API key',
+      placeholder: 'Enter your OpenRouter API key (optional if configured in settings)',
       password: true,
-      required: true,
+      required: false,
     },
   ],
   tools: {

@@ -100,7 +100,11 @@ function getMissingConfigError(scheduleType: string): string {
  * Find schedule blocks in a workflow's blocks
  */
 export function findScheduleBlocks(blocks: Record<string, BlockState>): BlockState[] {
-  return Object.values(blocks).filter((block) => block.type === 'schedule')
+  return Object.values(blocks).filter((block) => 
+    block.type === 'schedule' || 
+    block.type === 'kafka_trigger' ||
+    block.type === 'pushover_trigger'
+  )
 }
 
 /**
@@ -108,6 +112,55 @@ export function findScheduleBlocks(blocks: Record<string, BlockState>): BlockSta
  * Returns validation result with error details if invalid
  */
 export function validateScheduleBlock(block: BlockState): ScheduleValidationResult {
+  // Special handling for Kafka Trigger
+  if (block.type === 'kafka_trigger') {
+      const checkInterval = getSubBlockValue(block, 'checkInterval')
+      const intervalSecs = Number(checkInterval) || 60
+      
+      // Generate a cron expression for the interval (every N seconds)
+      // Note: Standard cron is minute-resolution. Croner supports seconds (6 fields).
+      // If interval < 60, use "*/N * * * * *"
+      // If interval >= 60, use minute approximation
+      
+      let cronExpression = ''
+      if (intervalSecs < 60) {
+          cronExpression = `*/${intervalSecs} * * * * *`
+      } else {
+          const minutes = Math.floor(intervalSecs / 60)
+          cronExpression = `*/${minutes} * * * *`
+      }
+
+      return {
+          isValid: true,
+          scheduleType: 'custom',
+          cronExpression,
+          nextRunAt: calculateNextRunTime('custom', { cronExpression }),
+          timezone: 'UTC'
+      }
+  }
+
+  // Special handling for Pushover Trigger
+  if (block.type === 'pushover_trigger') {
+      const checkInterval = getSubBlockValue(block, 'checkInterval')
+      const intervalSecs = Number(checkInterval) || 60
+      
+      let cronExpression = ''
+      if (intervalSecs < 60) {
+          cronExpression = `*/${intervalSecs} * * * * *`
+      } else {
+          const minutes = Math.floor(intervalSecs / 60)
+          cronExpression = `*/${minutes} * * * *`
+      }
+
+      return {
+          isValid: true,
+          scheduleType: 'custom',
+          cronExpression,
+          nextRunAt: calculateNextRunTime('custom', { cronExpression }),
+          timezone: 'UTC'
+      }
+  }
+
   const scheduleType = getSubBlockValue(block, 'scheduleType')
 
   if (!scheduleType) {

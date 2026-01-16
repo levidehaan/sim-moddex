@@ -125,11 +125,53 @@ export const KafkaBlock: BlockConfig<KafkaResponse> = {
       required: true,
     },
     {
-      id: 'fromBeginning',
-      title: 'From Beginning',
-      type: 'switch',
-      defaultValue: false,
-      description: 'Start consuming from the beginning of the topic',
+      id: 'readMode',
+      title: 'Read Mode',
+      type: 'dropdown',
+      options: [
+        { label: 'New Messages Only (Latest)', id: 'latest' },
+        { label: 'From Beginning (Earliest)', id: 'earliest' },
+        { label: 'Last N Messages', id: 'last_n' },
+        { label: 'Time Range', id: 'time_range' },
+      ],
+      defaultValue: 'latest',
+      description: 'Where to start consuming messages from',
+      condition: { field: 'operation', value: 'consume' },
+      required: true,
+    },
+    {
+      id: 'startOffset',
+      title: 'Last N Messages',
+      type: 'short-input',
+      placeholder: '10',
+      description: 'Number of recent messages to read per partition',
+      condition: { field: 'readMode', value: 'last_n' },
+      required: true,
+    },
+    {
+      id: 'startDate',
+      title: 'Start Date (ISO)',
+      type: 'short-input',
+      placeholder: '2024-01-01T00:00:00Z',
+      description: 'Start consuming from this date',
+      condition: { field: 'readMode', value: 'time_range' },
+      required: true,
+    },
+    {
+      id: 'endDate',
+      title: 'End Date (ISO)',
+      type: 'short-input',
+      placeholder: '2024-01-02T00:00:00Z',
+      description: 'Stop consuming at this date (optional)',
+      condition: { field: 'readMode', value: 'time_range' },
+      required: false,
+    },
+    {
+      id: 'searchPatterns',
+      title: 'Search Keywords',
+      type: 'short-input',
+      placeholder: 'error, critical, payment',
+      description: 'Comma-separated keywords to filter messages (case-insensitive)',
       condition: { field: 'operation', value: 'consume' },
       required: false,
     },
@@ -161,6 +203,33 @@ export const KafkaBlock: BlockConfig<KafkaResponse> = {
       condition: { field: 'operation', value: 'consume' },
       required: false,
     },
+    {
+      id: 'extractFields',
+      title: 'Extract Fields',
+      type: 'code',
+      placeholder: '[{"name": "userId", "path": "value.user.id"}, {"name": "amount", "path": "value.transaction.amount"}]',
+      description: 'JSON array of fields to extract from messages. Each field has a name and JSONPath.',
+      condition: { field: 'operation', value: 'consume' },
+      required: false,
+    },
+    {
+      id: 'transformations',
+      title: 'Transformations',
+      type: 'code',
+      placeholder: '[{"field": "amount", "operation": "multiply", "value": 1.1}, {"field": "name", "operation": "uppercase"}]',
+      description: 'JSON array of transformations to apply to extracted fields (math: add, subtract, multiply, divide; text: uppercase, lowercase, trim, substring)',
+      condition: { field: 'operation', value: 'consume' },
+      required: false,
+    },
+    {
+      id: 'aggregations',
+      title: 'Aggregations',
+      type: 'code',
+      placeholder: '[{"field": "amount", "operation": "sum"}, {"field": "amount", "operation": "avg"}]',
+      description: 'JSON array of aggregations to compute across all messages (sum, avg, min, max, count)',
+      condition: { field: 'operation', value: 'consume' },
+      required: false,
+    },
   ],
   tools: {
     access: ['kafka_produce', 'kafka_consume'],
@@ -185,6 +254,9 @@ export const KafkaBlock: BlockConfig<KafkaResponse> = {
           maxMessages,
           timeout,
           condition,
+          extractFields,
+          transformations,
+          aggregations,
           saslMechanism,
           ...rest
         } = params
@@ -230,11 +302,28 @@ export const KafkaBlock: BlockConfig<KafkaResponse> = {
           if (acks !== undefined) result.acks = Number.parseInt(acks as string, 10)
         } else if (operation === 'consume') {
           result.groupId = groupId
-          if (fromBeginning !== undefined) result.fromBeginning = fromBeginning
+          if (params.readMode) result.readMode = params.readMode
+          if (params.startOffset) result.startOffset = Number.parseInt(params.startOffset as string, 10)
+          if (params.startDate) result.startDate = params.startDate
+          if (params.endDate) result.endDate = params.endDate
+          if (params.searchPatterns) {
+             const patterns = (params.searchPatterns as string).split(',').map(s => s.trim()).filter(s => s.length > 0)
+             if (patterns.length > 0) result.searchPatterns = patterns
+          }
+
           if (maxMessages !== undefined)
             result.maxMessages = Number.parseInt(maxMessages as string, 10)
           if (timeout !== undefined) result.timeout = Number.parseInt(timeout as string, 10)
           if (condition) result.condition = condition
+          
+          const parsedExtractFields = parseJson(extractFields, 'extractFields')
+          if (parsedExtractFields !== undefined) result.extractFields = parsedExtractFields
+          
+          const parsedTransformations = parseJson(transformations, 'transformations')
+          if (parsedTransformations !== undefined) result.transformations = parsedTransformations
+          
+          const parsedAggregations = parseJson(aggregations, 'aggregations')
+          if (parsedAggregations !== undefined) result.aggregations = parsedAggregations
         }
 
         return result
@@ -253,10 +342,19 @@ export const KafkaBlock: BlockConfig<KafkaResponse> = {
     messages: { type: 'json', description: 'Array of messages to produce' },
     acks: { type: 'number', description: 'Acknowledgments required' },
     groupId: { type: 'string', description: 'Consumer group ID' },
-    fromBeginning: { type: 'boolean', description: 'Start consuming from beginning' },
+    groupId: { type: 'string', description: 'Consumer group ID' },
+    // fromBeginning removed from inputs block as it is simulated by readMode
     maxMessages: { type: 'number', description: 'Maximum messages to consume' },
     timeout: { type: 'number', description: 'Timeout in milliseconds' },
+    readMode: { type: 'string', description: 'Consumption mode (latest, earliest, last_n, time_range)' },
+    startOffset: { type: 'number', description: 'Number of messages to read from end' },
+    startDate: { type: 'string', description: 'Start date for time range consumption' },
+    endDate: { type: 'string', description: 'End date for time range consumption' },
+    searchPatterns: { type: 'string', description: 'Keywords to filter messages' },
     condition: { type: 'string', description: 'JavaScript filter expression for messages' },
+    extractFields: { type: 'json', description: 'Fields to extract from messages' },
+    transformations: { type: 'json', description: 'Transformations to apply to extracted fields' },
+    aggregations: { type: 'json', description: 'Aggregations to compute across messages' },
   },
   outputs: {
     message: {
@@ -278,6 +376,14 @@ export const KafkaBlock: BlockConfig<KafkaResponse> = {
     messages: {
       type: 'array',
       description: 'Consumed messages with key, value, headers, partition, offset, and timestamp',
+    },
+    extractedData: {
+      type: 'array',
+      description: 'Extracted and transformed fields from messages',
+    },
+    aggregations: {
+      type: 'json',
+      description: 'Computed aggregations across all messages',
     },
     groupId: {
       type: 'string',

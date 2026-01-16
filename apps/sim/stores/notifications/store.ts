@@ -1,6 +1,7 @@
 import { createLogger } from '@sim/logger'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { generateUUID } from '@/lib/core/utils/uuid'
 
 const logger = createLogger('NotificationStore')
 
@@ -116,7 +117,7 @@ export const useNotificationStore = create<NotificationStore>()(
       notifications: [],
 
       addNotification: (params: AddNotificationParams) => {
-        const id = crypto.randomUUID()
+        const id = generateUUID()
 
         const notification: Notification = {
           id,

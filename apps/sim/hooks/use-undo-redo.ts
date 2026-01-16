@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { generateUUID } from '@/lib/core/utils/uuid'
 import { createLogger } from '@sim/logger'
 import type { Edge } from 'reactflow'
 import { useSession } from '@/lib/auth/auth-client'
@@ -37,7 +38,7 @@ export function useUndoRedo() {
       if (!activeWorkflowId) return
 
       const operation: Operation = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'add-block',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -53,7 +54,7 @@ export function useUndoRedo() {
       const edgesToRemove = autoConnectEdge ? [autoConnectEdge] : []
 
       const inverse: RemoveBlockOperation = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'remove-block',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -89,7 +90,7 @@ export function useUndoRedo() {
       if (!activeWorkflowId) return
 
       const operation: RemoveBlockOperation = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'remove-block',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -103,7 +104,7 @@ export function useUndoRedo() {
       }
 
       const inverse: Operation = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'add-block',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -124,7 +125,7 @@ export function useUndoRedo() {
       if (!activeWorkflowId) return
 
       const operation: Operation = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'add-edge',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -133,7 +134,7 @@ export function useUndoRedo() {
       }
 
       const inverse: RemoveEdgeOperation = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'remove-edge',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -157,7 +158,7 @@ export function useUndoRedo() {
       if (!activeWorkflowId) return
 
       const operation: RemoveEdgeOperation = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'remove-edge',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -169,7 +170,7 @@ export function useUndoRedo() {
       }
 
       const inverse: Operation = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'add-edge',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -194,7 +195,7 @@ export function useUndoRedo() {
       if (!activeWorkflowId) return
 
       const operation: MoveBlockOperation = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'move-block',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -207,7 +208,7 @@ export function useUndoRedo() {
       }
 
       const inverse: MoveBlockOperation = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'move-block',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -237,7 +238,7 @@ export function useUndoRedo() {
       if (!activeWorkflowId) return
 
       const operation: DuplicateBlockOperation = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'duplicate-block',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -252,7 +253,7 @@ export function useUndoRedo() {
 
       // Inverse is to remove the duplicated block
       const inverse: RemoveBlockOperation = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'remove-block',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -284,7 +285,7 @@ export function useUndoRedo() {
       if (!activeWorkflowId) return
 
       const operation: UpdateParentOperation = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'update-parent',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -300,7 +301,7 @@ export function useUndoRedo() {
       }
 
       const inverse: UpdateParentOperation = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'update-parent',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -344,7 +345,7 @@ export function useUndoRedo() {
         workflowId: activeWorkflowId,
       })
 
-      const opId = crypto.randomUUID()
+      const opId = generateUUID()
 
       switch (entry.inverse.type) {
         case 'remove-block': {
@@ -367,7 +368,7 @@ export function useUndoRedo() {
                 workflowStore.removeEdge(edge.id)
                 // Send edge removal to server
                 addToQueue({
-                  id: crypto.randomUUID(),
+                  id: generateUUID(),
                   operation: {
                     operation: 'remove',
                     target: 'edge',
@@ -499,7 +500,7 @@ export function useUndoRedo() {
 
                 // Send to server with subBlocks included in payload
                 addToQueue({
-                  id: crypto.randomUUID(),
+                  id: generateUUID(),
                   operation: {
                     operation: 'add',
                     target: 'block',
@@ -536,7 +537,7 @@ export function useUndoRedo() {
             edgeSnapshots.forEach((edge) => {
               workflowStore.addEdge(edge)
               addToQueue({
-                id: crypto.randomUUID(),
+                id: generateUUID(),
                 operation: {
                   operation: 'add',
                   target: 'edge',
@@ -652,7 +653,7 @@ export function useUndoRedo() {
             edges.forEach((edge) => {
               workflowStore.removeEdge(edge.id)
               addToQueue({
-                id: crypto.randomUUID(),
+                id: generateUUID(),
                 operation: {
                   operation: 'remove',
                   target: 'edge',
@@ -694,7 +695,7 @@ export function useUndoRedo() {
                 if (!workflowStore.edges.find((e) => e.id === edge.id)) {
                   workflowStore.addEdge(edge)
                   addToQueue({
-                    id: crypto.randomUUID(),
+                    id: generateUUID(),
                     operation: {
                       operation: 'add',
                       target: 'edge',
@@ -709,7 +710,7 @@ export function useUndoRedo() {
 
             // Send position update to server
             addToQueue({
-              id: crypto.randomUUID(),
+              id: generateUUID(),
               operation: {
                 operation: 'update-position',
                 target: 'block',
@@ -755,7 +756,7 @@ export function useUndoRedo() {
                 if (workflowStore.edges.find((e) => e.id === edge.id)) {
                   workflowStore.removeEdge(edge.id)
                   addToQueue({
-                    id: crypto.randomUUID(),
+                    id: generateUUID(),
                     operation: {
                       operation: 'remove',
                       target: 'edge',
@@ -960,7 +961,7 @@ export function useUndoRedo() {
         return
       }
 
-      const opId = crypto.randomUUID()
+      const opId = generateUUID()
 
       switch (entry.operation.type) {
         case 'add-block': {
@@ -1061,7 +1062,7 @@ export function useUndoRedo() {
 
                 // Send to server with subBlocks included
                 addToQueue({
-                  id: crypto.randomUUID(),
+                  id: generateUUID(),
                   operation: {
                     operation: 'add',
                     target: 'block',
@@ -1098,7 +1099,7 @@ export function useUndoRedo() {
             if (!workflowStore.edges.find((e) => e.id === edge.id)) {
               workflowStore.addEdge(edge)
               addToQueue({
-                id: crypto.randomUUID(),
+                id: generateUUID(),
                 operation: {
                   operation: 'add',
                   target: 'edge',
@@ -1119,7 +1120,7 @@ export function useUndoRedo() {
             if (workflowStore.edges.find((e) => e.id === edge.id)) {
               workflowStore.removeEdge(edge.id)
               addToQueue({
-                id: crypto.randomUUID(),
+                id: generateUUID(),
                 operation: {
                   operation: 'remove',
                   target: 'edge',
@@ -1312,7 +1313,7 @@ export function useUndoRedo() {
           if (autoConnectEdge && !workflowStore.edges.find((e) => e.id === autoConnectEdge.id)) {
             workflowStore.addEdge(autoConnectEdge)
             addToQueue({
-              id: crypto.randomUUID(),
+              id: generateUUID(),
               operation: {
                 operation: 'add',
                 target: 'edge',
@@ -1336,7 +1337,7 @@ export function useUndoRedo() {
                 if (workflowStore.edges.find((e) => e.id === edge.id)) {
                   workflowStore.removeEdge(edge.id)
                   addToQueue({
-                    id: crypto.randomUUID(),
+                    id: generateUUID(),
                     operation: {
                       operation: 'remove',
                       target: 'edge',
@@ -1351,7 +1352,7 @@ export function useUndoRedo() {
 
             // Send position update to server
             addToQueue({
-              id: crypto.randomUUID(),
+              id: generateUUID(),
               operation: {
                 operation: 'update-position',
                 target: 'block',
@@ -1397,7 +1398,7 @@ export function useUndoRedo() {
                 if (!workflowStore.edges.find((e) => e.id === edge.id)) {
                   workflowStore.addEdge(edge)
                   addToQueue({
-                    id: crypto.randomUUID(),
+                    id: generateUUID(),
                     operation: {
                       operation: 'add',
                       target: 'edge',
@@ -1602,7 +1603,7 @@ export function useUndoRedo() {
       if (!activeWorkflowId) return
 
       const operation: any = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'apply-diff',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -1615,7 +1616,7 @@ export function useUndoRedo() {
       }
 
       const inverse: any = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'apply-diff',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -1646,7 +1647,7 @@ export function useUndoRedo() {
       if (!activeWorkflowId) return
 
       const operation: any = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'accept-diff',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -1660,7 +1661,7 @@ export function useUndoRedo() {
       }
 
       const inverse: any = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'accept-diff',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -1686,7 +1687,7 @@ export function useUndoRedo() {
       if (!activeWorkflowId) return
 
       const operation: any = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'reject-diff',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,
@@ -1700,7 +1701,7 @@ export function useUndoRedo() {
       }
 
       const inverse: any = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'reject-diff',
         timestamp: Date.now(),
         workflowId: activeWorkflowId,

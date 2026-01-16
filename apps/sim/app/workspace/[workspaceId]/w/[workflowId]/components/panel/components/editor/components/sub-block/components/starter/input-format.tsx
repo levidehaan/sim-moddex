@@ -17,6 +17,7 @@ import {
 } from '@/components/emcn'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/core/utils/cn'
+import { generateUUID } from '@/lib/core/utils/uuid'
 import { formatDisplayText } from '@/app/workspace/[workspaceId]/w/[workflowId]/components/panel/components/editor/components/sub-block/components/formatted-text'
 import { TagDropdown } from '@/app/workspace/[workspaceId]/w/[workflowId]/components/panel/components/editor/components/sub-block/components/tag-dropdown/tag-dropdown'
 import { useSubBlockInput } from '@/app/workspace/[workspaceId]/w/[workflowId]/components/panel/components/editor/components/sub-block/hooks/use-sub-block-input'
@@ -69,7 +70,7 @@ const BOOLEAN_OPTIONS: ComboboxOption[] = [
  * Creates a new field with default values
  */
 const createDefaultField = (): Field => ({
-  id: crypto.randomUUID(),
+  id: generateUUID(),
   name: '',
   type: 'string',
   value: '',

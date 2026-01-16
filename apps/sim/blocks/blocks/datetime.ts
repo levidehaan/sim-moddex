@@ -4,16 +4,57 @@ import type { BlockConfig } from '@/blocks/types'
 export const DateTimeBlock: BlockConfig = {
   type: 'datetime',
   name: 'Date/Time',
-  description: 'Get current date and time in various formats',
+  description: 'Get, manipulate, and format dates and times',
   longDescription:
-    'Returns the current date and time in multiple formats including ISO 8601, Unix timestamps, US/EU formats, and custom format strings. Supports timezone conversion and locale-aware formatting.',
+    'Returns date and time in multiple formats including ISO 8601, Unix timestamps, US/EU formats, and custom format strings. Supports timezone conversion, locale-aware formatting, and date arithmetic (add/subtract time). Use a base date or current time as the starting point.',
   category: 'tools',
   bgColor: '#6366F1',
   icon: Calendar,
   subBlocks: [
     {
+      id: 'baseDate',
+      title: 'Base Date',
+      type: 'short-input',
+      placeholder: 'Leave empty for current time, or enter date/timestamp',
+      description: 'ISO 8601 string, Unix timestamp, or parseable date. Empty = now',
+    },
+    {
+      id: 'operation',
+      title: 'Operation',
+      type: 'dropdown',
+      options: [
+        { label: 'None (just format)', id: 'none' },
+        { label: 'Add Time', id: 'add' },
+        { label: 'Subtract Time', id: 'subtract' },
+      ],
+      value: () => 'none',
+    },
+    {
+      id: 'amount',
+      title: 'Amount',
+      type: 'short-input',
+      placeholder: 'e.g., 5',
+      condition: { field: 'operation', value: 'none', not: true },
+    },
+    {
+      id: 'unit',
+      title: 'Unit',
+      type: 'dropdown',
+      options: [
+        { label: 'Years', id: 'years' },
+        { label: 'Months', id: 'months' },
+        { label: 'Weeks', id: 'weeks' },
+        { label: 'Days', id: 'days' },
+        { label: 'Hours', id: 'hours' },
+        { label: 'Minutes', id: 'minutes' },
+        { label: 'Seconds', id: 'seconds' },
+      ],
+      value: () => 'days',
+      condition: { field: 'operation', value: 'none', not: true },
+    },
+    {
       id: 'format',
-      title: 'Format',
+      title: 'Output Format',
       type: 'dropdown',
       options: [
         { label: 'ISO 8601', id: 'iso' },
@@ -55,7 +96,11 @@ export const DateTimeBlock: BlockConfig = {
     config: {
       tool: () => 'datetime_now',
       params: (params) => {
-        const result: Record<string, string> = {}
+        const result: Record<string, string | number> = {}
+        if (params.baseDate) result.baseDate = params.baseDate
+        if (params.operation) result.operation = params.operation
+        if (params.amount) result.amount = Number(params.amount)
+        if (params.unit) result.unit = params.unit
         if (params.format) result.format = params.format
         if (params.customFormat) result.customFormat = params.customFormat
         if (params.timezone) result.timezone = params.timezone
@@ -65,6 +110,10 @@ export const DateTimeBlock: BlockConfig = {
     },
   },
   inputs: {
+    baseDate: { type: 'string', description: 'Base date (ISO 8601, Unix timestamp, or parseable date string)' },
+    operation: { type: 'string', description: 'Operation: none, add, or subtract' },
+    amount: { type: 'number', description: 'Amount of time to add or subtract' },
+    unit: { type: 'string', description: 'Unit: years, months, weeks, days, hours, minutes, seconds' },
     format: { type: 'string', description: 'Output format' },
     customFormat: { type: 'string', description: 'Custom format string' },
     timezone: { type: 'string', description: 'IANA timezone name' },

@@ -108,11 +108,23 @@ export const alpacaGetOptionChainTool: ToolConfig<
 
   transformResponse: async (response: Response) => {
     if (!response.ok) {
-      const data = await response.json().catch(() => ({}))
-      handleAlpacaError(data, response.status, 'get_option_chain')
+      const errorText = await response.text()
+      let errorData: any = {}
+      try {
+        errorData = JSON.parse(errorText)
+      } catch {
+        errorData = { message: errorText }
+      }
+      handleAlpacaError(errorData, response.status, 'get_option_chain')
     }
 
     const data = await response.json()
+    
+    // Log for debugging
+    if (!data.option_contracts || data.option_contracts.length === 0) {
+      console.warn('No option contracts found. Response:', JSON.stringify(data, null, 2))
+    }
+    
     return {
       success: true,
       output: {

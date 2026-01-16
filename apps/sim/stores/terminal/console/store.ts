@@ -2,6 +2,7 @@ import { createLogger } from '@sim/logger'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { redactApiKeys } from '@/lib/core/security/redaction'
+import { generateUUID } from '@/lib/core/utils/uuid'
 import type { NormalizedBlockOutput } from '@/executor/types'
 import { useExecutionStore } from '@/stores/execution/store'
 import { useNotificationStore } from '@/stores/notifications'
@@ -96,7 +97,7 @@ export const useTerminalConsoleStore = create<ConsoleStore>()(
             // Create new entry with ID and timestamp
             const newEntry: ConsoleEntry = {
               ...redactedEntry,
-              id: crypto.randomUUID(),
+              id: generateUUID(),
               timestamp: new Date().toISOString(),
             }
 

@@ -71,6 +71,7 @@ import {
   asanaSearchTasksTool,
   asanaUpdateTaskTool,
 } from '@/tools/asana'
+import { bestbuyTool } from '@/tools/bestbuy'
 import { browserUseRunTaskTool } from '@/tools/browser_use'
 import {
   calendlyCancelEventTool,
@@ -85,6 +86,8 @@ import {
   calendlyListWebhooksTool,
 } from '@/tools/calendly'
 import { clayPopulateTool } from '@/tools/clay'
+import { coingeckoTool } from '@/tools/coingecko'
+import { comfyuiTool } from '@/tools/comfyui'
 import {
   confluenceCreateCommentTool,
   confluenceCreatePageTool,
@@ -102,6 +105,7 @@ import {
   confluenceUpdateTool,
   confluenceUploadAttachmentTool,
 } from '@/tools/confluence'
+import { congressTool } from '@/tools/congress'
 import {
   cursorAddFollowupTool,
   cursorDeleteAgentTool,
@@ -111,6 +115,7 @@ import {
   cursorListAgentsTool,
   cursorStopAgentTool,
 } from '@/tools/cursor'
+import { defillamaTool } from '@/tools/defillama'
 import {
   datadogCancelDowntimeTool,
   datadogCreateDowntimeTool,
@@ -207,6 +212,8 @@ import {
   exaSearchTool,
 } from '@/tools/exa'
 import { fileParseTool } from '@/tools/file'
+import { finnhubTool } from '@/tools/finnhub'
+import { fredTool } from '@/tools/fred'
 import {
   firecrawlAgentTool,
   firecrawlCrawlTool,
@@ -391,6 +398,7 @@ import {
   grainListTeamsTool,
 } from '@/tools/grain'
 import { guardrailsValidateTool } from '@/tools/guardrails'
+import { hackerNewsTool } from '@/tools/hackernews'
 import { httpRequestTool } from '@/tools/http'
 import {
   hubspotCreateCompanyTool,
@@ -407,6 +415,8 @@ import {
   hubspotUpdateContactTool,
 } from '@/tools/hubspot'
 import { huggingfaceChatTool } from '@/tools/huggingface'
+import { homeassistantTool } from '@/tools/homeassistant'
+import { imageHandlerTool } from '@/tools/image'
 import {
   hunterCompaniesFindTool,
   hunterDiscoverTool,
@@ -481,6 +491,7 @@ import {
   intercomUpdateContactTool,
 } from '@/tools/intercom'
 import { jinaReadUrlTool, jinaSearchTool } from '@/tools/jina'
+import { jsonTransformTool } from '@/tools/json_transform'
 import {
   jiraAddCommentTool,
   jiraAddWatcherTool,
@@ -530,6 +541,7 @@ import {
   knowledgeSearchTool,
   knowledgeUploadChunkTool,
 } from '@/tools/knowledge'
+import { krogerTool } from '@/tools/kroger'
 import {
   linearAddLabelToIssueTool,
   linearAddLabelToProjectTool,
@@ -689,6 +701,7 @@ import {
   mailchimpUpdateSegmentTool,
   mailchimpUpdateTemplateTool,
 } from '@/tools/mailchimp'
+import { mathCalculateTool } from '@/tools/math'
 import {
   mailgunAddListMemberTool,
   mailgunCreateMailingListTool,
@@ -761,6 +774,8 @@ import {
   neo4jQueryTool,
   neo4jUpdateTool,
 } from '@/tools/neo4j'
+import { nwsWeatherTool } from '@/tools/nws'
+import { ntfySendTool } from '@/tools/ntfy'
 import {
   notionCreateDatabaseTool,
   notionCreatePageTool,
@@ -778,6 +793,10 @@ import {
   onedriveUploadTool,
 } from '@/tools/onedrive'
 import { openAIEmbeddingsTool, openAIImageTool } from '@/tools/openai'
+import { openfdaTool } from '@/tools/openfda'
+import { openmeteoTool } from '@/tools/openmeteo'
+import { openskyTool } from '@/tools/opensky'
+import { openrouterImageGenerationTool } from '@/tools/openrouter'
 import {
   outlookCopyTool,
   outlookDeleteTool,
@@ -952,6 +971,7 @@ import {
   updateProjectTool,
 } from '@/tools/sentry'
 import { serperSearchTool } from '@/tools/serper'
+import { shodanTool } from '@/tools/shodan'
 import {
   servicenowCreateRecordTool,
   servicenowDeleteRecordTool,
@@ -1202,6 +1222,7 @@ import {
   telegramSendVideoTool,
 } from '@/tools/telegram'
 import { thinkingTool } from '@/tools/thinking'
+import { tmdbTool } from '@/tools/tmdb'
 import {
   trelloAddCommentTool,
   trelloCreateCardTool,
@@ -1232,6 +1253,7 @@ import {
   typeformUpdateFormTool,
 } from '@/tools/typeform'
 import type { ToolConfig } from '@/tools/types'
+import { usgsEarthquakeTool } from '@/tools/usgs_earthquake'
 import {
   falaiVideoTool,
   lumaVideoTool,
@@ -1386,6 +1408,7 @@ export const tools: Record<string, ToolConfig> = {
   asana_get_projects: asanaGetProjectsTool,
   asana_search_tasks: asanaSearchTasksTool,
   asana_add_comment: asanaAddCommentTool,
+  bestbuy_api: bestbuyTool,
   browser_use_run_task: browserUseRunTaskTool,
   openai_embeddings: openAIEmbeddingsTool,
   http_request: httpRequestTool,
@@ -1393,8 +1416,11 @@ export const tools: Record<string, ToolConfig> = {
   llm_chat: llmChatTool,
   function_execute: functionExecuteTool,
   datetime_now: dateTimeTool,
+  defillama_api: defillamaTool,
   vision_tool: visionTool,
   file_parser: fileParseTool,
+  finnhub_api: finnhubTool,
+  fred_api: fredTool,
   firecrawl_scrape: firecrawlScrapeTool,
   firecrawl_search: firecrawlSearchTool,
   firecrawl_crawl: firecrawlCrawlTool,
@@ -1422,6 +1448,7 @@ export const tools: Record<string, ToolConfig> = {
   grafana_create_folder: grafanaCreateFolderTool,
   google_search: googleSearchTool,
   guardrails_validate: guardrailsValidateTool,
+  hackernews_api: hackerNewsTool,
   jina_read_url: jinaReadUrlTool,
   jina_search: jinaSearchTool,
   linkup_search: linkupSearchTool,
@@ -1543,6 +1570,7 @@ export const tools: Record<string, ToolConfig> = {
   github_repo_info: githubRepoInfoTool,
   github_latest_commit: githubLatestCommitTool,
   serper_search: serperSearchTool,
+  shodan_api: shodanTool,
   servicenow_create_record: servicenowCreateRecordTool,
   servicenow_read_record: servicenowReadRecordTool,
   servicenow_update_record: servicenowUpdateRecordTool,
@@ -1590,6 +1618,7 @@ export const tools: Record<string, ToolConfig> = {
   typeform_create_form: typeformCreateFormTool,
   typeform_update_form: typeformUpdateFormTool,
   typeform_delete_form: typeformDeleteFormTool,
+  usgs_earthquake_api: usgsEarthquakeTool,
   youtube_search: youtubeSearchTool,
   youtube_video_details: youtubeVideoDetailsTool,
   youtube_channel_info: youtubeChannelInfoTool,
@@ -1687,6 +1716,8 @@ export const tools: Record<string, ToolConfig> = {
   neo4j_update: neo4jUpdateTool,
   neo4j_delete: neo4jDeleteTool,
   neo4j_execute: neo4jExecuteTool,
+  nws_weather: nwsWeatherTool,
+  ntfy_send: ntfySendTool,
   github_pr: githubPrTool,
   github_comment: githubCommentTool,
   github_issue_comment: githubIssueCommentTool,
@@ -1845,6 +1876,7 @@ export const tools: Record<string, ToolConfig> = {
   confluence_list_labels: confluenceListLabelsTool,
   confluence_get_space: confluenceGetSpaceTool,
   confluence_list_spaces: confluenceListSpacesTool,
+  congress_api: congressTool,
   cursor_list_agents: cursorListAgentsTool,
   cursor_get_agent: cursorGetAgentTool,
   cursor_get_conversation: cursorGetConversationTool,
@@ -1884,6 +1916,15 @@ export const tools: Record<string, ToolConfig> = {
   alpaca_close_position: alpacaClosePositionTool,
   alpaca_close_all_positions: alpacaCloseAllPositionsTool,
   alpaca_exercise_option: alpacaExerciseOptionTool,
+  json_transform_execute: jsonTransformTool,
+  math_calculate: mathCalculateTool,
+  homeassistant_api: homeassistantTool,
+  image_handler: imageHandlerTool,
+  openfda_api: openfdaTool,
+  openmeteo_api: openmeteoTool,
+  opensky_api: openskyTool,
+  openrouter_image_generation: openrouterImageGenerationTool,
+  tmdb_api: tmdbTool,
   pushover_send_notification: pushoverSendNotificationTool,
   pushover_get_sounds: pushoverGetSoundsTool,
   pushover_get_receipt: pushoverGetReceiptTool,
@@ -1946,6 +1987,7 @@ export const tools: Record<string, ToolConfig> = {
   knowledge_search: knowledgeSearchTool,
   knowledge_upload_chunk: knowledgeUploadChunkTool,
   knowledge_create_document: knowledgeCreateDocumentTool,
+  kroger_api: krogerTool,
   search_tool: searchTool,
   elevenlabs_tts: elevenLabsTtsTool,
   stt_whisper: whisperSttTool,
@@ -1978,6 +2020,8 @@ export const tools: Record<string, ToolConfig> = {
   telegram_send_video: telegramSendVideoTool,
   telegram_send_document: telegramSendDocumentTool,
   clay_populate: clayPopulateTool,
+  coingecko_api: coingeckoTool,
+  comfyui_request: comfyuiTool,
   discord_send_message: discordSendMessageTool,
   discord_get_messages: discordGetMessagesTool,
   discord_get_server: discordGetServerTool,

@@ -1628,7 +1628,50 @@ export const mcpServers = pgTable(
     description: text('description'),
 
     transport: text('transport').notNull(),
+    source: text('source').notNull().default('remote'),
     url: text('url'),
+
+    // Local execution config
+    command: text('command'),
+    args: jsonb('args'),
+    env: jsonb('env'),
+    cwd: text('cwd'),
+
+    // NPM/Python package config
+    package: text('package'),
+    version: text('version'),
+    installCommand: text('install_command'),
+
+    // Repository config
+    repositoryUrl: text('repository_url'),
+    repositoryRef: text('repository_ref'),
+
+    // Docker config
+    dockerImage: text('docker_image'),
+    dockerTag: text('docker_tag'),
+    dockerPorts: jsonb('docker_ports'),
+
+    // Security and sandboxing
+    sandboxed: boolean('sandboxed').default(false),
+    allowedPaths: jsonb('allowed_paths'),
+    allowedHosts: jsonb('allowed_hosts'),
+    maxMemory: integer('max_memory'),
+    maxCpu: integer('max_cpu'),
+
+    // Auto-deploy settings
+    autoDeploy: boolean('auto_deploy').default(false),
+    autoRestart: boolean('auto_restart').default(false),
+    healthCheckUrl: text('health_check_url'),
+    healthCheckInterval: integer('health_check_interval'),
+
+    // Dynamic configuration
+    configSchema: jsonb('config_schema'),
+    configValues: jsonb('config_values'),
+
+    // Process management
+    pid: integer('pid'),
+    status: text('status').default('disconnected'),
+    uptime: integer('uptime'),
 
     headers: json('headers').default('{}'),
     timeout: integer('timeout').default(30000),
@@ -1663,6 +1706,12 @@ export const mcpServers = pgTable(
       table.workspaceId,
       table.deletedAt
     ),
+
+    // Source type index for filtering
+    sourceIdx: index('mcp_servers_source_idx').on(table.source),
+
+    // Status index for monitoring
+    statusIdx: index('mcp_servers_status_idx').on(table.status),
   })
 )
 

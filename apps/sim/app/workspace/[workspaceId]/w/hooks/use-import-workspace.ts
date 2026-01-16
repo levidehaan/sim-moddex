@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { generateUUID } from '@/lib/core/utils/uuid'
 import { createLogger } from '@sim/logger'
 import { useRouter } from 'next/navigation'
 import {
@@ -162,7 +163,7 @@ export function useImportWorkspace({ onSuccess }: UseImportWorkspaceProps = {}) 
             // Save variables if any
             if (workflowData.variables && workflowData.variables.length > 0) {
               const variablesPayload = workflowData.variables.map((v: any) => ({
-                id: typeof v.id === 'string' && v.id.trim() ? v.id : crypto.randomUUID(),
+                id: typeof v.id === 'string' && v.id.trim() ? v.id : generateUUID(),
                 workflowId: newWorkflow.id,
                 name: v.name,
                 type: v.type,

@@ -1,8 +1,9 @@
 import type { Operation, OperationEntry } from '@/stores/undo-redo/types'
+import { generateUUID } from '@/lib/core/utils/uuid'
 
 export function createOperationEntry(operation: Operation, inverse: Operation): OperationEntry {
   return {
-    id: crypto.randomUUID(),
+    id: generateUUID(),
     operation,
     inverse,
     createdAt: Date.now(),

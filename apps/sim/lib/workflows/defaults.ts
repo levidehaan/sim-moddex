@@ -1,3 +1,4 @@
+import { generateUUID } from '@/lib/core/utils/uuid'
 import { getBlockOutputs } from '@/lib/workflows/blocks/block-outputs'
 import { getBlock } from '@/blocks'
 import type { BlockConfig, SubBlockConfig } from '@/blocks/types'

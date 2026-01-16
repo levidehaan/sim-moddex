@@ -7,10 +7,11 @@
 </p>
 
 <p align="center">
-  Build, deploy, and scale agentic workflows with visual drag-and-drop canvas, MCP server support, and enterprise-ready features.
+  Build, deploy, and scale agentic workflows with visual drag-and-drop canvas, advanced MCP 2026 server support, ComfyUI integration, and enterprise-ready features.
 </p>
 
 For questions about this mod, contact @levidehaan on twitter.
+
 ---
 
 ## 🙏 Attribution
@@ -25,7 +26,186 @@ For questions about this mod, contact @levidehaan on twitter.
 
 We are deeply grateful to the SIM Studio team for creating the foundational open-source AI agent workflow builder that made this project possible. All original work and credit belongs to the [SIM Studio team](https://github.com/simstudioai).
 
-This fork extends the original with additional features including enhanced MCP server support, expanded integrations, and custom modifications for specific use cases.
+This fork is a **total rebuild** with extensive new functionality including MCP 2026 server management, OAuth provider integration, ComfyUI workflows, enhanced Kafka processing, advanced image generation, and 27+ new integration blocks.
+
+---
+
+## 📚 Table of Contents
+
+- [What's New in This Fork](#-whats-new-in-this-fork)
+- [OAuth Provider Setup](#-oauth-provider-setup)
+- [MCP 2026 Server Integration](#-mcp-2026-server-integration)
+- [Features](#-features)
+- [New Integrations](#-sim-moddex-additions)
+- [Requirements](#️-requirements)
+- [Quickstart](#-quickstart)
+- [Advanced Guides](#-advanced-guides)
+- [Environment Variables](#-environment-variables)
+- [Tech Stack](#-tech-stack)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+---
+
+## 🆕 What's New in This Fork
+
+This is a **complete rebuild** of SIM Studio with massive new capabilities:
+
+### 🔐 Self-Hosted OAuth Integration
+- **25+ OAuth providers** ready to configure for self-hosted deployments
+- Complete setup guides for Google, Microsoft, GitHub, Slack, and more
+- Detailed difficulty ratings and time estimates for each provider
+- See [OAuth Provider Setup](#-oauth-provider-setup) below
+
+### 🤖 MCP 2026 Server Management
+- **14+ pre-configured MCP servers** with one-click installation
+- Support for NPM, Python, Node.js, and remote servers
+- Built-in repository browser with search and filtering
+- Auto-deploy and auto-restart capabilities
+- Dynamic configuration forms
+- See [MCP 2026 Integration](#-mcp-2026-server-integration) below
+
+### 🎨 ComfyUI Integration
+- Full ComfyUI workflow support for advanced image generation
+- Queue prompts, upload images, monitor generation
+- System stats and resource monitoring
+- See [ComfyUI Integration Guide](COMFYUI_INTEGRATION.md)
+
+### 📊 Enhanced Kafka Processing
+- Advanced field extraction from Kafka messages
+- Mathematical and text transformations
+- Real-time aggregations (sum, avg, min, max, count)
+- JavaScript-based message filtering
+- See [Kafka Enhanced Guide](KAFKA_ENHANCED_GUIDE.md)
+
+### 🖼️ Advanced Image Generation
+- **Text-to-Image** - Generate from descriptions
+- **Image-to-Image** - Modify existing images with AI
+- **Image+Text Reference** - Use images as style references
+- Support for Flux, Gemini, DALL-E, and more
+- See [Image Generation Guide](IMAGE_GENERATION_GUIDE.md)
+
+### 📈 27+ New Integration Blocks
+- Trading: Alpaca, Webull, CoinGecko, DeFi Llama, Finnhub, FRED
+- Weather: Open-Meteo, National Weather Service, USGS Earthquake
+- Government: Congress.gov, OpenFDA
+- E-Commerce: Best Buy, Kroger
+- Media: ComfyUI, TMDB, Hacker News
+- Smart Home: Home Assistant, Ntfy
+- Transportation: OpenSky Network
+- Security: Shodan
+- And more...
+
+---
+
+## 🔐 OAuth Provider Setup
+
+For **self-hosted deployments**, you'll need to configure OAuth providers for integrations like Google, Microsoft, GitHub, Slack, and more.
+
+### Quick Start Guide
+
+We provide **two comprehensive guides** to help you set up OAuth providers:
+
+#### 📖 [Self-Hosted OAuth Setup Guide](docs/SELF_HOSTED_OAUTH_SETUP.md)
+Complete step-by-step instructions for configuring 25+ OAuth providers including:
+- Google (Gmail, Drive, Docs, Sheets, Calendar)
+- Microsoft (Outlook, OneDrive, Teams, SharePoint)
+- GitHub, Slack, Notion, Linear, Airtable
+- Atlassian (Jira, Confluence)
+- And 15+ more providers
+
+#### 🎯 [OAuth Provider Reality Check](docs/OAUTH_PROVIDER_REALITY_CHECK.md)
+Honest, practical information about OAuth setup including:
+- **Difficulty ratings** for each provider (Easy/Medium/Hard)
+- **Time estimates** for setup
+- **Cost information** (most are free!)
+- **Approval requirements** and waiting times
+- **Local development tips** for testing
+- **Minimum viable setup** recommendations
+
+### Provider Difficulty Overview
+
+| Difficulty | Providers | Setup Time |
+|------------|-----------|------------|
+| **Very Easy** | GitHub, Linear | 5 minutes |
+| **Easy** | Google, Microsoft, Slack, Notion, Airtable, Asana, HubSpot, Dropbox | 10-15 minutes |
+| **Medium** | Atlassian, Salesforce, Shopify, Zoom, Reddit, Pipedrive, Webflow | 15-30 minutes |
+| **Hard** | LinkedIn, X/Twitter, Spotify, Wealthbox | 30+ minutes or $$$ |
+
+### Recommended Setup Order
+
+**Phase 1 - Easy Wins (30 minutes):**
+1. GitHub (5 min)
+2. Google (10 min)
+3. Slack (5 min)
+4. Notion (5 min)
+5. Linear (5 min)
+
+**Phase 2 - Useful Additions (1 hour):**
+- Microsoft, Airtable, Dropbox, Asana, HubSpot
+
+**Phase 3 - As Needed:**
+- Atlassian (Jira/Confluence), Salesforce, Zoom
+
+### Environment Variables
+
+All OAuth credentials are configured via environment variables. See the [Environment Variables](#-environment-variables) section below for the complete list.
+
+For detailed setup instructions, see:
+- **[docs/SELF_HOSTED_OAUTH_SETUP.md](docs/SELF_HOSTED_OAUTH_SETUP.md)** - Step-by-step guides
+- **[docs/OAUTH_PROVIDER_REALITY_CHECK.md](docs/OAUTH_PROVIDER_REALITY_CHECK.md)** - Practical tips and reality check
+
+---
+
+## 🤖 MCP 2026 Server Integration
+
+SIM Moddex includes **comprehensive MCP (Model Context Protocol) 2026 support** with a built-in server repository, launcher, and management system.
+
+### What's New in MCP 2026
+
+- ✅ **14+ Pre-configured Servers** - One-click installation from repository
+- ✅ **Multiple Server Types** - NPM, Python, Node.js, Docker, Remote HTTP
+- ✅ **Repository Browser** - Search, filter, and install servers
+- ✅ **Dynamic Configuration** - Auto-generated forms for server setup
+- ✅ **Auto-Deploy** - Servers launch automatically on workspace load
+- ✅ **Process Management** - Start, stop, restart, monitor servers
+- ✅ **Security & Sandboxing** - Filesystem and network restrictions
+- ✅ **Health Monitoring** - Auto-restart on failure
+
+### Available MCP Servers
+
+| Server | Category | Description |
+|--------|----------|-------------|
+| **Filesystem** | File System | File operations (read, write, search) |
+| **GitHub** | Development | Repository management, issues, PRs |
+| **PostgreSQL** | Database | Database queries and management |
+| **Brave Search** | Search | Web search capabilities |
+| **Google Drive** | Cloud Storage | Cloud storage access |
+| **Slack** | Communication | Team communication integration |
+| **Memory** | AI/ML | Knowledge graph and memory management |
+| **Puppeteer** | Automation | Browser automation and scraping |
+| **Sequential Thinking** | AI/ML | Problem-solving workflows |
+| **Fetch** | Network | HTTP requests and API calls |
+| **SQLite** | Database | Local database operations |
+| **Google Maps** | Location | Location and mapping services |
+| **Everything** | File System | Windows file search |
+| **AWS KB Retrieval** | AI/ML | Bedrock knowledge base integration |
+
+### How to Use
+
+1. **Open Settings** → Tools → MCP
+2. **Click "Repository"** button to browse available servers
+3. **Search or filter** by category
+4. **Click "Install"** on any server
+5. **Configure** using the auto-generated form
+6. **Server launches automatically** and is ready to use
+
+### Documentation
+
+For complete MCP 2026 documentation, see:
+- **[WHAT_CHANGED_MCP.md](WHAT_CHANGED_MCP.md)** - Quick overview of changes
+- **[MCP_2026_UPGRADE_GUIDE.md](MCP_2026_UPGRADE_GUIDE.md)** - Comprehensive upgrade guide
+- **[MCP_2026_IMPLEMENTATION_SUMMARY.md](MCP_2026_IMPLEMENTATION_SUMMARY.md)** - Implementation details
 
 ---
 
@@ -44,17 +224,19 @@ This fork extends the original with additional features including enhanced MCP s
 - **Code execution**: Sandboxed Python and JavaScript runtime
 
 ### 🔌 Extensive Integrations
-- **APIs**: GitHub, Linear, Jira, Slack, Discord, Notion, Airtable
-- **Databases**: PostgreSQL, MySQL, MongoDB, Redis, Supabase
+- **APIs**: GitHub, Linear, Jira, Slack, Discord, Notion, Airtable, and 25+ OAuth providers
+- **Databases**: PostgreSQL, MySQL, MongoDB, Redis, Supabase, SQLite
 - **AI Models**: OpenAI, Anthropic, Google, Mistral, local models (llama.cpp, vLLM)
-- **MCP Servers**: Model Context Protocol support with 14+ verified servers
-- **Triggers**: Webhooks, schedules, API calls, chat interfaces
+- **MCP Servers**: Model Context Protocol 2026 support with 14+ verified servers
+- **Image Generation**: ComfyUI, Flux, DALL-E, Gemini, Stable Diffusion
+- **Triggers**: Webhooks, schedules, API calls, chat interfaces, Kafka streams
 
 ### 🧠 Knowledge & Memory
 - Vector database integration (Pinecone, Qdrant, Supabase)
 - Document upload and semantic search
 - Persistent memory with knowledge graphs
 - RAG (Retrieval Augmented Generation) support
+- MCP Memory server for persistent knowledge
 
 ## 🆕 SIM Moddex Additions
 
@@ -105,6 +287,13 @@ This fork includes extensive enhancements beyond the original SIM Studio:
 
 ### 🔒 Security & Research
 - **Shodan**: Internet-connected device search and security research
+
+### 🔒 Security & Research
+- **Shodan**: Internet-connected device search and security research
+
+### ⚡ New Triggers
+- **Kafka Trigger**: Advanced buffering, schema discovery, and JSON path filtering
+- **Pushover Trigger**: Real-time notification monitoring with text/priority filtering and device support
 
 ### 🛠️ Utility Blocks
 - **Math Operations**: Advanced mathematical calculations
@@ -364,6 +553,8 @@ Copilot is a Sim-managed service. To use Copilot on a self-hosted instance:
 
 Key environment variables for self-hosted deployments (see `apps/sim/.env.example` for full list):
 
+### Core Application
+
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `DATABASE_URL` | Yes | PostgreSQL connection string with pgvector |
@@ -371,10 +562,80 @@ Key environment variables for self-hosted deployments (see `apps/sim/.env.exampl
 | `BETTER_AUTH_URL` | Yes | Your app URL (e.g., `http://localhost:3000`) |
 | `NEXT_PUBLIC_APP_URL` | Yes | Public app URL (same as above) |
 | `ENCRYPTION_KEY` | Yes | Encryption key (`openssl rand -hex 32`) |
+
+### AI Models
+
+| Variable | Required | Description |
+|----------|----------|-------------|
 | `LLAMACPP_BASE_URL` | No | llama.cpp server URL for local models |
 | `LLAMACPP_API_KEY` | No | Optional API key for llama.cpp server |
 | `VLLM_BASE_URL` | No | vLLM server URL for self-hosted models |
 | `COPILOT_API_KEY` | No | API key from sim.ai for Copilot features |
+
+### OAuth Providers (Tier 1 - Easy Setup)
+
+| Variable | Provider | Description |
+|----------|----------|-------------|
+| `GOOGLE_CLIENT_ID` | Google | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Google | Google OAuth client secret |
+| `GITHUB_CLIENT_ID` | GitHub | GitHub OAuth client ID |
+| `GITHUB_CLIENT_SECRET` | GitHub | GitHub OAuth client secret |
+| `SLACK_CLIENT_ID` | Slack | Slack OAuth client ID |
+| `SLACK_CLIENT_SECRET` | Slack | Slack OAuth client secret |
+| `NOTION_CLIENT_ID` | Notion | Notion OAuth client ID |
+| `NOTION_CLIENT_SECRET` | Notion | Notion OAuth client secret |
+| `LINEAR_CLIENT_ID` | Linear | Linear OAuth client ID |
+| `LINEAR_CLIENT_SECRET` | Linear | Linear OAuth client secret |
+| `AIRTABLE_CLIENT_ID` | Airtable | Airtable OAuth client ID |
+| `AIRTABLE_CLIENT_SECRET` | Airtable | Airtable OAuth client secret |
+| `ASANA_CLIENT_ID` | Asana | Asana OAuth client ID |
+| `ASANA_CLIENT_SECRET` | Asana | Asana OAuth client secret |
+
+### OAuth Providers (Tier 2 - Moderate Setup)
+
+| Variable | Provider | Description |
+|----------|----------|-------------|
+| `MICROSOFT_CLIENT_ID` | Microsoft | Microsoft OAuth client ID |
+| `MICROSOFT_CLIENT_SECRET` | Microsoft | Microsoft OAuth client secret |
+| `JIRA_CLIENT_ID` | Jira | Jira OAuth client ID |
+| `JIRA_CLIENT_SECRET` | Jira | Jira OAuth client secret |
+| `CONFLUENCE_CLIENT_ID` | Confluence | Confluence OAuth client ID |
+| `CONFLUENCE_CLIENT_SECRET` | Confluence | Confluence OAuth client secret |
+| `HUBSPOT_CLIENT_ID` | HubSpot | HubSpot OAuth client ID |
+| `HUBSPOT_CLIENT_SECRET` | HubSpot | HubSpot OAuth client secret |
+| `SALESFORCE_CLIENT_ID` | Salesforce | Salesforce OAuth client ID |
+| `SALESFORCE_CLIENT_SECRET` | Salesforce | Salesforce OAuth client secret |
+| `DROPBOX_CLIENT_ID` | Dropbox | Dropbox OAuth client ID |
+| `DROPBOX_CLIENT_SECRET` | Dropbox | Dropbox OAuth client secret |
+| `SHOPIFY_CLIENT_ID` | Shopify | Shopify OAuth client ID |
+| `SHOPIFY_CLIENT_SECRET` | Shopify | Shopify OAuth client secret |
+| `ZOOM_CLIENT_ID` | Zoom | Zoom OAuth client ID |
+| `ZOOM_CLIENT_SECRET` | Zoom | Zoom OAuth client secret |
+| `REDDIT_CLIENT_ID` | Reddit | Reddit OAuth client ID |
+| `REDDIT_CLIENT_SECRET` | Reddit | Reddit OAuth client secret |
+| `PIPEDRIVE_CLIENT_ID` | Pipedrive | Pipedrive OAuth client ID |
+| `PIPEDRIVE_CLIENT_SECRET` | Pipedrive | Pipedrive OAuth client secret |
+| `WEBFLOW_CLIENT_ID` | Webflow | Webflow OAuth client ID |
+| `WEBFLOW_CLIENT_SECRET` | Webflow | Webflow OAuth client secret |
+
+### OAuth Providers (Tier 3 - Challenging)
+
+| Variable | Provider | Description |
+|----------|----------|-------------|
+| `X_CLIENT_ID` | X/Twitter | X OAuth client ID |
+| `X_CLIENT_SECRET` | X/Twitter | X OAuth client secret |
+| `LINKEDIN_CLIENT_ID` | LinkedIn | LinkedIn OAuth client ID |
+| `LINKEDIN_CLIENT_SECRET` | LinkedIn | LinkedIn OAuth client secret |
+| `SPOTIFY_CLIENT_ID` | Spotify | Spotify OAuth client ID |
+| `SPOTIFY_CLIENT_SECRET` | Spotify | Spotify OAuth client secret |
+| `WORDPRESS_CLIENT_ID` | WordPress | WordPress OAuth client ID |
+| `WORDPRESS_CLIENT_SECRET` | WordPress | WordPress OAuth client secret |
+| `WEALTHBOX_CLIENT_ID` | Wealthbox | Wealthbox OAuth client ID |
+| `WEALTHBOX_CLIENT_SECRET` | Wealthbox | Wealthbox OAuth client secret |
+
+For complete OAuth setup instructions, see:
+- **[docs/SELF_HOSTED_OAUTH_SETUP.md](docs/SELF_HOSTED_OAUTH_SETUP.md)** - Detailed setup guides
+- **[docs/OAUTH_PROVIDER_REALITY_CHECK.md](docs/OAUTH_PROVIDER_REALITY_CHECK.md)** - Practical tips and difficulty ratings
 
 ## Troubleshooting
 
@@ -402,6 +663,32 @@ If ports 3000, 3002, or 5432 are in use, configure alternatives:
 # Custom ports
 NEXT_PUBLIC_APP_URL=http://localhost:3100 POSTGRES_PORT=5433 docker compose up -d
 ```
+
+## 📖 Advanced Guides
+
+SIM Moddex includes comprehensive documentation for all major features:
+
+### OAuth & Authentication
+- **[Self-Hosted OAuth Setup Guide](docs/SELF_HOSTED_OAUTH_SETUP.md)** - Step-by-step OAuth provider configuration for 25+ services
+- **[OAuth Provider Reality Check](docs/OAUTH_PROVIDER_REALITY_CHECK.md)** - Practical guide with difficulty ratings, costs, and time estimates
+
+### MCP Server Integration
+- **[What Changed - MCP 2026](WHAT_CHANGED_MCP.md)** - Quick overview of MCP 2026 changes and new features
+- **[MCP 2026 Upgrade Guide](MCP_2026_UPGRADE_GUIDE.md)** - Comprehensive guide to MCP 2026 features and usage
+- **[MCP 2026 Implementation Summary](MCP_2026_IMPLEMENTATION_SUMMARY.md)** - Technical implementation details
+
+### Image Generation & Processing
+- **[ComfyUI Integration Guide](COMFYUI_INTEGRATION.md)** - Complete guide to ComfyUI workflow integration
+- **[Image Generation Guide](IMAGE_GENERATION_GUIDE.md)** - Text-to-Image, Image-to-Image, and reference-based generation
+
+### Data Processing
+- **[Kafka Enhanced Guide](KAFKA_ENHANCED_GUIDE.md)** - Advanced Kafka message processing with extraction, transformation, and aggregation
+
+### Additional Documentation
+- **[ADDITIONS.md](ADDITIONS.md)** - Complete list of all new blocks and integrations
+- **[CLAUDE.md](CLAUDE.md)** - Claude-specific integration notes
+
+---
 
 ## Tech Stack
 

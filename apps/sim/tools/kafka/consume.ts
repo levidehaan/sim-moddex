@@ -57,11 +57,41 @@ export const consumeTool: ToolConfig<KafkaConsumeParams, KafkaConsumeResponse> =
       visibility: 'user-only',
       description: 'Consumer group ID',
     },
-    fromBeginning: {
-      type: 'boolean',
+    groupId: {
+      type: 'string',
+      required: true,
+      visibility: 'user-only',
+      description: 'Consumer group ID',
+    },
+    readMode: {
+      type: 'string',
       required: false,
       visibility: 'user-only',
-      description: 'Start consuming from the beginning of the topic',
+      description: 'Read mode: latest, earliest (from beginning), last_n, time_range',
+    },
+    startOffset: {
+      type: 'number',
+      required: false,
+      visibility: 'user-only',
+      description: 'For last_n mode: number of messages to read from the end',
+    },
+    startDate: {
+      type: 'string',
+      required: false,
+      visibility: 'user-only',
+      description: 'For time_range mode: start date (ISO string)',
+    },
+    endDate: {
+      type: 'string',
+      required: false,
+      visibility: 'user-only',
+      description: 'For time_range mode: end date (ISO string)',
+    },
+    searchPatterns: {
+      type: 'array',
+      required: false,
+      visibility: 'user-or-llm',
+      description: 'List of keywords to search for in message values',
     },
     maxMessages: {
       type: 'number',
@@ -82,6 +112,27 @@ export const consumeTool: ToolConfig<KafkaConsumeParams, KafkaConsumeResponse> =
       description:
         'JavaScript condition expression to filter messages (e.g., "value.status === \'error\'" or "value.amount > 100")',
     },
+    extractFields: {
+      type: 'json',
+      required: false,
+      visibility: 'user-or-llm',
+      description:
+        'Array of fields to extract from messages. Each field has name and path (e.g., [{"name": "userId", "path": "value.user.id"}])',
+    },
+    transformations: {
+      type: 'json',
+      required: false,
+      visibility: 'user-or-llm',
+      description:
+        'Array of transformations to apply (e.g., [{"field": "amount", "operation": "multiply", "value": 1.1}])',
+    },
+    aggregations: {
+      type: 'json',
+      required: false,
+      visibility: 'user-or-llm',
+      description:
+        'Array of aggregations to compute (e.g., [{"field": "amount", "operation": "sum"}])',
+    },
   },
 
   request: {
@@ -97,10 +148,18 @@ export const consumeTool: ToolConfig<KafkaConsumeParams, KafkaConsumeResponse> =
       saslPassword: params.saslPassword,
       topic: params.topic,
       groupId: params.groupId,
-      fromBeginning: params.fromBeginning,
+      groupId: params.groupId,
+      readMode: params.readMode,
+      startOffset: params.startOffset,
+      startDate: params.startDate,
+      endDate: params.endDate,
+      searchPatterns: params.searchPatterns,
       maxMessages: params.maxMessages,
       timeout: params.timeout,
       condition: params.condition,
+      extractFields: params.extractFields,
+      transformations: params.transformations,
+      aggregations: params.aggregations,
     }),
   },
 
@@ -119,6 +178,8 @@ export const consumeTool: ToolConfig<KafkaConsumeParams, KafkaConsumeResponse> =
         groupId: data.groupId,
         messageCount: data.messageCount,
         messages: data.messages,
+        extractedData: data.extractedData,
+        aggregations: data.aggregations,
       },
       error: undefined,
     }
@@ -130,5 +191,7 @@ export const consumeTool: ToolConfig<KafkaConsumeParams, KafkaConsumeResponse> =
     groupId: { type: 'string', description: 'Consumer group ID' },
     messageCount: { type: 'number', description: 'Number of messages consumed' },
     messages: { type: 'array', description: 'Array of consumed messages' },
+    extractedData: { type: 'array', description: 'Extracted and transformed fields from messages' },
+    aggregations: { type: 'json', description: 'Computed aggregations across all messages' },
   },
 }

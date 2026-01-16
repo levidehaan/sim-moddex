@@ -1,0 +1,3 @@
+$ cd apps/sim && bun run dev:full
+$ concurrently -n "App,Realtime" -c "cyan,magenta" "bun run dev" "bun run dev:sockets"
+error: script "dev:full" was terminated by signal SIGHUP (Terminal hung up)

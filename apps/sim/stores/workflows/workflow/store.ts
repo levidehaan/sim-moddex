@@ -1,3 +1,4 @@
+import { generateUUID } from '@/lib/core/utils/uuid'
 import { createLogger } from '@sim/logger'
 import type { Edge } from 'reactflow'
 import { create } from 'zustand'
@@ -86,7 +87,7 @@ function resolveInitialSubblockValue(config: SubBlockConfig): unknown {
   if (config.type === 'input-format') {
     return [
       {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         name: '',
         type: 'string',
         value: '',
@@ -464,7 +465,7 @@ export const useWorkflowStore = create<WorkflowStore>()(
         }
 
         const newEdge: Edge = {
-          id: edge.id || crypto.randomUUID(),
+          id: edge.id || generateUUID(),
           source: edge.source,
           target: edge.target,
           sourceHandle: edge.sourceHandle,
@@ -601,7 +602,7 @@ export const useWorkflowStore = create<WorkflowStore>()(
         const block = get().blocks[id]
         if (!block) return
 
-        const newId = crypto.randomUUID()
+        const newId = generateUUID()
         const offsetPosition = {
           x: block.position.x + DEFAULT_DUPLICATE_OFFSET.x,
           y: block.position.y + DEFAULT_DUPLICATE_OFFSET.y,

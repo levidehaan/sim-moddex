@@ -38,14 +38,14 @@ export const embeddingsTool: ToolConfig<OpenAIEmbeddingsParams> = {
 
   request: {
     method: 'POST',
-    url: () => 'https://api.openai.com/v1/embeddings',
+    url: () => 'https://openrouter.ai/api/v1/embeddings',
     headers: (params) => ({
       Authorization: `Bearer ${params.apiKey}`,
       'Content-Type': 'application/json',
     }),
     body: (params) => ({
       input: params.input,
-      model: params.model || 'text-embedding-3-small',
+      model: params.model || 'openai/text-embedding-3-small',
       encoding_format: params.encodingFormat || 'float',
     }),
   },

@@ -1,5 +1,6 @@
 'use client'
 
+import { generateUUID } from '@/lib/core/utils/uuid'
 import { createLogger } from '@sim/logger'
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
@@ -523,7 +524,7 @@ function createUserMessage(
   messageId?: string
 ): CopilotMessage {
   return {
-    id: messageId || crypto.randomUUID(),
+    id: messageId || generateUUID(),
     role: 'user',
     content,
     timestamp: new Date().toISOString(),
@@ -540,7 +541,7 @@ function createUserMessage(
 
 function createStreamingMessage(): CopilotMessage {
   return {
-    id: crypto.randomUUID(),
+    id: generateUUID(),
     role: 'assistant',
     content: '',
     timestamp: new Date().toISOString(),

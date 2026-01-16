@@ -189,6 +189,7 @@ export const PushoverBlock: BlockConfig = {
       'pushover_get_sounds',
       'pushover_get_receipt',
       'pushover_cancel_emergency',
+      'pushover_list_devices',
     ],
     config: {
       tool: (params) => {

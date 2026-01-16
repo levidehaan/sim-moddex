@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Badge } from '@/components/emcn'
 import { Combobox, type ComboboxOption } from '@/components/emcn/components'
+import { cn } from '@/lib/core/utils/cn'
+import { generateUUID } from '@/lib/core/utils/uuid'
 import { useSubBlockValue } from '@/app/workspace/[workspaceId]/w/[workflowId]/components/panel/components/editor/components/sub-block/hooks/use-sub-block-value'
 import type { SubBlockConfig } from '@/blocks/types'
 import { getDependsOnFields } from '@/blocks/utils'
@@ -219,7 +221,7 @@ export function Dropdown({
             fieldType === 'object' || fieldType === 'array' ? JSON.stringify(value, null, 2) : value
 
           return {
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             name: key,
             type: fieldType,
             value: fieldValue,

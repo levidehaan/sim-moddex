@@ -3,11 +3,23 @@ import { env, getEnv, isTruthy } from './lib/core/config/env'
 import { isDev, isHosted } from './lib/core/config/feature-flags'
 import { getMainCSPPolicy, getWorkflowExecutionCSPPolicy } from './lib/core/security/csp'
 
+// Load .env.local manually for config time
+import { config as loadEnv } from 'dotenv'
+import { resolve } from 'path'
+loadEnv({ path: resolve(__dirname, '.env.local') })
+
 /**
  * Check if local network access is enabled (for home network usage)
  */
 function isLocalNetworkAccessEnabled(): boolean {
   return isDev || getEnv('ALLOW_LOCAL_NETWORK') === 'true'
+}
+
+/**
+ * Get the app URL for CORS configuration
+ */
+function getAppUrl(): string {
+  return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'
 }
 
 const nextConfig: NextConfig = {
@@ -99,29 +111,28 @@ const nextConfig: NextConfig = {
     turbopackFileSystemCacheForDev: true,
   },
   ...(isDev && {
-    allowedDevOrigins: [
-      ...(env.NEXT_PUBLIC_APP_URL
-        ? (() => {
-            try {
-              return [new URL(env.NEXT_PUBLIC_APP_URL).host]
-            } catch {
-              return []
-            }
-          })()
-        : []),
-      'localhost:3000',
-      'localhost:3001',
-      // Allow local network access (common private IP ranges)
-      '192.168.*.*:3000',
-      '192.168.*.*:3001',
-      '192.168.*.*:3002',
-      '10.*.*.*:3000',
-      '10.*.*.*:3001',
-      '10.*.*.*:3002',
-      '172.16.*.*:3000',
-      '172.16.*.*:3001',
-      '172.16.*.*:3002',
-    ],
+    webpack: (config, { dev, isServer }) => {
+      if (!isServer) {
+        config.resolve.fallback = {
+          ...config.resolve.fallback,
+          net: false,
+          tls: false,
+        }
+      }
+      
+      // Configure webpack-dev-server to allow WebSocket connections from any origin
+      if (dev && !isServer) {
+        config.devServer = {
+          ...config.devServer,
+          allowedHosts: 'all',
+          client: {
+            webSocketURL: 'auto://0.0.0.0:0/ws',
+          },
+        }
+      }
+      
+      return config
+    },
   }),
   transpilePackages: [
     'prettier',

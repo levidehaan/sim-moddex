@@ -162,12 +162,36 @@ export function SocketProvider({ children, user }: SocketProviderProps) {
 
     const initializeSocket = () => {
       try {
-        const socketUrl = getEnv('NEXT_PUBLIC_SOCKET_URL') || 'http://localhost:3002'
+        const configuredUrl = getEnv('NEXT_PUBLIC_SOCKET_URL')
+        let socketUrl: string
+        if (configuredUrl) {
+          try {
+            const u = new URL(configuredUrl)
+            if (typeof window !== 'undefined') {
+              const isLocalHost = u.hostname === 'localhost' || u.hostname === '127.0.0.1'
+              const winHost = window.location.hostname
+              const winIsLocal = winHost === 'localhost' || winHost === '127.0.0.1'
+              if (isLocalHost && !winIsLocal) {
+                u.hostname = winHost
+              }
+            }
+            socketUrl = u.toString()
+          } catch {
+            socketUrl = configuredUrl
+          }
+        } else {
+          const fallbackSocketUrl =
+            typeof window !== 'undefined'
+              ? `${window.location.protocol}//${window.location.hostname}:3002`
+              : 'http://localhost:3002'
+          socketUrl = fallbackSocketUrl
+        }
 
         logger.info('Attempting to connect to Socket.IO server', {
           url: socketUrl,
           userId: user?.id || 'no-user',
           timestamp: new Date().toISOString(),
+          windowLocation: typeof window !== 'undefined' ? window.location.href : 'undefined',
         })
 
         const socketInstance = io(socketUrl, {
@@ -178,8 +202,10 @@ export function SocketProvider({ children, user }: SocketProviderProps) {
           reconnectionDelayMax: 30000, // Max 30 second delay
           timeout: 10000, // Back to original timeout
           auth: async (cb) => {
+            logger.debug('Socket auth callback triggered', { timestamp: new Date().toISOString() })
             try {
               const freshToken = await generateSocketToken()
+              logger.debug('Generated fresh socket token', { timestamp: new Date().toISOString() })
               cb({ token: freshToken })
             } catch (error) {
               logger.error('Failed to generate fresh token for connection:', error)
@@ -196,6 +222,7 @@ export function SocketProvider({ children, user }: SocketProviderProps) {
             socketId: socketInstance.id,
             connected: socketInstance.connected,
             transport: socketInstance.io.engine?.transport?.name,
+            timestamp: new Date().toISOString(),
           })
 
           // Automatically join the current workflow room based on URL
@@ -216,6 +243,7 @@ export function SocketProvider({ children, user }: SocketProviderProps) {
 
           logger.info('Socket disconnected', {
             reason,
+            timestamp: new Date().toISOString(),
           })
 
           // Clear presence when disconnected
@@ -230,6 +258,7 @@ export function SocketProvider({ children, user }: SocketProviderProps) {
             description: error.description,
             type: error.type,
             transport: error.transport,
+            timestamp: new Date().toISOString(),
           })
 
           // Authentication errors now indicate either session expiry or token generation issues

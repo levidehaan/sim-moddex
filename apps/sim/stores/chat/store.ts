@@ -2,6 +2,7 @@ import { createLogger } from '@sim/logger'
 import { v4 as uuidv4 } from 'uuid'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
+import { generateUUID } from '@/lib/core/utils/uuid'
 
 const logger = createLogger('ChatStore')
 

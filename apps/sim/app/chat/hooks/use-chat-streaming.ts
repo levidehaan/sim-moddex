@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react'
 import { createLogger } from '@sim/logger'
 import { isUserFile } from '@/lib/core/utils/display-filters'
+import { generateUUID } from '@/lib/core/utils/uuid'
 import type { ChatFile, ChatMessage } from '@/app/chat/components/message/message'
 import { CHAT_ERROR_MESSAGES } from '@/app/chat/constants'
 
@@ -141,7 +142,7 @@ export function useChatStreaming() {
 
     // Track which blocks have streamed content (like chat panel)
     const messageIdMap = new Map<string, string>()
-    const messageId = crypto.randomUUID()
+    const messageId = generateUUID()
     setMessages((prev) => [
       ...prev,
       {

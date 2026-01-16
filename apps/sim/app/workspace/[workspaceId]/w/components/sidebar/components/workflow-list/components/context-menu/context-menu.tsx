@@ -155,7 +155,9 @@ export function ContextMenu({
       <PopoverContent ref={menuRef} align='start' side='bottom' sideOffset={4}>
         {showOpenInNewTab && onOpenInNewTab && (
           <PopoverItem
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
               onOpenInNewTab()
               onClose()
             }}
@@ -166,7 +168,9 @@ export function ContextMenu({
         {showRename && onRename && (
           <PopoverItem
             disabled={disableRename}
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
               onRename()
               onClose()
             }}
@@ -177,7 +181,9 @@ export function ContextMenu({
         {showCreate && onCreate && (
           <PopoverItem
             disabled={disableCreate}
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
               onCreate()
               onClose()
             }}
@@ -188,7 +194,9 @@ export function ContextMenu({
         {showCreateFolder && onCreateFolder && (
           <PopoverItem
             disabled={disableCreateFolder}
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
               onCreateFolder()
               onClose()
             }}
@@ -199,7 +207,9 @@ export function ContextMenu({
         {showDuplicate && onDuplicate && (
           <PopoverItem
             disabled={disableDuplicate}
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
               onDuplicate()
               onClose()
             }}
@@ -210,7 +220,9 @@ export function ContextMenu({
         {showExport && onExport && (
           <PopoverItem
             disabled={disableExport}
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
               onExport()
               onClose()
             }}
@@ -220,7 +232,10 @@ export function ContextMenu({
         )}
         <PopoverItem
           disabled={disableDelete}
-          onClick={() => {
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            e.nativeEvent.stopImmediatePropagation()
             onDelete()
             onClose()
           }}

@@ -126,6 +126,69 @@ function getTimezoneOffset(date: Date): string {
   return `${sign}${hours}:${mins}`
 }
 
+/**
+ * Parse a date string into a Date object
+ * Supports ISO 8601, Unix timestamps (seconds or milliseconds), and other parseable formats
+ */
+function parseBaseDate(dateStr: string): Date {
+  // Check if it's a Unix timestamp (all digits, optionally with leading minus)
+  if (/^-?\d+$/.test(dateStr)) {
+    const timestamp = Number.parseInt(dateStr, 10)
+    // If timestamp is less than 10 billion, assume it's in seconds, otherwise milliseconds
+    if (Math.abs(timestamp) < 10000000000) {
+      return new Date(timestamp * 1000)
+    }
+    return new Date(timestamp)
+  }
+  
+  // Try parsing as ISO 8601 or other standard format
+  const parsed = new Date(dateStr)
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error(`Invalid date format: ${dateStr}`)
+  }
+  return parsed
+}
+
+/**
+ * Add or subtract time from a date
+ */
+function modifyDate(
+  date: Date,
+  operation: 'add' | 'subtract',
+  amount: number,
+  unit: 'years' | 'months' | 'weeks' | 'days' | 'hours' | 'minutes' | 'seconds'
+): Date {
+  const result = new Date(date.getTime())
+  const multiplier = operation === 'subtract' ? -1 : 1
+  const adjustedAmount = amount * multiplier
+
+  switch (unit) {
+    case 'years':
+      result.setFullYear(result.getFullYear() + adjustedAmount)
+      break
+    case 'months':
+      result.setMonth(result.getMonth() + adjustedAmount)
+      break
+    case 'weeks':
+      result.setDate(result.getDate() + adjustedAmount * 7)
+      break
+    case 'days':
+      result.setDate(result.getDate() + adjustedAmount)
+      break
+    case 'hours':
+      result.setHours(result.getHours() + adjustedAmount)
+      break
+    case 'minutes':
+      result.setMinutes(result.getMinutes() + adjustedAmount)
+      break
+    case 'seconds':
+      result.setSeconds(result.getSeconds() + adjustedAmount)
+      break
+  }
+
+  return result
+}
+
 export const dateTimeTool: ToolConfig<DateTimeToolParams, DateTimeToolResponse> = {
   id: 'datetime_now',
   name: 'Get Current Date/Time',
@@ -156,14 +219,81 @@ export const dateTimeTool: ToolConfig<DateTimeToolParams, DateTimeToolResponse> 
       description:
         'Custom format string using tokens: YYYY, MM, DD, HH, mm, ss, etc. (only used when format is "custom")',
     },
+    baseDate: {
+      type: 'string',
+      required: false,
+      description:
+        'Base date to use instead of current time. Accepts ISO 8601 string, Unix timestamp (seconds or milliseconds), or any parseable date string. If not provided, uses current date/time.',
+    },
+    operation: {
+      type: 'string',
+      required: false,
+      description: 'Operation to perform: "none" (default), "add", or "subtract"',
+    },
+    amount: {
+      type: 'number',
+      required: false,
+      description: 'Amount of time to add or subtract (used with operation and unit)',
+    },
+    unit: {
+      type: 'string',
+      required: false,
+      description:
+        'Unit of time for the operation: "years", "months", "weeks", "days", "hours", "minutes", or "seconds"',
+    },
   },
 
   directExecution: async (params: DateTimeToolParams): Promise<DateTimeToolResponse> => {
     const locale = params.locale || 'en-US'
     const timezone = params.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone
 
-    // Create date in the specified timezone
-    const now = new Date()
+    // Get base date - either from params or current time
+    let baseDate: Date
+    if (params.baseDate) {
+      try {
+        baseDate = parseBaseDate(params.baseDate)
+      } catch (error) {
+        return {
+          success: false,
+          output: {
+            iso: '',
+            unix: 0,
+            unixMs: 0,
+            formatted: '',
+            date: '',
+            time: '',
+            year: 0,
+            month: 0,
+            day: 0,
+            hour: 0,
+            minute: 0,
+            second: 0,
+            dayOfWeek: '',
+            dayOfYear: 0,
+            weekOfYear: 0,
+            quarter: 0,
+            timezone: '',
+            offset: '',
+          },
+        }
+      }
+    } else {
+      baseDate = new Date()
+    }
+
+    // Apply date arithmetic if operation is specified
+    let resultDate = baseDate
+    if (params.operation && params.operation !== 'none' && params.amount !== undefined && params.unit) {
+      resultDate = modifyDate(
+        baseDate,
+        params.operation as 'add' | 'subtract',
+        params.amount,
+        params.unit as 'years' | 'months' | 'weeks' | 'days' | 'hours' | 'minutes' | 'seconds'
+      )
+    }
+
+    // Use resultDate instead of now for all calculations
+    const now = resultDate
     let dateInTz: Date
 
     try {

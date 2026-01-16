@@ -282,15 +282,6 @@ export const useWorkflowRegistry = create<WorkflowRegistry>()(
       },
 
       loadWorkflowState: async (workflowId: string) => {
-        const { workflows } = get()
-
-        if (!workflows[workflowId]) {
-          const message = `Workflow not found: ${workflowId}`
-          logger.error(message)
-          set({ error: message })
-          throw new Error(message)
-        }
-
         const requestId = createRequestId()
 
         set((state) => ({
@@ -311,6 +302,33 @@ export const useWorkflowRegistry = create<WorkflowRegistry>()(
           }
 
           const workflowData = (await response.json()).data
+          
+          // Ensure workflow metadata exists in registry
+          const { workflows } = get()
+          if (!workflows[workflowId]) {
+            logger.info(`Workflow metadata missing for ${workflowId}, adding to registry`)
+            
+            // Construct metadata from the fetched data
+            // We need to ensure we have the necessary fields
+            const metadata: WorkflowMetadata = {
+              id: workflowData.id || workflowId,
+              name: workflowData.name || 'Untitled Workflow',
+              description: workflowData.description,
+              color: workflowData.color || getNextWorkflowColor(),
+              workspaceId: workflowData.workspaceId,
+              folderId: workflowData.folderId,
+              createdAt: workflowData.createdAt ? new Date(workflowData.createdAt) : new Date(),
+              lastModified: workflowData.updatedAt ? new Date(workflowData.updatedAt) : new Date(),
+            }
+
+            set((state) => ({
+              workflows: {
+                ...state.workflows,
+                [workflowId]: metadata,
+              },
+            }))
+          }
+
           let workflowState: any
 
           if (workflowData?.state) {

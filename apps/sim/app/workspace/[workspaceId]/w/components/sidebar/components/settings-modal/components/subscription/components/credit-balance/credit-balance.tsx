@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { generateUUID } from '@/lib/core/utils/uuid'
 import { createLogger } from '@sim/logger'
 import {
   Button,

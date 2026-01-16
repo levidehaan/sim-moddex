@@ -14,6 +14,7 @@ import ReactFlow, {
   useReactFlow,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
+import { generateUUID } from '@/lib/core/utils/uuid'
 import { createLogger } from '@sim/logger'
 import { useShallow } from 'zustand/react/shallow'
 import type { OAuthConnectEventDetail } from '@/lib/copilot/tools/client/other/oauth-request-access'
@@ -151,12 +152,14 @@ const WorkflowContent = React.memo(() => {
 
   const addNotification = useNotificationStore((state) => state.addNotification)
 
-  const { workflows, activeWorkflowId, hydration, setActiveWorkflow } = useWorkflowRegistry(
+  const { workflows, activeWorkflowId, hydration, setActiveWorkflow, workflowIds } = useWorkflowRegistry(
     useShallow((state) => ({
       workflows: state.workflows,
       activeWorkflowId: state.activeWorkflowId,
       hydration: state.hydration,
       setActiveWorkflow: state.setActiveWorkflow,
+      // Use stable array of IDs instead of entire workflows object
+      workflowIds: Object.keys(state.workflows),
     }))
   )
 
@@ -618,7 +621,7 @@ const WorkflowContent = React.memo(() => {
   /** Creates a standardized edge object for workflow connections. */
   const createEdgeObject = useCallback(
     (sourceId: string, targetId: string, sourceHandle: string): Edge => ({
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       source: sourceId,
       target: targetId,
       sourceHandle,
@@ -785,7 +788,7 @@ const WorkflowContent = React.memo(() => {
         document.body.classList.remove('sim-drag-subflow')
 
         if (data.type === 'loop' || data.type === 'parallel') {
-          const id = crypto.randomUUID()
+          const id = generateUUID()
           const baseName = data.type === 'loop' ? 'Loop' : 'Parallel'
           const name = getUniqueBlockName(baseName, blocks)
 
@@ -820,7 +823,7 @@ const WorkflowContent = React.memo(() => {
         }
 
         // Generate id and name here so they're available in all code paths
-        const id = crypto.randomUUID()
+        const id = generateUUID()
         // Prefer semantic default names for triggers; then ensure unique numbering centrally
         const defaultTriggerNameDrop = TriggerUtils.getDefaultTriggerName(data.type)
         const baseName = defaultTriggerNameDrop || blockConfig.name
@@ -989,7 +992,7 @@ const WorkflowContent = React.memo(() => {
 
       // Special handling for container nodes (loop or parallel)
       if (type === 'loop' || type === 'parallel') {
-        const id = crypto.randomUUID()
+        const id = generateUUID()
         const baseName = type === 'loop' ? 'Loop' : 'Parallel'
         const name = getUniqueBlockName(baseName, blocks)
 
@@ -1027,7 +1030,7 @@ const WorkflowContent = React.memo(() => {
       if (checkTriggerConstraints(type)) return
 
       // Create a new block with a unique ID
-      const id = crypto.randomUUID()
+      const id = generateUUID()
       // Prefer semantic default names for triggers; then ensure unique numbering centrally
       const defaultTriggerName = TriggerUtils.getDefaultTriggerName(type)
       const baseName = defaultTriggerName || blockConfig.name
@@ -1439,7 +1442,7 @@ const WorkflowContent = React.memo(() => {
     hydration.phase,
     workspaceId,
     router,
-    workflows,
+    // Don't include workflows object - it causes navigation loops due to reference changes
   ])
 
   const blockConfigCache = useRef<Map<string, any>>(new Map())
@@ -1786,7 +1789,7 @@ const WorkflowContent = React.memo(() => {
         const targetParentId = blocks[targetNode.id]?.data?.parentId
 
         // Generate a unique edge ID
-        const edgeId = crypto.randomUUID()
+        const edgeId = generateUUID()
 
         // Special case for container start source: Always allow connections to nodes within the same container
         if (

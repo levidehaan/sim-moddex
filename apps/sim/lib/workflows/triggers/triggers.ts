@@ -12,6 +12,8 @@ export const TRIGGER_TYPES = {
   WEBHOOK: 'webhook',
   GENERIC_WEBHOOK: 'generic_webhook',
   SCHEDULE: 'schedule',
+  KAFKA: 'kafka_trigger',
+  PUSHOVER: 'pushover_trigger',
   START: 'start_trigger',
   STARTER: 'starter', // Legacy
 } as const
@@ -95,6 +97,8 @@ export function classifyStartBlockType(
       return StartBlockPath.SPLIT_MANUAL
     case TRIGGER_TYPES.WEBHOOK:
     case TRIGGER_TYPES.SCHEDULE:
+    case TRIGGER_TYPES.KAFKA:
+    case TRIGGER_TYPES.PUSHOVER:
       return StartBlockPath.EXTERNAL_TRIGGER
     default:
       if (opts?.category === 'triggers' || opts?.triggerModeEnabled) {

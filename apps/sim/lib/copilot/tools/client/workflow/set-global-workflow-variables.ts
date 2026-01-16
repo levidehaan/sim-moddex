@@ -1,5 +1,6 @@
 import { createLogger } from '@sim/logger'
 import { Loader2, Settings2, X, XCircle } from 'lucide-react'
+import { generateUUID } from '@/lib/core/utils/uuid'
 import {
   BaseClientTool,
   type BaseClientToolMetadata,
@@ -158,7 +159,7 @@ export class SetGlobalWorkflowVariablesClientTool extends BaseClientTool {
         const typedValue = coerceValue(op.value, nextType)
         if (op.operation === 'add') {
           byName[key] = {
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             workflowId: payload.workflowId,
             name: key,
             type: nextType,
@@ -170,7 +171,7 @@ export class SetGlobalWorkflowVariablesClientTool extends BaseClientTool {
           if (!byName[key]) {
             // If editing a non-existent variable, create it
             byName[key] = {
-              id: crypto.randomUUID(),
+              id: generateUUID(),
               workflowId: payload.workflowId,
               name: key,
               type: nextType,

@@ -1,6 +1,7 @@
 import { createLogger } from '@sim/logger'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { client } from '@/lib/auth/auth-client'
+import { isBillingEnabled } from '@/lib/core/config/feature-flags'
 
 const logger = createLogger('OrganizationQueries')
 
@@ -24,6 +25,13 @@ export const organizationKeys = {
  * Note: Billing data is fetched separately via useSubscriptionData() to avoid duplicate calls
  */
 async function fetchOrganizations() {
+  if (!isBillingEnabled) {
+    return {
+      organizations: [],
+      activeOrganization: null,
+    }
+  }
+
   const [orgsResponse, activeOrgResponse] = await Promise.all([
     client.organization.list(),
     client.organization.getFullOrganization(),
@@ -42,6 +50,7 @@ export function useOrganizations() {
   return useQuery({
     queryKey: organizationKeys.lists(),
     queryFn: fetchOrganizations,
+    enabled: isBillingEnabled,
     staleTime: 30 * 1000,
     placeholderData: keepPreviousData,
   })
@@ -133,7 +142,7 @@ export function useOrganizationBilling(orgId: string) {
   return useQuery({
     queryKey: organizationKeys.billing(orgId),
     queryFn: () => fetchOrganizationBilling(orgId),
-    enabled: !!orgId,
+    enabled: isBillingEnabled && !!orgId,
     retry: false,
     staleTime: 30 * 1000,
     placeholderData: keepPreviousData,

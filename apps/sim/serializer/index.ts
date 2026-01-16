@@ -1,5 +1,6 @@
 import { createLogger } from '@sim/logger'
 import type { Edge } from 'reactflow'
+import { generateUUID } from '@/lib/core/utils/uuid'
 import { BlockPathCalculator } from '@/lib/workflows/blocks/block-path-calculator'
 import { getBlock } from '@/blocks'
 import type { SubBlockConfig } from '@/blocks/types'
@@ -645,7 +646,7 @@ export class Serializer {
     // Deserialize connections
     workflow.connections.forEach((connection) => {
       edges.push({
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         source: connection.source,
         target: connection.target,
         sourceHandle: connection.sourceHandle,

@@ -1,6 +1,7 @@
 import { createLogger } from '@sim/logger'
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
+import { generateUUID } from '@/lib/core/utils/uuid'
 import { sanitizeForCopilot } from '@/lib/workflows/sanitization/json-sanitizer'
 import {
   computeEditSequence,

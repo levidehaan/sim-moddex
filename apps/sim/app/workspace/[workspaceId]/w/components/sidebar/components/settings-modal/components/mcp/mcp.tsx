@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createLogger } from '@sim/logger'
-import { Plus, Search } from 'lucide-react'
+import { Plus, Search, Package, Code, Server as ServerIcon } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import {
   Badge,
@@ -15,6 +15,7 @@ import {
   ModalHeader,
 } from '@/components/emcn'
 import { Input } from '@/components/ui'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getIssueBadgeLabel, getMcpToolIssue, type McpToolIssue } from '@/lib/mcp/tool-validation'
 import { checkEnvVarTrigger } from '@/app/workspace/[workspaceId]/w/[workflowId]/components/panel/components/editor/components/sub-block/components/env-var-dropdown'
 import {
@@ -26,6 +27,11 @@ import {
   useStoredMcpTools,
 } from '@/hooks/queries/mcp'
 import { useMcpServerTest } from '@/hooks/use-mcp-server-test'
+import { useLaunchMcpServer, useStopMcpServer, useRestartMcpServer } from '@/hooks/use-mcp-server-management'
+import { RepositoryBrowser } from '@/components/mcp/repository-browser'
+import { DynamicConfigForm } from '@/components/mcp/dynamic-config-form'
+import type { McpRepositoryEntry } from '@/lib/mcp/types'
+import { generateMcpServerId } from '@/lib/mcp/utils'
 import type { InputFieldType, McpServerFormData, McpServerTestResult } from './components'
 import {
   FormattedInput,
@@ -129,6 +135,25 @@ export function MCP({ initialServerId }: MCPProps) {
 
   const [urlScrollLeft, setUrlScrollLeft] = useState(0)
   const [headerScrollLeft, setHeaderScrollLeft] = useState<Record<string, number>>({})
+  
+  // New MCP 2026 features
+  const [showRepository, setShowRepository] = useState(false)
+  const [selectedRepoServer, setSelectedRepoServer] = useState<McpRepositoryEntry | null>(null)
+  const [repoConfigValues, setRepoConfigValues] = useState<Record<string, any>>({})
+  const [showInstallForm, setShowInstallForm] = useState(false)
+  const [configErrors, setConfigErrors] = useState<Record<string, string>>({})
+  const launchServerMutation = useLaunchMcpServer()
+  const stopServerMutation = useStopMcpServer()
+  const restartServerMutation = useRestartMcpServer()
+  
+  const handleRepositorySelect = useCallback((server: McpRepositoryEntry) => {
+    setSelectedRepoServer(server)
+    setRepoConfigValues({})
+    setShowRepository(false)
+    setShowInstallForm(true)
+    setShowAddForm(false)
+    setConfigErrors({})
+  }, [])
 
   // Auto-select server when initialServerId is provided
   useEffect(() => {
@@ -620,7 +645,18 @@ export function MCP({ initialServerId }: MCPProps) {
             />
           </div>
           <Button
-            onClick={() => setShowAddForm(!showAddForm)}
+            onClick={() => setShowRepository(!showRepository)}
+            variant='tertiary'
+            disabled={serversLoading}
+          >
+            <Package className='mr-[6px] h-[13px] w-[13px]' />
+            Repository
+          </Button>
+          <Button
+            onClick={() => {
+              setShowAddForm(!showAddForm)
+              setShowRepository(false)
+            }}
             variant='tertiary'
             disabled={serversLoading}
           >
@@ -628,6 +664,117 @@ export function MCP({ initialServerId }: MCPProps) {
             Add
           </Button>
         </div>
+
+        {showRepository && !serversLoading && (
+          <div className='rounded-[8px] border bg-[var(--surface-3)] p-[10px]'>
+            <div className='mb-2 flex items-center justify-between'>
+              <h3 className='text-sm font-medium'>MCP Server Repository</h3>
+              <Button variant='ghost' size='sm' onClick={() => setShowRepository(false)}>
+                Close
+              </Button>
+            </div>
+            <RepositoryBrowser onSelect={handleRepositorySelect} />
+          </div>
+        )}
+
+        {showInstallForm && selectedRepoServer && !serversLoading && (
+          <div className='rounded-[8px] border bg-[var(--surface-3)] p-[10px]'>
+            <div className='mb-4 flex items-center justify-between'>
+              <div>
+                <h3 className='text-sm font-medium'>Install {selectedRepoServer.name}</h3>
+                <p className='text-xs text-[var(--text-tertiary)] mt-1'>{selectedRepoServer.description}</p>
+              </div>
+              <Button 
+                variant='ghost' 
+                size='sm' 
+                onClick={() => {
+                  setShowInstallForm(false)
+                  setSelectedRepoServer(null)
+                  setRepoConfigValues({})
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+
+            {selectedRepoServer.configSchema && (
+              <div className='mb-4'>
+                <DynamicConfigForm
+                  schema={selectedRepoServer.configSchema}
+                  values={repoConfigValues}
+                  onChange={setRepoConfigValues}
+                  errors={configErrors}
+                />
+              </div>
+            )}
+
+            <div className='flex justify-end gap-2'>
+              <Button
+                variant='tertiary'
+                onClick={() => {
+                  setShowInstallForm(false)
+                  setSelectedRepoServer(null)
+                  setRepoConfigValues({})
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={async () => {
+                  try {
+                    setIsAddingServer(true)
+                    setConfigErrors({})
+
+                    // Validate required fields
+                    if (selectedRepoServer.configSchema?.required) {
+                      const errors: Record<string, string> = {}
+                      for (const field of selectedRepoServer.configSchema.required) {
+                        if (!repoConfigValues[field] || 
+                            (Array.isArray(repoConfigValues[field]) && repoConfigValues[field].length === 0)) {
+                          errors[field] = 'This field is required'
+                        }
+                      }
+                      if (Object.keys(errors).length > 0) {
+                        setConfigErrors(errors)
+                        return
+                      }
+                    }
+
+                    // Create the server
+                    await createServerMutation.mutateAsync({
+                      workspaceId,
+                      config: {
+                        name: selectedRepoServer.name,
+                        transport: 'stdio',
+                        source: selectedRepoServer.source,
+                        package: selectedRepoServer.package,
+                        command: selectedRepoServer.command,
+                        args: selectedRepoServer.args,
+                        configSchema: selectedRepoServer.configSchema,
+                        configValues: repoConfigValues,
+                        enabled: true,
+                        timeout: 30000,
+                        headers: {},
+                      },
+                    })
+
+                    logger.info(`Installed MCP server: ${selectedRepoServer.name}`)
+                    setShowInstallForm(false)
+                    setSelectedRepoServer(null)
+                    setRepoConfigValues({})
+                  } catch (error) {
+                    logger.error('Failed to install MCP server:', error)
+                  } finally {
+                    setIsAddingServer(false)
+                  }
+                }}
+                disabled={isAddingServer}
+              >
+                {isAddingServer ? 'Installing...' : 'Install Server'}
+              </Button>
+            </div>
+          </div>
+        )}
 
         {showAddForm && !serversLoading && (
           <div className='rounded-[8px] border bg-[var(--surface-3)] p-[10px]'>

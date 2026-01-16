@@ -2,11 +2,22 @@
  * DateTime Tool Types
  */
 
+export type DateTimeOperation = 'none' | 'add' | 'subtract'
+export type DateTimeUnit = 'years' | 'months' | 'weeks' | 'days' | 'hours' | 'minutes' | 'seconds'
+
 export interface DateTimeToolParams {
   format?: string
   timezone?: string
   locale?: string
   customFormat?: string
+  /** Base date to use instead of current time (ISO 8601 string, Unix timestamp, or parseable date string) */
+  baseDate?: string
+  /** Operation to perform on the date */
+  operation?: DateTimeOperation
+  /** Amount to add or subtract */
+  amount?: number
+  /** Unit of time to add or subtract */
+  unit?: DateTimeUnit
 }
 
 export interface DateTimeToolResponse {

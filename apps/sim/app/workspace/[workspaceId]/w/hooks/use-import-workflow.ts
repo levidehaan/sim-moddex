@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { generateUUID } from '@/lib/core/utils/uuid'
 import { createLogger } from '@sim/logger'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
@@ -82,7 +83,7 @@ export function useImportWorkflow({ workspaceId }: UseImportWorkflowProps) {
       // Save variables if any
       if (workflowData.variables && workflowData.variables.length > 0) {
         const variablesPayload = workflowData.variables.map((v: any) => ({
-          id: typeof v.id === 'string' && v.id.trim() ? v.id : crypto.randomUUID(),
+          id: typeof v.id === 'string' && v.id.trim() ? v.id : generateUUID(),
           workflowId: newWorkflowId,
           name: v.name,
           type: v.type,

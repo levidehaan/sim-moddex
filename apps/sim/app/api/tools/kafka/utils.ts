@@ -4,14 +4,23 @@ import {
   type KafkaConfig,
   logLevel,
   type SASLOptions,
+  CompressionTypes,
+  CompressionCodecs,
 } from 'kafkajs'
+import SnappyCodec from 'kafkajs-snappy'
 import type { KafkaConnectionConfig, KafkaConsumedMessage, KafkaMessage } from '@/tools/kafka/types'
+
+// Register Snappy Codec
+CompressionCodecs[CompressionTypes.Snappy] = SnappyCodec
 
 /**
  * Creates a Kafka client with the given configuration
  */
 export function createKafkaClient(config: KafkaConnectionConfig): Kafka {
-  const brokerList = config.brokers.split(',').map((b) => b.trim())
+  const brokerList = config.brokers
+    .split(',')
+    .map((b) => b.trim())
+    .filter((b) => b.length > 0)
 
   const kafkaConfig: KafkaConfig = {
     clientId: config.clientId || 'sim-kafka-client',
@@ -122,7 +131,7 @@ export function evaluateCondition(condition: string, value: unknown): boolean {
 }
 
 /**
- * Consume messages from a Kafka topic with optional condition filtering
+ * Consume messages from a Kafka topic with advanced filtering
  */
 export async function consumeMessages(
   kafka: Kafka,
@@ -130,6 +139,11 @@ export async function consumeMessages(
   groupId: string,
   options?: {
     fromBeginning?: boolean
+    readMode?: 'latest' | 'earliest' | 'last_n' | 'time_range'
+    startOffset?: number
+    startDate?: string
+    endDate?: string
+    searchPatterns?: string[]
     maxMessages?: number
     timeout?: number
     condition?: string | null
@@ -145,13 +159,75 @@ export async function consumeMessages(
   const maxMessages = options?.maxMessages ?? 100
   const timeout = options?.timeout ?? 5000
   const condition = options?.condition
+  const readMode = options?.readMode || (options?.fromBeginning ? 'earliest' : 'latest')
+  
+  // Parse dates
+  const startDateMs = options?.startDate ? new Date(options.startDate).getTime() : 0
+  const endDateMs = options?.endDate ? new Date(options.endDate).getTime() : undefined
+
+  // Pre-fetch offsets if needed
+  const partitionsToSeek: Record<number, string> = {}
+  
+  if (readMode === 'last_n' && options?.startOffset) {
+    const admin = kafka.admin()
+    try {
+      await admin.connect()
+      const offsets = await admin.fetchTopicOffsets(topic)
+      for (const item of offsets) {
+        const high = BigInt(item.high)
+        const start = high - BigInt(options.startOffset)
+        partitionsToSeek[item.partition] = (start > 0n ? start : 0n).toString()
+      }
+    } catch (err) {
+      console.warn('Failed to fetch topic offsets for seek:', err)
+    } finally {
+      try { await admin.disconnect() } catch {}
+    }
+  } else if (readMode === 'time_range' && startDateMs > 0) {
+    // ... (keep existing time_range logic, maybe add logs if needed later)
+    const admin = kafka.admin()
+    try {
+      await admin.connect()
+      const offsets = await admin.fetchTopicOffsetsByTimestamp(topic, startDateMs)
+      for (const item of offsets) {
+        if (item.offset) {
+          partitionsToSeek[item.partition] = item.offset
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to fetch timestamp offsets:', err)
+    } finally {
+      try { await admin.disconnect() } catch {}
+    }
+  }
 
   try {
     await consumer.connect()
-    await consumer.subscribe({ topic, fromBeginning: options?.fromBeginning ?? false })
+    
+    // Determine initial subscription mode
+    const fromBeginning = readMode === 'earliest'
+    await consumer.subscribe({ topic, fromBeginning })
 
     let resolvePromise: () => void
     let timeoutId: ReturnType<typeof setTimeout>
+    let isSeeking = Object.keys(partitionsToSeek).length > 0
+
+    // Handle seeking on join
+    if (isSeeking) {
+      consumer.on(consumer.events.GROUP_JOIN, ({ payload }) => {
+        // We need to verify we are assigned the partitions we want to seek
+        // But seek() works on currently assigned partitions.
+        // We can just try to seek all we calculated.
+        for (const [partitionStr, offset] of Object.entries(partitionsToSeek)) {
+           const p = Number(partitionStr)
+           try {
+             consumer.seek({ topic, partition: p, offset })
+           } catch (e) {
+             // Ignore if not assigned
+           }
+        }
+      })
+    }
 
     const consumePromise = new Promise<void>((resolve) => {
       resolvePromise = resolve
@@ -163,9 +239,25 @@ export async function consumeMessages(
 
     await consumer.run({
       eachMessage: async ({ topic: msgTopic, partition, message }: EachMessagePayload) => {
-        const valueStr = message.value?.toString() || ''
-        let parsedValue: unknown
+        // Date filtering (End Date)
+        const msgTime = Number(message.timestamp)
+        if (endDateMs !== undefined && msgTime > endDateMs) {
+            // We reached the end date. 
+            // Ideally we should stop consuming from this partition, but for now we just skip.
+            // If all partitions pass end date, we could stop, but that's complex to track.
+            return
+        }
 
+        // Search Pattern Filtering
+        const valueStr = message.value?.toString() || ''
+        if (options?.searchPatterns && options.searchPatterns.length > 0) {
+            const hasMatch = options.searchPatterns.some(pattern => 
+                valueStr.toLowerCase().includes(pattern.toLowerCase())
+            )
+            if (!hasMatch) return
+        }
+
+        let parsedValue: unknown
         try {
           parsedValue = JSON.parse(valueStr)
         } catch {
