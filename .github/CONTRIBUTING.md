@@ -211,7 +211,7 @@ Dev Containers provide a consistent and easy-to-use development environment:
 
 3. **Start Developing:**
 
-   - Run `bun run dev:full` in the terminal or use the `sim-start` alias
+   - Run `npm run dev:full` in the terminal or use the `sim-start` alias
    - This starts both the main application and the realtime socket server
    - All dependencies and configurations are automatically set up
    - Your changes will be automatically hot-reloaded
@@ -228,7 +228,7 @@ If you prefer not to use Docker or Dev Containers:
    ```bash
    git clone https://github.com/<your-username>/sim.git
    cd sim
-   bun install
+   npm install
    ```
 
 2. **Set Up Environment:**
@@ -243,13 +243,13 @@ If you prefer not to use Docker or Dev Containers:
 3. **Set Up Database:**
 
    ```bash
-   bunx drizzle-kit push
+   npx drizzle-kit push
    ```
 
 4. **Run the Development Server:**
 
    ```bash
-   bun run dev:full
+   npm run dev:full
    ```
 
    This command starts both the main application and the realtime socket server required for full functionality.

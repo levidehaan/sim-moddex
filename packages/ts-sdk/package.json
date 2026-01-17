@@ -13,10 +13,10 @@
     }
   },
   "scripts": {
-    "build": "bun run build:tsc",
+    "build": "npm run build:tsc",
     "build:tsc": "tsc",
     "dev:watch": "tsc --watch",
-    "prepublishOnly": "bun run build",
+    "prepublishOnly": "npm run build",
     "test": "vitest run",
     "test:watch": "vitest"
   },

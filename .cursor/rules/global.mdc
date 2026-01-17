@@ -17,4 +17,4 @@ Use TSDoc for documentation. No `====` separators. No non-TSDoc comments.
 Never update global styles. Keep all styling local to components.
 
 ## Package Manager
-Use `bun` and `bunx`, not `npm` and `npx`.
+Use `npm` and `npx`, not `bun` and `bunx`. Bun has reliability issues with builds and should be avoided.

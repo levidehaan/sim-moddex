@@ -401,14 +401,14 @@ When running with Docker, use `host.docker.internal` if vLLM is on your host mac
 
 1. Open VS Code with the [Remote - Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 2. Open the project and click "Reopen in Container" when prompted
-3. Run `bun run dev:full` in the terminal or use the `sim-start` alias
+3. Run `npm run dev:full` in the terminal or use the `sim-start` alias
    - This starts both the main application and the realtime socket server
 
 ### Self-hosted: Manual Setup
 
 **Requirements:**
-- [Bun](https://bun.sh/) runtime
-- [Node.js](https://nodejs.org/) v20+ (required for sandboxed code execution)
+- [Node.js](https://nodejs.org/) v20+ (required for runtime and sandboxed code execution)
+- npm (comes with Node.js)
 - PostgreSQL 12+ with [pgvector extension](https://github.com/pgvector/pgvector) (required for AI embeddings)
 
 **Note:** Sim uses vector embeddings for AI features like knowledge bases and semantic search, which requires the `pgvector` PostgreSQL extension.
@@ -418,7 +418,7 @@ When running with Docker, use `host.docker.internal` if vLLM is on your host mac
 ```bash
 git clone https://github.com/levidehaan/sim-moddex.git
 cd sim-moddex
-bun install
+npm install
 ```
 
 2. Set up PostgreSQL with pgvector:
@@ -467,7 +467,7 @@ DATABASE_URL="postgresql://postgres:your_password@localhost:5432/simstudio"
 Then run the migrations:
 ```bash
 cd packages/db # Required so drizzle picks correct .env file
-bunx drizzle-kit migrate --config=./drizzle.config.ts
+npx drizzle-kit migrate --config=./drizzle.config.ts
 ```
 
 5. Start the development servers:
@@ -475,7 +475,7 @@ bunx drizzle-kit migrate --config=./drizzle.config.ts
 **Recommended approach - run both servers together (from project root):**
 
 ```bash
-bun run dev:full
+npm run dev:full
 ```
 
 This starts both the main Next.js application and the realtime socket server required for full functionality.
@@ -484,13 +484,13 @@ This starts both the main Next.js application and the realtime socket server req
 
 Next.js app (from project root):
 ```bash
-bun run dev
+npm run dev
 ```
 
 Realtime socket server (from `apps/sim` directory in a separate terminal):
 ```bash
 cd apps/sim
-bun run dev:sockets
+npm run dev:sockets
 ```
 
 ### Self-hosted: Android (Termux)
@@ -693,7 +693,8 @@ SIM Moddex includes comprehensive documentation for all major features:
 ## Tech Stack
 
 - **Framework**: [Next.js](https://nextjs.org/) (App Router)
-- **Runtime**: [Bun](https://bun.sh/)
+- **Runtime**: [Node.js](https://nodejs.org/) v20+
+- **Package Manager**: npm
 - **Database**: PostgreSQL with [Drizzle ORM](https://orm.drizzle.team)
 - **Authentication**: [Better Auth](https://better-auth.com)
 - **UI**: [Shadcn](https://ui.shadcn.com/), [Tailwind CSS](https://tailwindcss.com)
@@ -704,6 +705,19 @@ SIM Moddex includes comprehensive documentation for all major features:
 - **Realtime**: [Socket.io](https://socket.io/)
 - **Background Jobs**: [Trigger.dev](https://trigger.dev/)
 - **Remote Code Execution**: [E2B](https://www.e2b.dev/)
+
+## Why Not Bun?
+
+This project intentionally uses npm instead of Bun. While Bun markets itself as a fast JavaScript runtime and package manager, we found significant issues in practice:
+
+- **Unreliable builds**: Bun's build process frequently hangs or freezes indefinitely, especially on larger projects
+- **Compatibility issues**: Many npm packages don't work correctly with Bun, requiring workarounds or patches
+- **Immature ecosystem**: Despite the hype, Bun's tooling is not production-ready for complex monorepo setups
+- **Silent failures**: Bun often fails silently or produces cryptic errors that are difficult to debug
+- **Memory issues**: High memory consumption and memory leaks during long-running processes
+- **Inconsistent behavior**: Same code can behave differently between Bun and Node.js, breaking assumptions
+
+**Our recommendation**: Stick with Node.js and npm for production applications. They're battle-tested, well-documented, and have a mature ecosystem. Don't fall for the "fast" marketing—reliability matters more than benchmarks.
 
 ## Contributing
 

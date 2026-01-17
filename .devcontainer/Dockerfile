@@ -1,4 +1,4 @@
-FROM oven/bun:1.3.3-alpine
+FROM node:20-alpine
 
 # Install necessary packages for development
 RUN apk add --no-cache \
@@ -18,7 +18,7 @@ RUN apk add --no-cache \
     shadow
 
 # Create a non-root user with matching UID/GID
-ARG USERNAME=bun
+ARG USERNAME=node
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
@@ -35,9 +35,6 @@ RUN if ! getent passwd $USER_UID >/dev/null; then \
 # Add sudo support
 RUN echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
-
-# Set up shell environment
-RUN echo "export PATH=\$PATH:/home/$USERNAME/.bun/bin" >> /etc/profile
 
 WORKDIR /workspace
 

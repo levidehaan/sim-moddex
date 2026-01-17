@@ -20,9 +20,9 @@ You must use TSDOC for comments. Do not use ==== for comments to separate sectio
 
 You should not update the global styles unless it is absolutely necessary. Keep all styling local to components and files.
 
-## Bun
+## Package Manager
 
-Use bun and bunx not npm and npx.
+Use npm and npx for all package management tasks. Do not use bun or bunx.
 
 ## Code Quality
 

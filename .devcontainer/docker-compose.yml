@@ -5,7 +5,7 @@ services:
       dockerfile: .devcontainer/Dockerfile
     volumes:
       - ..:/workspace:cached
-      - bun-cache:/home/bun/.bun/cache:delegated
+      - npm-cache:/home/node/.npm:delegated
     command: sleep infinity
     deploy:
       resources:
@@ -22,7 +22,6 @@ services:
       - SIM_AGENT_API_URL=${SIM_AGENT_API_URL}
       - LLAMACPP_BASE_URL=${LLAMACPP_BASE_URL:-}
       - NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL:-http://localhost:3002}
-      - BUN_INSTALL_CACHE_DIR=/home/bun/.bun/cache
     depends_on:
       db:
         condition: service_healthy
@@ -39,7 +38,7 @@ services:
       dockerfile: .devcontainer/Dockerfile
     volumes:
       - ..:/workspace:cached
-      - bun-cache:/home/bun/.bun/cache:delegated
+      - npm-cache:/home/node/.npm:delegated
     command: sleep infinity
     deploy:
       resources:
@@ -67,7 +66,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: ['bun', 'run', 'db:migrate']
+    command: ['npm', 'run', 'db:migrate']
     restart: 'no'
 
   db:
@@ -89,4 +88,4 @@ services:
 
 volumes:
   postgres-data:
-  bun-cache:
+  npm-cache:

@@ -10,17 +10,9 @@ cd /workspace
 
 # Install global packages for development (done at runtime, not build time)
 echo "📦 Installing global development tools..."
-bun install -g turbo drizzle-kit typescript @types/node 2>/dev/null || {
+npm install -g turbo drizzle-kit typescript @types/node 2>/dev/null || {
   echo "⚠️ Some global packages may already be installed, continuing..."
 }
-
-# Set up bun completions (with proper shell detection)
-echo "🔧 Setting up shell completions..."
-if [ -n "$SHELL" ] && [ -f "$SHELL" ]; then
-  SHELL=/bin/bash bun completions 2>/dev/null | sudo tee /etc/bash_completion.d/bun > /dev/null || {
-    echo "⚠️ Could not install bun completions, but continuing..."
-  }
-fi
 
 # Add project commands to shell profile
 echo "📄 Setting up project commands..."
@@ -55,18 +47,18 @@ if [ -d "node_modules" ]; then
   rm -rf apps/docs/node_modules
 fi
 
-# Ensure Bun cache directory exists and has correct permissions
-mkdir -p ~/.bun/cache
-chmod 700 ~/.bun ~/.bun/cache
+# Ensure npm cache directory exists and has correct permissions
+mkdir -p ~/.npm
+chmod 700 ~/.npm
 
 # Install dependencies with platform-specific binaries
-echo "Installing dependencies with Bun..."
-bun install
+echo "Installing dependencies with npm..."
+npm install
 
 # Check for native dependencies
 echo "Checking for native dependencies compatibility..."
 if grep -q '"trustedDependencies"' apps/sim/package.json 2>/dev/null; then
-  echo "⚠️ Native dependencies detected. Bun will handle compatibility during install."
+  echo "⚠️ Native dependencies detected. npm will handle compatibility during install."
 fi
 
 # Set up environment variables if .env doesn't exist for the sim app
@@ -83,7 +75,7 @@ fi
 echo "🗃️ Running database schema generation and migrations..."
 echo "Generating schema..."
 cd apps/sim
-bunx drizzle-kit generate
+npx drizzle-kit generate
 cd ../..
 
 echo "Waiting for database to be ready..."
@@ -94,7 +86,7 @@ echo "Waiting for database to be ready..."
     if PGPASSWORD=postgres psql -h db -U postgres -c '\q' 2>/dev/null; then
       echo "Database is ready!"
       cd apps/sim
-      DATABASE_URL=postgresql://postgres:postgres@db:5432/simstudio bunx drizzle-kit push
+      DATABASE_URL=postgresql://postgres:postgres@db:5432/simstudio npx drizzle-kit push
       cd ../..
       break
     fi
@@ -102,7 +94,7 @@ echo "Waiting for database to be ready..."
     sleep 5
     timeout=$((timeout - 5))
   done
-  
+
   if [ $timeout -le 0 ]; then
     echo "⚠️ Database connection timed out, skipping migrations"
   fi
@@ -123,4 +115,4 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 # Exit successfully regardless of any previous errors
-exit 0 
+exit 0

@@ -23,8 +23,7 @@
         "github.copilot-chat",
         "mikestead.dotenv",
         "dsznajder.es7-react-js-snippets",
-        "steoates.autoimport",
-        "oven.bun-vscode"
+        "steoates.autoimport"
       ]
     }
   },
@@ -33,5 +32,5 @@
 
   "postCreateCommand": "bash -c 'bash .devcontainer/post-create.sh || true'",
 
-  "remoteUser": "bun"
+  "remoteUser": "node"
 }
