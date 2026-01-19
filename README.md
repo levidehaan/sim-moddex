@@ -82,7 +82,7 @@ This is a **complete rebuild** of SIM Studio with massive new capabilities:
 - **Text-to-Image** - Generate from descriptions
 - **Image-to-Image** - Modify existing images with AI
 - **Image+Text Reference** - Use images as style references
-- Support for Flux, Gemini, DALL-E, and more
+- Support for Flux, DALL-E, Stable Diffusion, and more via OpenRouter
 - See [Image Generation Guide](IMAGE_GENERATION_GUIDE.md)
 
 ### 📈 27+ New Integration Blocks
@@ -225,10 +225,10 @@ For complete MCP 2026 documentation, see:
 
 ### 🔌 Extensive Integrations
 - **APIs**: GitHub, Linear, Jira, Slack, Discord, Notion, Airtable, and 25+ OAuth providers
-- **Databases**: PostgreSQL, MySQL, MongoDB, Redis, Supabase, SQLite
+- **Databases**: PostgreSQL, MySQL, MongoDB, Supabase
 - **AI Models**: OpenAI, Anthropic, Google, Mistral, local models (llama.cpp, vLLM)
 - **MCP Servers**: Model Context Protocol 2026 support with 14+ verified servers
-- **Image Generation**: ComfyUI, Flux, DALL-E, Gemini, Stable Diffusion
+- **Image Generation**: ComfyUI, Flux, DALL-E, Stable Diffusion
 - **Triggers**: Webhooks, schedules, API calls, chat interfaces, Kafka streams
 
 ### 🧠 Knowledge & Memory
